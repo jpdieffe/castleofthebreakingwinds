@@ -61,7 +61,14 @@ export class MainMenuScene extends Phaser.Scene {
 
   private async onNewGame(): Promise<void> {
     this.statusText.setText("Signing in...");
-    const user = await ensureSignedIn();
+
+    let user;
+    try {
+      user = await ensureSignedIn();
+    } catch (e) {
+      this.statusText.setText(`Auth error: ${e}`);
+      return;
+    }
 
     const gameId = generateGameId();
     const seed = (Math.random() * 0xffffffff) >>> 0;
@@ -75,14 +82,12 @@ export class MainMenuScene extends Phaser.Scene {
       status: "waiting",
     };
 
-    await createSession(session);
-
-    const { width, height } = this.scale;
-
-    // Show the code prominently and wait for the player to click Start
+    // Show code immediately — don't wait for Firebase
     this.statusText.setText(
       `Share this code with your friend:\n\n${gameId}\n\n(copy it, then click Start)`
     );
+
+    const { width, height } = this.scale;
 
     const startBtn = this.add
       .text(width / 2, height / 2 + 140, "[ Start Game ]", {
@@ -91,6 +96,11 @@ export class MainMenuScene extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
+
+    // Save to Firebase in background — show error if it fails
+    createSession(session).catch((e) => {
+      this.statusText.setText(`Firebase error: ${e}\n\nGame code: ${gameId}`);
+    });
 
     startBtn.on("pointerup", () => {
       startBtn.destroy();
