@@ -150,6 +150,15 @@ export class GameScene extends Phaser.Scene {
       .text(10, 10, "", { fontSize: "13px", color: "#ffffff" })
       .setDepth(10);
 
+    // Always show game ID so Player A can share it
+    this.add
+      .text(10, this.scale.height - 10, `Game code: ${this.turnManager.getState().gameId}`, {
+        fontSize: "12px",
+        color: "#888888",
+      })
+      .setOrigin(0, 1)
+      .setDepth(10);
+
     this.endTurnBtn = this.add
       .text(width - 16, height - 16, "[ End Turn ]", {
         fontSize: "16px",

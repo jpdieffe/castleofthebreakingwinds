@@ -76,13 +76,28 @@ export class MainMenuScene extends Phaser.Scene {
     };
 
     await createSession(session);
+
+    const { width, height } = this.scale;
+
+    // Show the code prominently and wait for the player to click Start
     this.statusText.setText(
-      `Game created!\nShare this code with your friend:\n\n${gameId}\n\nWaiting for Player B...`
+      `Share this code with your friend:\n\n${gameId}\n\n(copy it, then click Start)`
     );
 
-    this.scene.start("GameScene", {
-      session,
-      playerSlot: "playerA" as PlayerSlot,
+    const startBtn = this.add
+      .text(width / 2, height / 2 + 140, "[ Start Game ]", {
+        fontSize: "18px",
+        color: "#88ff88",
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    startBtn.on("pointerup", () => {
+      startBtn.destroy();
+      this.scene.start("GameScene", {
+        session,
+        playerSlot: "playerA" as PlayerSlot,
+      });
     });
   }
 
