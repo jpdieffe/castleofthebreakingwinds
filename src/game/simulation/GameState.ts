@@ -27,17 +27,23 @@ export function applyActions(state: GameState, actions: Action[]): GameState {
   return s;
 }
 
+export interface NpcPhaseResult {
+  state: GameState;
+  /** One entry per enemy, in iteration order. actions may be empty if the enemy couldn't move. */
+  entityTurns: { entityId: string; actions: Action[] }[];
+}
+
 /**
  * Run the NPC/enemy phase deterministically using a seeded RNG.
- * Called once after BOTH players have taken their turns in a round.
+ * Returns the new state AND per-entity action lists for sequential animation.
  */
-export function runNpcPhase(state: GameState, npcSeed: number): GameState {
+export function runNpcPhase(state: GameState, npcSeed: number): NpcPhaseResult {
   const rng = new RNG(npcSeed);
   let s = deepClone(state);
+  const entityTurns: { entityId: string; actions: Action[] }[] = [];
 
   for (const entity of Object.values(s.entities)) {
     if (entity.type !== "enemy") continue;
-    // Simple placeholder AI: move one tile in a random cardinal direction
     const dirs: TileCoord[] = [
       { x: 0, y: -1 },
       { x: 0, y: 1 },
@@ -49,12 +55,15 @@ export function runNpcPhase(state: GameState, npcSeed: number): GameState {
       x: entity.pos.x + dir.x,
       y: entity.pos.y + dir.y,
     };
+    const actions: Action[] = [];
     if (isTileWalkable(s, newPos)) {
       s.entities[entity.id] = { ...entity, pos: newPos };
+      actions.push({ type: "MOVE", unitId: entity.id, to: newPos });
     }
+    entityTurns.push({ entityId: entity.id, actions });
   }
 
-  return s;
+  return { state: s, entityTurns };
 }
 
 // ─── Private helpers ──────────────────────────────────────────────────────────

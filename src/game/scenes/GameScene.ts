@@ -213,7 +213,7 @@ export class GameScene extends Phaser.Scene {
 
       if (isNow) {
         // Pulsing glow outline — draw a border rect that fades in/out
-        const glow = this.add.rectangle(0, 0, SLOT_SIZE + 4, SLOT_SIZE + 4, 0xffdd44, 0);
+        const glow = this.add.rectangle(0, 0, SLOT_SIZE + 4, SLOT_SIZE + 4, 0x44ff88, 0);
         container.addAt(glow, 0);
         this.tweens.add({ targets: glow, alpha: 0.9, duration: 500, yoyo: true, repeat: -1 });
       }

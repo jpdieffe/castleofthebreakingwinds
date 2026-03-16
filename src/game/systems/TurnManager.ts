@@ -1,5 +1,6 @@
 import type { GameState, Action, TurnLog, PlayerSlot, RoundPhase, HistoryEntry } from "../../types";
 import { applyActions, runNpcPhase, MOVEMENT_POINTS, ACTION_POINTS } from "../simulation/GameState";
+import type { NpcPhaseResult } from "../simulation/GameState";
 import { RNG } from "../simulation/RNG";
 import { submitTurn, subscribeTurns } from "../../firebase/turnService";
 
@@ -14,6 +15,7 @@ export class TurnManager {
   private onAnimate: AnimateCallback;
   private history: HistoryEntry[] = [];
   private busy = false; // lock during animation
+  private processedLogs = new Set<string>(); // dedup guard against Firestore re-delivery
 
   constructor(
     initialState: GameState,
@@ -73,13 +75,7 @@ export class TurnManager {
     // If playerB just ended, run enemy phase locally then advance to next round
     if (this.state.phase === "playerB") {
       this.busy = true;
-      this.onAnimate([], "enemies", () => {
-        const stateAfterEnemies = runNpcPhase(this.state, npcSeed);
-        this.pushHistory({ round: this.state.round, phase: "enemies", label: "Enemies", log: null });
-        this.state = this.advancePhase(stateAfterEnemies);
-        this.busy = false;
-        this.onStateChanged(this.state);
-      });
+      this.runEnemyPhase(npcSeed);
     } else {
       this.state = this.advancePhase(this.state);
       this.onStateChanged(this.state);
@@ -100,30 +96,60 @@ export class TurnManager {
   //  Private 
 
   private applyRemoteTurn(log: TurnLog): void {
+    const logKey = `${log.round}_${log.phase}`;
+    if (this.processedLogs.has(logKey)) return;
     if (log.playerId === this.localPlayer) return;
     if (log.round !== this.state.round) return;
     if (log.phase !== this.state.phase) return;
 
+    this.processedLogs.add(logKey);
     this.busy = true;
     this.onAnimate(log.actions, log.phase, () => {
       this.state = applyActions(this.state, log.actions);
       this.pushHistory({ round: log.round, phase: log.phase, label: log.phase === "playerA" ? "P1" : "P2", log });
 
       if (log.phase === "playerB") {
-        // Run enemy phase after both players have gone
-        this.onAnimate([], "enemies", () => {
-          const stateAfterEnemies = runNpcPhase(this.state, log.npcSeed);
-          this.pushHistory({ round: this.state.round, phase: "enemies", label: "Enemies", log: null });
-          this.state = this.advancePhase(stateAfterEnemies);
-          this.busy = false;
-          this.onStateChanged(this.state);
-        });
+        this.runEnemyPhase(log.npcSeed);
       } else {
         this.state = this.advancePhase(this.state);
         this.busy = false;
         this.onStateChanged(this.state);
       }
     });
+  }
+
+  /** Animate each enemy one-by-one, push one history entry per enemy, then advance phase. */
+  private runEnemyPhase(npcSeed: number): void {
+    const { state: stateAfterEnemies, entityTurns }: NpcPhaseResult = runNpcPhase(this.state, npcSeed);
+    const currentRound = this.state.round;
+
+    // stateAfterEnemies.phase is still "playerB" (runNpcPhase doesn't change phase).
+    // advancePhase needs phase="enemies" to correctly roll over to playerA of next round.
+    const enemiesState = { ...stateAfterEnemies, phase: "enemies" as const };
+
+    const runOne = (idx: number) => {
+      if (idx >= entityTurns.length) {
+        this.state = this.advancePhase(enemiesState);
+        this.busy = false;
+        this.onStateChanged(this.state);
+        return;
+      }
+      const { actions } = entityTurns[idx];
+      const label = `NPC ${idx + 1}`;
+      this.onAnimate(actions, "enemies", () => {
+        this.pushHistory({ round: currentRound, phase: "enemies", label, log: null });
+        runOne(idx + 1);
+      });
+    };
+
+    if (entityTurns.length === 0) {
+      this.state = this.advancePhase(enemiesState);
+      this.busy = false;
+      this.onStateChanged(this.state);
+      return;
+    }
+
+    runOne(0);
   }
 
   private advancePhase(state: GameState): GameState {
