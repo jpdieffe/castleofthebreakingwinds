@@ -29,8 +29,7 @@ export function applyActions(state: GameState, actions: Action[]): GameState {
 
 /**
  * Run the NPC/enemy phase deterministically using a seeded RNG.
- * Called after each player's actions — both clients call this independently
- * with the same seed and get identical results.
+ * Called once after BOTH players have taken their turns in a round.
  */
 export function runNpcPhase(state: GameState, npcSeed: number): GameState {
   const rng = new RNG(npcSeed);

@@ -44,19 +44,16 @@ export async function getSession(gameId: string): Promise<GameSession | null> {
  * Document ID: `turn_{turn}_{playerId}`
  */
 export async function submitTurn(log: TurnLog): Promise<void> {
-  const id = `turn_${String(log.turn).padStart(4, "0")}_${log.playerId}`;
+  const id = `round_${String(log.round).padStart(4, "0")}_${log.phase}`;
   await setDoc(doc(db, "sessions", log.gameId, "turns", id), log);
 }
 
-/**
- * Fetch a specific turn log.
- */
 export async function getTurn(
   gameId: string,
-  turn: number,
-  playerId: string
+  round: number,
+  phase: string
 ): Promise<TurnLog | null> {
-  const id = `turn_${String(turn).padStart(4, "0")}_${playerId}`;
+  const id = `round_${String(round).padStart(4, "0")}_${phase}`;
   const snap = await getDoc(doc(db, "sessions", gameId, "turns", id));
   return snap.exists() ? (snap.data() as TurnLog) : null;
 }

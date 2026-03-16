@@ -1,30 +1,32 @@
-import type { GameState, Action, TurnLog, PlayerSlot } from "../../types";
+import type { GameState, Action, TurnLog, PlayerSlot, RoundPhase, HistoryEntry } from "../../types";
 import { applyActions, runNpcPhase, MOVEMENT_POINTS, ACTION_POINTS } from "../simulation/GameState";
 import { RNG } from "../simulation/RNG";
 import { submitTurn, subscribeTurns } from "../../firebase/turnService";
 
-/**
- * TurnManager sits between the Phaser scene and Firestore.
- * It owns the authoritative local GameState and drives the turn loop.
- */
+export type AnimateCallback = (actions: Action[], phase: RoundPhase, onDone: () => void) => void;
+
 export class TurnManager {
   private state: GameState;
   private pendingActions: Action[] = [];
   private unsubscribe: (() => void) | null = null;
   private localPlayer: PlayerSlot;
   private onStateChanged: (state: GameState) => void;
+  private onAnimate: AnimateCallback;
+  private history: HistoryEntry[] = [];
+  private busy = false; // lock during animation
 
   constructor(
     initialState: GameState,
     localPlayer: PlayerSlot,
-    onStateChanged: (state: GameState) => void
+    onStateChanged: (state: GameState) => void,
+    onAnimate: AnimateCallback
   ) {
     this.state = initialState;
     this.localPlayer = localPlayer;
     this.onStateChanged = onStateChanged;
+    this.onAnimate = onAnimate;
   }
 
-  /** Call once the scene is ready to start receiving turns. */
   start(): void {
     this.unsubscribe = subscribeTurns(this.state.gameId, (log) => {
       this.applyRemoteTurn(log);
@@ -35,84 +37,121 @@ export class TurnManager {
     this.unsubscribe?.();
   }
 
-  getState(): GameState {
-    return this.state;
-  }
+  getState(): GameState { return this.state; }
+  getHistory(): HistoryEntry[] { return [...this.history]; }
+  isBusy(): boolean { return this.busy; }
 
   isLocalTurn(): boolean {
-    return this.state.activePlayer === this.localPlayer;
+    return !this.busy && this.state.phase === this.localPlayer;
   }
 
-  /** Queue an action during the local player's turn. */
   queueAction(action: Action): void {
     if (!this.isLocalTurn()) return;
     this.pendingActions.push(action);
-    // Optimistically apply for immediate visual feedback
+    // Optimistic local apply for immediate feedback
     this.state = applyActions(this.state, [action]);
     this.onStateChanged(this.state);
   }
 
-  /** Finalise the local player's turn and push to Firestore. */
   async endTurn(): Promise<void> {
     if (!this.isLocalTurn()) return;
-
     this.pendingActions.push({ type: "END_TURN" });
 
-    const npcSeed = RNG.turnSeed(this.state.seed, this.state.turn);
-
+    const npcSeed = RNG.turnSeed(this.state.seed, this.state.round);
     const log: TurnLog = {
       gameId: this.state.gameId,
-      turn: this.state.turn,
+      round: this.state.round,
+      phase: this.state.phase as "playerA" | "playerB",
       playerId: this.localPlayer,
       actions: [...this.pendingActions],
       npcSeed,
       timestamp: Date.now(),
     };
 
-    // Run NPC phase locally
-    this.state = runNpcPhase(this.state, npcSeed);
-    this.advanceTurn();
     this.pendingActions = [];
-    this.onStateChanged(this.state);
+
+    // If playerB just ended, run enemy phase locally then advance to next round
+    if (this.state.phase === "playerB") {
+      this.busy = true;
+      this.onAnimate([], "enemies", () => {
+        const stateAfterEnemies = runNpcPhase(this.state, npcSeed);
+        this.pushHistory({ round: this.state.round, phase: "enemies", label: "Enemies", log: null });
+        this.state = this.advancePhase(stateAfterEnemies);
+        this.busy = false;
+        this.onStateChanged(this.state);
+      });
+    } else {
+      this.state = this.advancePhase(this.state);
+      this.onStateChanged(this.state);
+    }
 
     await submitTurn(log);
   }
 
-  // ─── Private ───────────────────────────────────────────────────────────────
-
-  private applyRemoteTurn(log: TurnLog): void {
-    // Ignore turns we've already processed or turns from ourselves
-    if (log.playerId === this.localPlayer) return;
-    if (log.turn !== this.state.turn) return;
-
-    this.state = applyActions(this.state, log.actions);
-    this.state = runNpcPhase(this.state, log.npcSeed);
-    this.advanceTurn();
-    this.onStateChanged(this.state);
+  // Replay a history entry visually (does not change actual state)
+  replayEntry(entry: HistoryEntry): void {
+    if (!entry.log) return;
+    this.busy = true;
+    this.onAnimate(entry.log.actions, entry.phase as RoundPhase, () => {
+      this.busy = false;
+    });
   }
 
-  private advanceTurn(): void {
-    // Reset AP/MP for the next active player's units after both have moved
-    const nextPlayer =
-      this.state.activePlayer === "playerA" ? "playerB" : "playerA";
-    const nextTurn =
-      nextPlayer === "playerA" ? this.state.turn + 1 : this.state.turn;
+  //  Private 
 
-    const entities = { ...this.state.entities };
-    const nextUnitId = nextPlayer === "playerA" ? "player_a" : "player_b";
-    if (entities[nextUnitId]) {
-      entities[nextUnitId] = {
-        ...entities[nextUnitId],
-        movementPoints: MOVEMENT_POINTS,
-        actionPoints: ACTION_POINTS,
-      };
+  private applyRemoteTurn(log: TurnLog): void {
+    if (log.playerId === this.localPlayer) return;
+    if (log.round !== this.state.round) return;
+    if (log.phase !== this.state.phase) return;
+
+    this.busy = true;
+    this.onAnimate(log.actions, log.phase, () => {
+      this.state = applyActions(this.state, log.actions);
+      this.pushHistory({ round: log.round, phase: log.phase, label: log.phase === "playerA" ? "P1" : "P2", log });
+
+      if (log.phase === "playerB") {
+        // Run enemy phase after both players have gone
+        this.onAnimate([], "enemies", () => {
+          const stateAfterEnemies = runNpcPhase(this.state, log.npcSeed);
+          this.pushHistory({ round: this.state.round, phase: "enemies", label: "Enemies", log: null });
+          this.state = this.advancePhase(stateAfterEnemies);
+          this.busy = false;
+          this.onStateChanged(this.state);
+        });
+      } else {
+        this.state = this.advancePhase(this.state);
+        this.busy = false;
+        this.onStateChanged(this.state);
+      }
+    });
+  }
+
+  private advancePhase(state: GameState): GameState {
+    const entities = { ...state.entities };
+
+    if (state.phase === "playerA") {
+      // Reset playerB AP/MP ready for their turn
+      if (entities["player_b"]) {
+        entities["player_b"] = { ...entities["player_b"], movementPoints: MOVEMENT_POINTS, actionPoints: ACTION_POINTS };
+      }
+      return { ...state, entities, phase: "playerB", activePlayer: "playerB" };
     }
 
-    this.state = {
-      ...this.state,
-      turn: nextTurn,
-      activePlayer: nextPlayer,
-      entities,
-    };
+    if (state.phase === "playerB") {
+      // Enemy phase is handled inline; this shouldn't be called for playerB directly
+      // but if called, move to enemies
+      return { ...state, entities, phase: "enemies", activePlayer: "playerA" };
+    }
+
+    // After enemies: new round, reset playerA
+    if (entities["player_a"]) {
+      entities["player_a"] = { ...entities["player_a"], movementPoints: MOVEMENT_POINTS, actionPoints: ACTION_POINTS };
+    }
+    return { ...state, entities, phase: "playerA", activePlayer: "playerA", round: state.round + 1 };
+  }
+
+  private pushHistory(entry: HistoryEntry): void {
+    this.history.push(entry);
+    if (this.history.length > 20) this.history.shift();
   }
 }

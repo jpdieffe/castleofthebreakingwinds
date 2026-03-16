@@ -42,11 +42,12 @@ export type Action = MoveAction | AttackAction | UseItemAction | EndTurnAction;
 
 export interface TurnLog {
   gameId: string;
-  turn: number;
+  round: number;
+  phase: RoundPhase;
   playerId: string;          // "playerA" | "playerB"
   actions: Action[];
-  npcSeed: number;           // deterministic seed for NPC phase this turn
-  timestamp: number;         // Date.now()
+  npcSeed: number;           // used only when phase === "playerB" to run enemy phase after
+  timestamp: number;
 }
 
 // ─── Game State (lives only on clients, rebuilt from turn logs) ───────────────
@@ -63,12 +64,25 @@ export interface Entity {
   actionPoints: number;
 }
 
+// Phase within a round: playerA acts → playerB acts → enemies act → repeat
+export type RoundPhase = "playerA" | "playerB" | "enemies";
+
 export interface GameState {
   gameId: string;
-  turn: number;
-  activePlayer: "playerA" | "playerB";
+  round: number;             // increments after enemies phase
+  phase: RoundPhase;         // current phase within the round
+  activePlayer: "playerA" | "playerB";  // kept for UI compat
   entities: Record<string, Entity>;
-  seed: number;              // initial game seed (shared, stored in Firestore on game creation)
+  seed: number;
+}
+
+// ─── History ─────────────────────────────────────────────────────────────────
+
+export interface HistoryEntry {
+  round: number;
+  phase: RoundPhase;
+  label: string;             // e.g. "P1", "P2", "Enemies"
+  log: TurnLog | null;       // null for enemy phase (computed locally)
 }
 
 // ─── Lobby / Session ─────────────────────────────────────────────────────────
