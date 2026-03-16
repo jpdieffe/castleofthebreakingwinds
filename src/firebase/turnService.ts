@@ -68,7 +68,7 @@ export function subscribeTurns(
 ): Unsubscribe {
   const q = query(
     collection(db, "sessions", gameId, "turns"),
-    orderBy("turn", "asc")
+    orderBy("round", "asc")
   );
   return onSnapshot(q, (snapshot) => {
     snapshot.docChanges().forEach((change) => {

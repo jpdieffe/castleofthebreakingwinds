@@ -175,13 +175,15 @@ export class GameScene extends Phaser.Scene {
     const centerX = width / 2;
     const centerY = BAR_HEIGHT / 2;
 
-    // Build the schedule: past 5, [NOW], next 5
+    // Build the schedule: past 5, [current], next 5
     const past = history.slice(-5);
-    const upcoming = buildUpcoming(this.turnManager.getState(), 5);
+    const currentState = this.turnManager.getState();
+    const upcoming = buildUpcoming(currentState, 5);
+    const currentLabel = getPhaseLabel(currentState.phase);
     const all = [
-      ...past.map(e => ({ entry: e, type: "past" as const })),
-      { entry: null, type: "now" as const },
-      ...upcoming.map(e => ({ entry: e as HistoryEntry | null, type: "future" as const })),
+      ...past.map(e => ({ entry: e, type: "past" as const, label: getPhaseLabel(e.phase) })),
+      { entry: null, type: "now" as const, label: currentLabel },
+      ...upcoming.map(e => ({ entry: e as HistoryEntry | null, type: "future" as const, label: getPhaseLabel(e.phase!) })),
     ];
 
     // Background bar
@@ -190,18 +192,16 @@ export class GameScene extends Phaser.Scene {
     const totalSlots = all.length;
     const startX = centerX - ((totalSlots - 1) / 2) * (SLOT_SIZE + 4);
 
-    all.forEach(({ entry, type }, i) => {
+    all.forEach(({ entry, type, label }, i) => {
       const x = startX + i * (SLOT_SIZE + 4);
       const container = this.add.container(x, centerY).setDepth(21);
 
       const isNow = type === "now";
-      const bgColor = isNow ? 0xffdd44 : type === "past" ? 0x334455 : 0x223344;
+      const bgColor = isNow ? 0x445566 : type === "past" ? 0x334455 : 0x223344;
       const bg = this.add.rectangle(0, 0, SLOT_SIZE, SLOT_SIZE, bgColor, 1);
       container.add(bg);
 
-      const label = isNow ? "NOW" : entry ? getPhaseLabel(entry.phase) : "?";
-      const labelColor = isNow ? "#111111" : "#ffffff";
-      const text = this.add.text(0, 0, label, { fontSize: "11px", color: labelColor }).setOrigin(0.5);
+      const text = this.add.text(0, 0, label, { fontSize: "11px", color: "#ffffff" }).setOrigin(0.5);
       container.add(text);
 
       if (type === "past" && entry) {
@@ -212,8 +212,10 @@ export class GameScene extends Phaser.Scene {
       }
 
       if (isNow) {
-        // Pulsing outline
-        this.tweens.add({ targets: bg, alpha: 0.6, duration: 600, yoyo: true, repeat: -1 });
+        // Pulsing glow outline — draw a border rect that fades in/out
+        const glow = this.add.rectangle(0, 0, SLOT_SIZE + 4, SLOT_SIZE + 4, 0xffdd44, 0);
+        container.addAt(glow, 0);
+        this.tweens.add({ targets: glow, alpha: 0.9, duration: 500, yoyo: true, repeat: -1 });
       }
 
       this.historySlots.push(container);
