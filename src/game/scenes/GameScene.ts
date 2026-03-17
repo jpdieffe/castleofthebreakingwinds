@@ -182,6 +182,7 @@ export class GameScene extends Phaser.Scene {
     const past = history.slice(-5);
     const currentState = this.turnManager.getState();
     const upcoming = buildUpcoming(currentState, 5);
+    // "now" label: during enemies phase we don't know which NPC index, so just say "NPC"
     const currentLabel = getPhaseLabel(currentState.phase);
     const all = [
       ...past.map(e => ({ entry: e as HistoryEntry | null, type: "past" as const, label: e.label })),
@@ -338,20 +339,33 @@ function screenToTile(sx: number, sy: number, originX: number, originY: number) 
   };
 }
 
-function getPhaseLabel(phase: RoundPhase): string {
-  return phase === "playerA" ? "P1" : phase === "playerB" ? "P2" : "NPC";
+function getPhaseLabel(phase: RoundPhase, npcIndex?: number): string {
+  if (phase === "playerA") return "P1";
+  if (phase === "playerB") return "P2";
+  return npcIndex !== undefined ? `NPC${npcIndex + 1}` : "NPC";
 }
 
 function buildUpcoming(state: GameState, count: number): Partial<HistoryEntry>[] {
   const order: RoundPhase[] = ["playerA", "playerB", "enemies"];
+  const enemyIds = Object.values(state.entities).filter(e => e.type === "enemy").map(e => e.id);
+  const enemyCount = Math.max(1, enemyIds.length);
   const result: Partial<HistoryEntry>[] = [];
   let phase = state.phase;
   let round = state.round;
-  for (let i = 0; i < count; i++) {
+
+  while (result.length < count) {
     const idx = (order.indexOf(phase) + 1) % order.length;
     phase = order[idx];
     if (phase === "playerA") round++;
-    result.push({ round, phase, label: getPhaseLabel(phase) });
+
+    if (phase === "enemies") {
+      // Expand into one slot per enemy
+      for (let n = 0; n < enemyCount && result.length < count; n++) {
+        result.push({ round, phase, label: `NPC${n + 1}` });
+      }
+    } else {
+      result.push({ round, phase, label: getPhaseLabel(phase) });
+    }
   }
   return result;
 }
