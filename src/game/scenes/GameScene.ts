@@ -19,6 +19,8 @@ export class GameScene extends Phaser.Scene {
   private uiText!: Phaser.GameObjects.Text;
   private endTurnBtn!: Phaser.GameObjects.Text;
   private historySlots: Phaser.GameObjects.Container[] = [];
+  private historyCursorIdx = -1;  // index into history array; -1 = no cursor
+  private playBtnRef: Phaser.GameObjects.Text | null = null;
 
   constructor() {
     super({ key: "GameScene" });
@@ -166,9 +168,10 @@ export class GameScene extends Phaser.Scene {
   //  History bar 
 
   private refreshHistoryBar(): void {
-    // Clear old slots
+    // Clear old slots and play button
     this.historySlots.forEach(c => c.destroy());
     this.historySlots = [];
+    if (this.playBtnRef) { this.playBtnRef.destroy(); this.playBtnRef = null; }
 
     const history = this.turnManager.getHistory();
     const { width } = this.scale;
@@ -181,9 +184,9 @@ export class GameScene extends Phaser.Scene {
     const upcoming = buildUpcoming(currentState, 5);
     const currentLabel = getPhaseLabel(currentState.phase);
     const all = [
-      ...past.map(e => ({ entry: e, type: "past" as const, label: getPhaseLabel(e.phase) })),
-      { entry: null, type: "now" as const, label: currentLabel },
-      ...upcoming.map(e => ({ entry: e as HistoryEntry | null, type: "future" as const, label: getPhaseLabel(e.phase!) })),
+      ...past.map(e => ({ entry: e as HistoryEntry | null, type: "past" as const, label: e.label })),
+      { entry: null as HistoryEntry | null, type: "now" as const, label: currentLabel },
+      ...upcoming.map(e => ({ entry: null as HistoryEntry | null, type: "future" as const, label: getPhaseLabel(e.phase!) })),
     ];
 
     // Background bar
@@ -197,38 +200,73 @@ export class GameScene extends Phaser.Scene {
       const container = this.add.container(x, centerY).setDepth(21);
 
       const isNow = type === "now";
-      const bgColor = isNow ? 0x445566 : type === "past" ? 0x334455 : 0x223344;
+      // historyIndex: which index in the full history array does this past slot correspond to?
+      const historyIndex = type === "past" ? history.length - past.length + i : -1;
+      const isCursor = historyIndex >= 0 && this.historyCursorIdx === historyIndex;
+
+      const bgColor = isNow ? 0x445566 : isCursor ? 0xaa5500 : type === "past" ? 0x334455 : 0x223344;
       const bg = this.add.rectangle(0, 0, SLOT_SIZE, SLOT_SIZE, bgColor, 1);
       container.add(bg);
 
       const text = this.add.text(0, 0, label, { fontSize: "11px", color: "#ffffff" }).setOrigin(0.5);
       container.add(text);
 
+      // Past slots: click to set/toggle the playback cursor
       if (type === "past" && entry) {
         bg.setInteractive({ useHandCursor: true });
-        bg.on("pointerover", () => bg.setFillStyle(0x556677));
-        bg.on("pointerout",  () => bg.setFillStyle(bgColor));
-        bg.on("pointerup", () => this.onHistoryClick(entry!));
+        bg.on("pointerover", () => bg.setFillStyle(isCursor ? 0xcc7700 : 0x556677));
+        bg.on("pointerout",  () => bg.setFillStyle(isCursor ? 0xaa5500 : bgColor));
+        bg.on("pointerup", () => {
+          this.historyCursorIdx = isCursor ? -1 : historyIndex; // toggle on re-click
+          this.refreshHistoryBar();
+        });
       }
 
+      // Orange border outline on the cursor slot
+      if (isCursor) {
+        const cursorGfx = this.add.graphics();
+        cursorGfx.lineStyle(3, 0xffaa00, 1);
+        cursorGfx.strokeRect(-(SLOT_SIZE / 2 + 2), -(SLOT_SIZE / 2 + 2), SLOT_SIZE + 4, SLOT_SIZE + 4);
+        container.add(cursorGfx); // added last → renders on top of bg and text
+      }
+
+      // Pulsing green border outline on the current "now" slot
       if (isNow) {
-        // Pulsing glow outline — draw a border rect that fades in/out
-        const glow = this.add.rectangle(0, 0, SLOT_SIZE + 4, SLOT_SIZE + 4, 0x44ff88, 0);
-        container.addAt(glow, 0);
-        this.tweens.add({ targets: glow, alpha: 0.9, duration: 500, yoyo: true, repeat: -1 });
+        const glow = this.add.graphics();
+        glow.lineStyle(3, 0x44ff88, 1);
+        glow.strokeRect(-(SLOT_SIZE / 2 + 2), -(SLOT_SIZE / 2 + 2), SLOT_SIZE + 4, SLOT_SIZE + 4);
+        container.add(glow); // added last → renders on top of bg and text
+        this.tweens.add({ targets: glow, alpha: 0.2, duration: 600, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
       }
 
       this.historySlots.push(container);
     });
-  }
 
-  private onHistoryClick(entry: HistoryEntry): void {
-    if (this.turnManager.isBusy()) return;
-    // Snapshot current sprites, replay, then restore
-    this.turnManager.replayEntry(entry);
-    // After replay the onAnimate callback will call onDone which clears busy
-    // Refresh history bar to show return button
-    this.refreshHistoryBar();
+    // Play button: appears only when a cursor is set
+    if (this.historyCursorIdx >= 0) {
+      this.playBtnRef = this.add
+        .text(width - 10, centerY, "▶ Play", {
+          fontSize: "13px",
+          color: "#ffcc00",
+          backgroundColor: "#334455",
+          padding: { x: 8, y: 4 },
+        })
+        .setOrigin(1, 0.5)
+        .setDepth(22)
+        .setInteractive({ useHandCursor: true });
+
+      this.playBtnRef.on("pointerup", () => {
+        if (this.turnManager.isBusy()) return;
+        const cursor = this.historyCursorIdx;
+        this.historyCursorIdx = -1;
+        this.refreshHistoryBar();
+        this.turnManager.replayFromIndex(cursor, () => {
+          // Snap all sprites back to current game-state positions after replay
+          this.syncSprites(this.turnManager.getState());
+          this.refreshHistoryBar();
+        });
+      });
+    }
   }
 
   //  UI 

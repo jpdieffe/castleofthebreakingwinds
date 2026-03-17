@@ -81,8 +81,9 @@ export interface GameState {
 export interface HistoryEntry {
   round: number;
   phase: RoundPhase;
-  label: string;             // e.g. "P1", "P2", "Enemies"
+  label: string;             // e.g. "P1", "P2", "NPC1"
   log: TurnLog | null;       // null for enemy phase (computed locally)
+  actions?: Action[];        // set for NPC entries (no log) for replay
 }
 
 // ─── Lobby / Session ─────────────────────────────────────────────────────────

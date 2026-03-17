@@ -72,6 +72,10 @@ export class TurnManager {
 
     this.pendingActions = [];
 
+    // Push the local player's own turn so both clients see the same history
+    const phaseLabel = this.state.phase === "playerA" ? "P1" : "P2";
+    this.pushHistory({ round: this.state.round, phase: this.state.phase as "playerA" | "playerB", label: phaseLabel, log });
+
     // If playerB just ended, run enemy phase locally then advance to next round
     if (this.state.phase === "playerB") {
       this.busy = true;
@@ -84,13 +88,20 @@ export class TurnManager {
     await submitTurn(log);
   }
 
-  // Replay a history entry visually (does not change actual state)
-  replayEntry(entry: HistoryEntry): void {
-    if (!entry.log) return;
+  /** Replay all history entries from startIdx forward, one-by-one. Calls onDone on completion. */
+  replayFromIndex(startIdx: number, onDone: () => void): void {
+    if (this.busy) return;
+    const entries = this.history.slice(startIdx);
+    if (entries.length === 0) { onDone(); return; }
     this.busy = true;
-    this.onAnimate(entry.log.actions, entry.phase as RoundPhase, () => {
-      this.busy = false;
-    });
+    let i = 0;
+    const playNext = () => {
+      if (i >= entries.length) { this.busy = false; onDone(); return; }
+      const entry = entries[i++];
+      const actions = entry.log?.actions ?? entry.actions ?? [];
+      this.onAnimate(actions, entry.phase, playNext);
+    };
+    playNext();
   }
 
   //  Private 
@@ -135,9 +146,9 @@ export class TurnManager {
         return;
       }
       const { actions } = entityTurns[idx];
-      const label = `NPC ${idx + 1}`;
+      const label = `NPC${idx + 1}`;
       this.onAnimate(actions, "enemies", () => {
-        this.pushHistory({ round: currentRound, phase: "enemies", label, log: null });
+        this.pushHistory({ round: currentRound, phase: "enemies", label, log: null, actions });
         runOne(idx + 1);
       });
     };
