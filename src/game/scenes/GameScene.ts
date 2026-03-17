@@ -21,6 +21,23 @@ export class GameScene extends Phaser.Scene {
   private historySlots: Phaser.GameObjects.Container[] = [];
   private historyCursorIdx = -1;  // index into history array; -1 = no cursor
   private playBtnRef: Phaser.GameObjects.Text | null = null;
+  private isRewound = false;  // true when sprites are snapped to a past state
+
+  /** Instantly move all sprites to the positions recorded in a snapshot. */
+  private snapSpritesToSnapshot(snapshot: Record<string, { x: number; y: number }>): void {
+    const originX = this.scale.width / 2;
+    // Kill any in-flight tweens on entity sprites first
+    for (const sprite of this.entitySprites.values()) {
+      this.tweens.killTweensOf(sprite);
+    }
+    for (const [id, pos] of Object.entries(snapshot)) {
+      const sprite = this.entitySprites.get(id);
+      if (sprite) {
+        const { sx, sy } = tileToScreen(pos.x, pos.y, originX, ORIGIN_Y);
+        sprite.setPosition(sx, sy - 16);
+      }
+    }
+  }
 
   constructor() {
     super({ key: "GameScene" });
@@ -187,7 +204,7 @@ export class GameScene extends Phaser.Scene {
     const all = [
       ...past.map(e => ({ entry: e as HistoryEntry | null, type: "past" as const, label: e.label })),
       { entry: null as HistoryEntry | null, type: "now" as const, label: currentLabel },
-      ...upcoming.map(e => ({ entry: null as HistoryEntry | null, type: "future" as const, label: getPhaseLabel(e.phase!) })),
+      ...upcoming.map(e => ({ entry: null as HistoryEntry | null, type: "future" as const, label: e.label! })),
     ];
 
     // Background bar
@@ -218,7 +235,17 @@ export class GameScene extends Phaser.Scene {
         bg.on("pointerover", () => bg.setFillStyle(isCursor ? 0xcc7700 : 0x556677));
         bg.on("pointerout",  () => bg.setFillStyle(isCursor ? 0xaa5500 : bgColor));
         bg.on("pointerup", () => {
-          this.historyCursorIdx = isCursor ? -1 : historyIndex; // toggle on re-click
+          if (isCursor) {
+            // Un-set cursor: snap back to present
+            this.historyCursorIdx = -1;
+            this.isRewound = false;
+            this.syncSprites(this.turnManager.getState());
+          } else {
+            // Set cursor: snap sprites to this point in history
+            this.historyCursorIdx = historyIndex;
+            this.isRewound = true;
+            this.snapSpritesToSnapshot(entry.entitySnapshot);
+          }
           this.refreshHistoryBar();
         });
       }
@@ -262,7 +289,8 @@ export class GameScene extends Phaser.Scene {
         this.historyCursorIdx = -1;
         this.refreshHistoryBar();
         this.turnManager.replayFromIndex(cursor, () => {
-          // Snap all sprites back to current game-state positions after replay
+          // Snap all sprites back to current real game-state positions
+          this.isRewound = false;
           this.syncSprites(this.turnManager.getState());
           this.refreshHistoryBar();
         });
@@ -319,7 +347,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private onStateChanged(state: GameState): void {
-    this.syncSprites(state);
+    if (!this.isRewound) {
+      this.syncSprites(state);
+    }
     this.refreshUI(state);
     this.refreshHistoryBar();
   }

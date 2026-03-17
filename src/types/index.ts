@@ -84,6 +84,8 @@ export interface HistoryEntry {
   label: string;             // e.g. "P1", "P2", "NPC1"
   log: TurnLog | null;       // null for enemy phase (computed locally)
   actions?: Action[];        // set for NPC entries (no log) for replay
+  /** Entity positions at the START of this entry (before actions applied). Used for visual rewind. */
+  entitySnapshot: Record<string, { x: number; y: number }>;
 }
 
 // ─── Lobby / Session ─────────────────────────────────────────────────────────

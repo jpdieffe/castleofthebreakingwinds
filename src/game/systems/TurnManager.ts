@@ -43,6 +43,15 @@ export class TurnManager {
   getHistory(): HistoryEntry[] { return [...this.history]; }
   isBusy(): boolean { return this.busy; }
 
+  /** Snapshot current entity positions — used to record where entities were before each action set. */
+  private takeSnapshot(): Record<string, { x: number; y: number }> {
+    const snap: Record<string, { x: number; y: number }> = {};
+    for (const [id, entity] of Object.entries(this.state.entities)) {
+      snap[id] = { x: entity.pos.x, y: entity.pos.y };
+    }
+    return snap;
+  }
+
   isLocalTurn(): boolean {
     return !this.busy && this.state.phase === this.localPlayer;
   }
@@ -74,7 +83,8 @@ export class TurnManager {
 
     // Push the local player's own turn so both clients see the same history
     const phaseLabel = this.state.phase === "playerA" ? "P1" : "P2";
-    this.pushHistory({ round: this.state.round, phase: this.state.phase as "playerA" | "playerB", label: phaseLabel, log });
+    const snapshot = this.takeSnapshot();
+    this.pushHistory({ round: this.state.round, phase: this.state.phase as "playerA" | "playerB", label: phaseLabel, log, entitySnapshot: snapshot });
 
     // If playerB just ended, run enemy phase locally then advance to next round
     if (this.state.phase === "playerB") {
@@ -115,9 +125,10 @@ export class TurnManager {
 
     this.processedLogs.add(logKey);
     this.busy = true;
+    const snapshot = this.takeSnapshot();
     this.onAnimate(log.actions, log.phase, () => {
       this.state = applyActions(this.state, log.actions);
-      this.pushHistory({ round: log.round, phase: log.phase, label: log.phase === "playerA" ? "P1" : "P2", log });
+      this.pushHistory({ round: log.round, phase: log.phase, label: log.phase === "playerA" ? "P1" : "P2", log, entitySnapshot: snapshot });
 
       if (log.phase === "playerB") {
         this.runEnemyPhase(log.npcSeed);
@@ -147,8 +158,9 @@ export class TurnManager {
       }
       const { actions } = entityTurns[idx];
       const label = `NPC${idx + 1}`;
+      const npcSnap = this.takeSnapshot();
       this.onAnimate(actions, "enemies", () => {
-        this.pushHistory({ round: currentRound, phase: "enemies", label, log: null, actions });
+        this.pushHistory({ round: currentRound, phase: "enemies", label, log: null, actions, entitySnapshot: npcSnap });
         runOne(idx + 1);
       });
     };
