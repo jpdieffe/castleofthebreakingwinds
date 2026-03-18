@@ -16,6 +16,7 @@ export class TurnManager {
   private history: HistoryEntry[] = [];
   private busy = false; // lock during animation
   private processedLogs = new Set<string>(); // dedup guard against Firestore re-delivery
+  private turnStartSnapshot: Record<string, { x: number; y: number }> | null = null;
 
   constructor(
     initialState: GameState,
@@ -58,6 +59,10 @@ export class TurnManager {
 
   queueAction(action: Action): void {
     if (!this.isLocalTurn()) return;
+    // Capture snapshot before the very first action of this turn
+    if (!this.turnStartSnapshot) {
+      this.turnStartSnapshot = this.takeSnapshot();
+    }
     this.pendingActions.push(action);
     // Optimistic local apply for immediate feedback
     this.state = applyActions(this.state, [action]);
@@ -83,7 +88,8 @@ export class TurnManager {
 
     // Push the local player's own turn so both clients see the same history
     const phaseLabel = this.state.phase === "playerA" ? "P1" : "P2";
-    const snapshot = this.takeSnapshot();
+    const snapshot = this.turnStartSnapshot ?? this.takeSnapshot();
+    this.turnStartSnapshot = null;
     this.pushHistory({ round: this.state.round, phase: this.state.phase as "playerA" | "playerB", label: phaseLabel, log, entitySnapshot: snapshot });
 
     // If playerB just ended, run enemy phase locally then advance to next round
