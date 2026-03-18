@@ -1,10 +1,10 @@
-import type { GameState, Action, TurnLog, PlayerSlot, RoundPhase, HistoryEntry } from "../../types";
-import { applyActions, runNpcPhase, MOVEMENT_POINTS, ACTION_POINTS } from "../simulation/GameState";
-import type { NpcPhaseResult } from "../simulation/GameState";
+import type { GameState, Action, TurnLog, PlayerSlot, HistoryEntry } from "../../types";
+import { applyActions, runNpcTurn, buildTurnOrder, checkCombatEnd, checkAggroCombat, MOVEMENT_POINTS, ACTION_POINTS } from "../simulation/GameState";
+import type { NpcTurnResult } from "../simulation/GameState";
 import { RNG } from "../simulation/RNG";
 import { submitTurn, subscribeTurns } from "../../firebase/turnService";
 
-export type AnimateCallback = (actions: Action[], phase: RoundPhase, onDone: () => void) => void;
+export type AnimateCallback = (actions: Action[], entityId: string, onDone: () => void) => void;
 
 export class TurnManager {
   private state: GameState;
@@ -14,8 +14,8 @@ export class TurnManager {
   private onStateChanged: (state: GameState) => void;
   private onAnimate: AnimateCallback;
   private history: HistoryEntry[] = [];
-  private busy = false; // lock during animation
-  private processedLogs = new Set<string>(); // dedup guard against Firestore re-delivery
+  private busy = false;
+  private processedLogs = new Set<string>();
   private turnStartSnapshot: Record<string, { x: number; y: number }> | null = null;
 
   constructor(
@@ -28,12 +28,22 @@ export class TurnManager {
     this.localPlayer = localPlayer;
     this.onStateChanged = onStateChanged;
     this.onAnimate = onAnimate;
+
+    // Build initial turn order
+    const rng = new RNG(RNG.turnSeed(initialState.seed, initialState.round));
+    this.state = {
+      ...this.state,
+      turnOrder: buildTurnOrder(this.state, rng),
+      turnIndex: 0,
+    };
   }
 
   start(): void {
     this.unsubscribe = subscribeTurns(this.state.gameId, (log) => {
       this.applyRemoteTurn(log);
     });
+    // If it's an NPC's turn at the start, kick it off
+    this.maybeRunNpcTurn();
   }
 
   stop(): void {
@@ -44,7 +54,22 @@ export class TurnManager {
   getHistory(): HistoryEntry[] { return [...this.history]; }
   isBusy(): boolean { return this.busy; }
 
-  /** Snapshot current entity positions — used to record where entities were before each action set. */
+  /** Which entity's turn is it right now? */
+  getCurrentEntityId(): string | undefined {
+    return this.state.turnOrder[this.state.turnIndex];
+  }
+
+  /** Is it the local player's turn (either player_a or player_b matching this.localPlayer)? */
+  isLocalTurn(): boolean {
+    if (this.busy) return false;
+    const currentId = this.getCurrentEntityId();
+    if (!currentId) return false;
+    const entity = this.state.entities[currentId];
+    if (!entity || entity.type !== "player") return false;
+    const playerEntityId = this.localPlayer === "playerA" ? "player_a" : "player_b";
+    return currentId === playerEntityId;
+  }
+
   private takeSnapshot(): Record<string, { x: number; y: number }> {
     const snap: Record<string, { x: number; y: number }> = {};
     for (const [id, entity] of Object.entries(this.state.entities)) {
@@ -53,18 +78,12 @@ export class TurnManager {
     return snap;
   }
 
-  isLocalTurn(): boolean {
-    return !this.busy && this.state.phase === this.localPlayer;
-  }
-
   queueAction(action: Action): void {
     if (!this.isLocalTurn()) return;
-    // Capture snapshot before the very first action of this turn
     if (!this.turnStartSnapshot) {
       this.turnStartSnapshot = this.takeSnapshot();
     }
     this.pendingActions.push(action);
-    // Optimistic local apply for immediate feedback
     this.state = applyActions(this.state, [action]);
     this.onStateChanged(this.state);
   }
@@ -73,38 +92,37 @@ export class TurnManager {
     if (!this.isLocalTurn()) return;
     this.pendingActions.push({ type: "END_TURN" });
 
-    const npcSeed = RNG.turnSeed(this.state.seed, this.state.round);
+    const entityId = this.getCurrentEntityId()!;
+    const npcSeed = RNG.turnSeed(this.state.seed, this.state.round * 100 + this.state.turnIndex);
+
     const log: TurnLog = {
       gameId: this.state.gameId,
       round: this.state.round,
-      phase: this.state.phase as "playerA" | "playerB",
+      turnIndex: this.state.turnIndex,
+      entityId,
       playerId: this.localPlayer,
       actions: [...this.pendingActions],
       npcSeed,
       timestamp: Date.now(),
     };
 
-    this.pendingActions = [];
-
-    // Push the local player's own turn so both clients see the same history
-    const phaseLabel = this.state.phase === "playerA" ? "P1" : "P2";
+    const entity = this.state.entities[entityId];
+    const label = entity?.name ?? entityId;
     const snapshot = this.turnStartSnapshot ?? this.takeSnapshot();
     this.turnStartSnapshot = null;
-    this.pushHistory({ round: this.state.round, phase: this.state.phase as "playerA" | "playerB", label: phaseLabel, log, entitySnapshot: snapshot });
+    this.pendingActions = [];
 
-    // If playerB just ended, run enemy phase locally then advance to next round
-    if (this.state.phase === "playerB") {
-      this.busy = true;
-      this.runEnemyPhase(npcSeed);
-    } else {
-      this.state = this.advancePhase(this.state);
-      this.onStateChanged(this.state);
-    }
+    this.pushHistory({ round: this.state.round, turnIndex: this.state.turnIndex, entityId, label, log, entitySnapshot: snapshot });
+
+    this.advanceTurn();
+    this.onStateChanged(this.state);
 
     await submitTurn(log);
+
+    // After our turn, maybe NPCs go next
+    this.maybeRunNpcTurn();
   }
 
-  /** Replay all history entries from startIdx forward, one-by-one. Calls onDone on completion. */
   replayFromIndex(startIdx: number, onDone: () => void): void {
     if (this.busy) return;
     const entries = this.history.slice(startIdx);
@@ -115,117 +133,111 @@ export class TurnManager {
       if (i >= entries.length) { this.busy = false; onDone(); return; }
       const entry = entries[i++];
       const actions = entry.log?.actions ?? entry.actions ?? [];
-      this.onAnimate(actions, entry.phase, playNext);
+      this.onAnimate(actions, entry.entityId, playNext);
     };
     playNext();
   }
 
-  //  Private 
+  // ─── Private ────────────────────────────────────────────────────────────────
 
   private applyRemoteTurn(log: TurnLog): void {
-    const logKey = `${log.round}_${log.phase}`;
+    const logKey = `${log.round}_${log.turnIndex}`;
     if (this.processedLogs.has(logKey)) return;
     if (log.playerId === this.localPlayer) return;
-    if (log.round !== this.state.round) return;
-    if (log.phase !== this.state.phase) return;
+    // Must match current turn
+    if (log.round !== this.state.round || log.turnIndex !== this.state.turnIndex) return;
 
     this.processedLogs.add(logKey);
     this.busy = true;
     const snapshot = this.takeSnapshot();
-    this.onAnimate(log.actions, log.phase, () => {
-      this.state = applyActions(this.state, log.actions);
-      this.pushHistory({ round: log.round, phase: log.phase, label: log.phase === "playerA" ? "P1" : "P2", log, entitySnapshot: snapshot });
 
-      if (log.phase === "playerB") {
-        this.runEnemyPhase(log.npcSeed);
-      } else {
-        this.state = this.advancePhase(this.state);
-        this.busy = false;
-        this.onStateChanged(this.state);
-      }
+    this.onAnimate(log.actions, log.entityId, () => {
+      this.state = applyActions(this.state, log.actions);
+      const entity = this.state.entities[log.entityId];
+      const label = entity?.name ?? log.entityId;
+      this.pushHistory({ round: log.round, turnIndex: log.turnIndex, entityId: log.entityId, label, log, entitySnapshot: snapshot });
+      this.advanceTurn();
+      this.busy = false;
+      this.onStateChanged(this.state);
+      this.maybeRunNpcTurn();
     });
   }
 
-  /** Animate each enemy one-by-one, push one history entry per enemy, then advance phase. */
-  private runEnemyPhase(npcSeed: number): void {
-    const { entityTurns }: NpcPhaseResult = runNpcPhase(this.state, npcSeed);
-    const currentRound = this.state.round;
+  /** Advance to the next turn index, or next round if at end of turn order. */
+  private advanceTurn(): void {
+    // Reset the current entity's AP/MP for next round
+    let nextIndex = this.state.turnIndex + 1;
 
-    const runOne = (idx: number) => {
-      if (idx >= entityTurns.length) {
-        // All NPCs done — set phase to enemies so advancePhase rolls to next round
-        this.state = { ...this.state, phase: "enemies" as const };
-        this.state = this.advancePhase(this.state);
-        this.busy = false;
-        this.onStateChanged(this.state);
-        return;
-      }
-      const { entityId, actions } = entityTurns[idx];
-      const label = entityLabel(entityId);
-      const npcSnap = this.takeSnapshot();
-      this.onAnimate(actions, "enemies", () => {
-        // Apply THIS NPC's actions to the live state so the next snapshot is up-to-date
-        if (actions.length > 0) {
-          for (const action of actions) {
-            if (action.type === "MOVE") {
-              const entity = this.state.entities[action.unitId];
-              if (entity) {
-                this.state = {
-                  ...this.state,
-                  entities: { ...this.state.entities, [action.unitId]: { ...entity, pos: action.to } },
-                };
-              }
-            }
-          }
+    if (nextIndex >= this.state.turnOrder.length) {
+      // New round
+      this.state = checkCombatEnd(this.state);
+      this.state = checkAggroCombat(this.state);
+      const newRound = this.state.round + 1;
+      const rng = new RNG(RNG.turnSeed(this.state.seed, newRound));
+      const newOrder = buildTurnOrder(this.state, rng);
+
+      // Reset all participants' AP/MP
+      const entities = { ...this.state.entities };
+      for (const id of newOrder) {
+        const e = entities[id];
+        if (e) {
+          entities[id] = { ...e, movementPoints: e.type === "player" ? MOVEMENT_POINTS : e.movementPoints, actionPoints: e.type === "player" ? ACTION_POINTS : e.actionPoints };
         }
-        this.pushHistory({ round: currentRound, phase: "enemies", label, log: null, actions, entitySnapshot: npcSnap });
-        runOne(idx + 1);
-      });
-    };
+      }
 
-    if (entityTurns.length === 0) {
-      this.state = { ...this.state, phase: "enemies" as const };
-      this.state = this.advancePhase(this.state);
-      this.busy = false;
-      this.onStateChanged(this.state);
-      return;
+      this.state = { ...this.state, entities, round: newRound, turnOrder: newOrder, turnIndex: 0 };
+    } else {
+      // Reset next entity's AP/MP
+      const nextId = this.state.turnOrder[nextIndex];
+      const nextEntity = this.state.entities[nextId];
+      if (nextEntity) {
+        const mp = nextEntity.type === "player" ? MOVEMENT_POINTS : nextEntity.movementPoints;
+        const ap = nextEntity.type === "player" ? ACTION_POINTS : nextEntity.actionPoints;
+        this.state = {
+          ...this.state,
+          turnIndex: nextIndex,
+          entities: { ...this.state.entities, [nextId]: { ...nextEntity, movementPoints: mp, actionPoints: ap } },
+        };
+      } else {
+        this.state = { ...this.state, turnIndex: nextIndex };
+      }
     }
-
-    runOne(0);
   }
 
-  private advancePhase(state: GameState): GameState {
-    const entities = { ...state.entities };
+  /** If the current turn belongs to an NPC, run their AI automatically. */
+  private maybeRunNpcTurn(): void {
+    if (this.busy) return;
+    const entityId = this.getCurrentEntityId();
+    if (!entityId) return;
+    const entity = this.state.entities[entityId];
+    if (!entity || entity.type === "player") return;
 
-    if (state.phase === "playerA") {
-      // Reset playerB AP/MP ready for their turn
-      if (entities["player_b"]) {
-        entities["player_b"] = { ...entities["player_b"], movementPoints: MOVEMENT_POINTS, actionPoints: ACTION_POINTS };
-      }
-      return { ...state, entities, phase: "playerB", activePlayer: "playerB" };
-    }
+    // It's an NPC turn — run it
+    this.busy = true;
+    const npcSeed = RNG.turnSeed(this.state.seed, this.state.round * 100 + this.state.turnIndex);
+    const snapshot = this.takeSnapshot();
+    const { state: newState, actions }: NpcTurnResult = runNpcTurn(this.state, entityId, npcSeed);
 
-    if (state.phase === "playerB") {
-      // Enemy phase is handled inline; this shouldn't be called for playerB directly
-      // but if called, move to enemies
-      return { ...state, entities, phase: "enemies", activePlayer: "playerA" };
-    }
+    this.onAnimate(actions, entityId, () => {
+      this.state = newState;
+      const label = entity.name ?? entityId;
+      this.pushHistory({ round: this.state.round, turnIndex: this.state.turnIndex, entityId, label, log: null, actions, entitySnapshot: snapshot });
+      this.advanceTurn();
+      this.busy = false;
+      this.onStateChanged(this.state);
 
-    // After enemies: new round, reset playerA
-    if (entities["player_a"]) {
-      entities["player_a"] = { ...entities["player_a"], movementPoints: MOVEMENT_POINTS, actionPoints: ACTION_POINTS };
-    }
-    return { ...state, entities, phase: "playerA", activePlayer: "playerA", round: state.round + 1 };
+      // Chain: maybe the next entity is also an NPC
+      this.time(() => this.maybeRunNpcTurn(), 100);
+    });
+  }
+
+  /** Simple setTimeout wrapper (not a Phaser timer — TurnManager has no Phaser dependency). */
+  private time(fn: () => void, ms: number): void {
+    setTimeout(fn, ms);
   }
 
   private pushHistory(entry: HistoryEntry): void {
     this.history.push(entry);
-    if (this.history.length > 20) this.history.shift();
+    if (this.history.length > 50) this.history.shift();
   }
-}
-
-/** Map an entity ID like "enemy_1" to a display label like "NPC1". */
-function entityLabel(entityId: string): string {
-  const m = entityId.match(/^enemy_(\d+)$/);
-  return m ? `NPC${m[1]}` : entityId;
 }

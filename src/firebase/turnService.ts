@@ -41,19 +41,20 @@ export async function getSession(gameId: string): Promise<GameSession | null> {
 
 /**
  * Write a completed turn log to Firestore.
- * Document ID: `turn_{turn}_{playerId}`
+ * Document ID: `round_{round}_turn_{turnIndex}_{entityId}`
  */
 export async function submitTurn(log: TurnLog): Promise<void> {
-  const id = `round_${String(log.round).padStart(4, "0")}_${log.phase}`;
+  const id = `round_${String(log.round).padStart(4, "0")}_turn_${String(log.turnIndex).padStart(2, "0")}_${log.entityId}`;
   await setDoc(doc(db, "sessions", log.gameId, "turns", id), log);
 }
 
 export async function getTurn(
   gameId: string,
   round: number,
-  phase: string
+  turnIndex: number,
+  entityId: string
 ): Promise<TurnLog | null> {
-  const id = `round_${String(round).padStart(4, "0")}_${phase}`;
+  const id = `round_${String(round).padStart(4, "0")}_turn_${String(turnIndex).padStart(2, "0")}_${entityId}`;
   const snap = await getDoc(doc(db, "sessions", gameId, "turns", id));
   return snap.exists() ? (snap.data() as TurnLog) : null;
 }
@@ -68,7 +69,8 @@ export function subscribeTurns(
 ): Unsubscribe {
   const q = query(
     collection(db, "sessions", gameId, "turns"),
-    orderBy("round", "asc")
+    orderBy("round", "asc"),
+    orderBy("turnIndex", "asc")
   );
   return onSnapshot(q, (snapshot) => {
     snapshot.docChanges().forEach((change) => {
