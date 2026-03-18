@@ -142,31 +142,44 @@ export class TurnManager {
 
   /** Animate each enemy one-by-one, push one history entry per enemy, then advance phase. */
   private runEnemyPhase(npcSeed: number): void {
-    const { state: stateAfterEnemies, entityTurns }: NpcPhaseResult = runNpcPhase(this.state, npcSeed);
+    const { entityTurns }: NpcPhaseResult = runNpcPhase(this.state, npcSeed);
     const currentRound = this.state.round;
-
-    // stateAfterEnemies.phase is still "playerB" (runNpcPhase doesn't change phase).
-    // advancePhase needs phase="enemies" to correctly roll over to playerA of next round.
-    const enemiesState = { ...stateAfterEnemies, phase: "enemies" as const };
 
     const runOne = (idx: number) => {
       if (idx >= entityTurns.length) {
-        this.state = this.advancePhase(enemiesState);
+        // All NPCs done — set phase to enemies so advancePhase rolls to next round
+        this.state = { ...this.state, phase: "enemies" as const };
+        this.state = this.advancePhase(this.state);
         this.busy = false;
         this.onStateChanged(this.state);
         return;
       }
-      const { actions } = entityTurns[idx];
-      const label = `NPC${idx + 1}`;
+      const { entityId, actions } = entityTurns[idx];
+      const label = entityLabel(entityId);
       const npcSnap = this.takeSnapshot();
       this.onAnimate(actions, "enemies", () => {
+        // Apply THIS NPC's actions to the live state so the next snapshot is up-to-date
+        if (actions.length > 0) {
+          for (const action of actions) {
+            if (action.type === "MOVE") {
+              const entity = this.state.entities[action.unitId];
+              if (entity) {
+                this.state = {
+                  ...this.state,
+                  entities: { ...this.state.entities, [action.unitId]: { ...entity, pos: action.to } },
+                };
+              }
+            }
+          }
+        }
         this.pushHistory({ round: currentRound, phase: "enemies", label, log: null, actions, entitySnapshot: npcSnap });
         runOne(idx + 1);
       });
     };
 
     if (entityTurns.length === 0) {
-      this.state = this.advancePhase(enemiesState);
+      this.state = { ...this.state, phase: "enemies" as const };
+      this.state = this.advancePhase(this.state);
       this.busy = false;
       this.onStateChanged(this.state);
       return;
@@ -203,4 +216,10 @@ export class TurnManager {
     this.history.push(entry);
     if (this.history.length > 20) this.history.shift();
   }
+}
+
+/** Map an entity ID like "enemy_1" to a display label like "NPC1". */
+function entityLabel(entityId: string): string {
+  const m = entityId.match(/^enemy_(\d+)$/);
+  return m ? `NPC${m[1]}` : entityId;
 }

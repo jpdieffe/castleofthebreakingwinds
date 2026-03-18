@@ -377,8 +377,10 @@ function getPhaseLabel(phase: RoundPhase, npcIndex?: number): string {
 
 function buildUpcoming(state: GameState, count: number): Partial<HistoryEntry>[] {
   const order: RoundPhase[] = ["playerA", "playerB", "enemies"];
-  const enemyIds = Object.values(state.entities).filter(e => e.type === "enemy").map(e => e.id);
-  const enemyCount = Math.max(1, enemyIds.length);
+  const enemyIds = Object.values(state.entities)
+    .filter(e => e.type === "enemy")
+    .map(e => e.id)
+    .sort(); // stable order
   const result: Partial<HistoryEntry>[] = [];
   let phase = state.phase;
   let round = state.round;
@@ -389,9 +391,16 @@ function buildUpcoming(state: GameState, count: number): Partial<HistoryEntry>[]
     if (phase === "playerA") round++;
 
     if (phase === "enemies") {
-      // Expand into one slot per enemy
-      for (let n = 0; n < enemyCount && result.length < count; n++) {
-        result.push({ round, phase, label: `NPC${n + 1}` });
+      // Expand into one slot per living enemy
+      for (const eid of enemyIds) {
+        if (result.length >= count) break;
+        const m = eid.match(/^enemy_(\d+)$/);
+        const label = m ? `NPC${m[1]}` : eid;
+        result.push({ round, phase, label });
+      }
+      if (enemyIds.length === 0) {
+        // No enemies alive — still show a placeholder
+        result.push({ round, phase, label: "NPC" });
       }
     } else {
       result.push({ round, phase, label: getPhaseLabel(phase) });
