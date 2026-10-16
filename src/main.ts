@@ -1,16 +1,19 @@
 import './style.css';
+import { PeerSession } from './peer-session';
 import type { Action, Player, ServerMessage, Snapshot } from '../shared/types';
 
 const base = import.meta.env.BASE_URL;
 const icon = (id: number | string) => `${base}classic/${id}.png`;
 const query = new URLSearchParams(location.search);
-const defaultServer = import.meta.env.VITE_GAME_SERVER || (location.hostname.endsWith('github.io') ? '' : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.hostname}${import.meta.env.DEV ? ':8787' : location.port ? `:${location.port}` : ''}/ws`);
-let serverUrl = query.get('server') || localStorage.getItem('castle-server') || defaultServer;
-let socket: WebSocket | undefined, state: Snapshot | undefined, playerId = '', reconnectTimer = 0;
+const defaultServer = 'peer';
+let serverUrl = query.get('server') || defaultServer;
+let socket: WebSocket | PeerSession | undefined, state: Snapshot | undefined, playerId = '', reconnectTimer = 0;
 let manualClose = false, pending = false, reconnectCount = 0, lastMessage = Date.now();
 let destination: { x: number; y: number } | undefined;
 let saved: { code: string; token: string; playerId: string; server: string } | undefined;
 try { saved = JSON.parse(sessionStorage.getItem('castle-session') || 'null') || undefined; } catch { sessionStorage.removeItem('castle-session'); }
+// Old dedicated-server sessions must not trap returning Pages visitors in the retired default.
+if (saved && saved.server !== 'peer' && !query.has('server')) { saved = undefined; sessionStorage.removeItem('castle-session'); }
 const images = new Map<string, HTMLImageElement>();
 const image = (id: number | string) => {
   const key = String(id);
@@ -25,8 +28,8 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 ${([['attack',111,'Attack','Space'],['bolt',343,'Magic Arrow','1'],['heal',227,'Heal','2'],['fireball',339,'Fireball','3'],['potion',231,'Potion','H'],['mana',233,'Mana','Q'],['interact',7,'Use / stairs','E'],['revive',269,'Revive','R']] as const).map(([action,id,name,key]) => `<button data-action="${action}"><img src="${icon(id)}" alt="">${name} <kbd>${key}</kbd></button>`).join('')}
 </div><div class="game-layout"><section class="viewport-pane" aria-label="Dungeon"><div class="pane-title"><span id="location">A Tiny Hamlet</span><span id="area-info">Original artwork · online co-op</span></div>
 <div class="canvas-wrap"><canvas id="world" width="736" height="544" tabindex="0" aria-label="Game map. Use arrows or WASD to move, Space to attack, E to use stairs."></canvas>
-<section id="lobby" class="lobby" aria-label="Join an expedition"><img class="original-logo" src="${icon('bitmap-10')}" alt="Castle of the Winds original logo"><h2>A familiar world.<br>A companion at your side.</h2><p>The original world returns in real time. Two adventurers, one expedition.</p>
-<form id="lobby-form"><label for="name">Adventurer’s name</label><input id="name" maxlength="20" required autocomplete="nickname" placeholder="Enter your name"><button type="submit" id="create" class="primary">Create expedition</button><div class="or">or join a friend</div><div class="join-row"><label class="sr-only" for="code">Expedition code</label><input id="code" maxlength="6" placeholder="6-character code" autocomplete="off" autocapitalize="characters"><button type="button" id="join">Join</button></div><details id="connection-settings"><summary>Game server</summary><label for="server">Server address</label><input id="server" type="url" placeholder="wss://your-server.example/ws"><p>Both players must use the same server.</p></details></form><p id="lobby-status" role="status"></p><small>Browser reconstruction using recovered Castle1 resources.<br>Rick Saada / SaadaSoft · Art: Paul Canniff · Publisher: Epic MegaGames</small></section>
+<section id="lobby" class="lobby" aria-label="Join an expedition"><img class="original-logo" src="${icon('bitmap-10')}" alt="Castle of the Winds original logo"><h2>A familiar world.<br>A companion at your side.</h2><p>Host here, then share your room code. Your browser runs the expedition. Keep the host tab open.</p>
+<form id="lobby-form"><label for="name">Adventurer’s name</label><input id="name" maxlength="20" required autocomplete="nickname" placeholder="Enter your name"><button type="submit" id="create" class="primary">Host expedition</button><div class="or">or join a friend</div><div class="join-row"><label class="sr-only" for="code">Expedition code</label><input id="code" maxlength="6" placeholder="6-character code" autocomplete="off" autocapitalize="characters"><button type="button" id="join">Join</button></div><details id="connection-settings"><summary>Advanced: dedicated server</summary><label for="server">Server address</label><input id="server" placeholder="peer"><p>Leave as peer for browser-to-browser play. Optional: a dedicated wss:// server.</p></details></form><p id="lobby-status" role="status"></p><small>Browser reconstruction using recovered Castle1 resources.<br>Rick Saada / SaadaSoft · Art: Paul Canniff · Publisher: Epic MegaGames</small></section>
 <section id="party-overlay" class="party-overlay" hidden><strong id="party-heading"></strong><p id="party-message"></p><button id="ready" class="primary">Ready to adventure</button><button id="restart" hidden>Begin again</button></section></div>
 <div class="map-footer"><span id="position">Explore together. Move with WASD or arrow keys.</span><span id="world-clock">Enemies move every 1.4 seconds</span></div></section>
 <aside><div class="pane-title">Your expedition <span>2 PLAYERS</span></div><div id="party"><div class="empty-party"><img src="${icon(421)}" alt="Adventurer">Every journey begins<br>with a first step.</div></div><div class="pane-title">Area map <span>SHARED</span></div><canvas id="minimap" width="230" height="170" aria-label="Shared explored map"></canvas><div class="quest"><span class="eyebrow">A QUESTION OF VENGEANCE</span><h3 id="quest-title">Find the road north</h3><p id="quest-text">Meet at the stairs, then press E to travel together. Rest and trade beside the village well.</p></div><div class="legend"><span><i class="gold-dot"></i>You</span><span><i class="blue-dot"></i>Partner</span><span><i class="red-dot"></i>Enemy</span></div></aside></div>
@@ -40,15 +43,6 @@ const dialog = el<HTMLDialogElement>('dialog');
 el<HTMLInputElement>('server').value = serverUrl;
 el<HTMLInputElement>('code').value = query.get('room')?.slice(0, 6).toUpperCase() || '';
 el<HTMLInputElement>('name').value = localStorage.getItem('castle-name') || '';
-if (!serverUrl) {
-  el<HTMLDetailsElement>('connection-settings').open = true;
-  const notice = document.createElement('p');
-  notice.className = 'local-server-notice';
-  notice.append('Hosting on your computer? ');
-  const link = document.createElement('a'); link.href = 'http://localhost:8787/'; link.textContent = 'Open the local game';
-  notice.append(link, '. For internet play, enter a secure game-server address below.');
-  el('lobby-form').before(notice);
-}
 let toastTimer = 0;
 function toast(message: string) { el('toast').textContent = message; el('toast').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { el('toast').hidden = true; }, 4000); }
 function connection(text: string, connected = false) { el('connection').textContent = text; el('connection').classList.toggle('connected', connected); }
@@ -57,14 +51,16 @@ function busy(value: boolean) { pending = value; el<HTMLButtonElement>('create')
 function connect(message: object, resume = false) {
   clearTimeout(reconnectTimer);
   try {
-    const url = new URL(serverUrl);
-    if (!['ws:', 'wss:'].includes(url.protocol) || (location.protocol === 'https:' && url.protocol !== 'wss:')) throw new Error('Use a wss:// game server on secure websites. Locally, use ws://localhost:8787/ws.');
+    if (serverUrl !== 'peer') {
+      const url = new URL(serverUrl);
+      if (!['ws:', 'wss:'].includes(url.protocol) || (location.protocol === 'https:' && url.protocol !== 'wss:')) throw new Error('Use a wss:// game server on secure websites. Locally, use ws://localhost:8787/ws.');
+    }
   } catch (error) { busy(false); lobbyMessage(error instanceof Error ? error.message : 'Enter a valid game server URL.'); return; }
   manualClose = false; busy(true); connection(resume ? 'Reconnecting…' : 'Connecting…');
-  const ws = new WebSocket(serverUrl); socket = ws;
-  const timeout = window.setTimeout(() => { if (pending) ws.close(); }, 10000);
+  const ws = serverUrl === 'peer' ? new PeerSession() : new WebSocket(serverUrl); socket = ws;
+  const timeout = window.setTimeout(() => { if (pending) ws.close(); }, 20000);
   ws.onopen = () => { ws.send(JSON.stringify(message)); lastMessage = Date.now(); };
-  ws.onmessage = event => {
+  ws.onmessage = (event: { data: string }) => {
     if (socket !== ws) return;
     lastMessage = Date.now(); const response = JSON.parse(event.data) as ServerMessage;
     if (response.type === 'welcome') {
@@ -73,30 +69,31 @@ function connect(message: object, resume = false) {
       sessionStorage.setItem('castle-session', JSON.stringify(saved)); localStorage.setItem('castle-server', serverUrl);
       el('lobby').hidden = true; el('share').hidden = false; el('leave').hidden = false;
       document.querySelector('.window')!.classList.add('in-game');
-      el('room-label').textContent = `ROOM ${response.code}`; connection('Connected', true); canvas.focus();
+      el('room-label').textContent = `ROOM ${response.code}`; connection(serverUrl === 'peer' ? 'Browser co-op · WebRTC' : 'Connected', true); canvas.focus();
     } else if (response.type === 'state') { state = response.state; render(); }
     else {
       busy(false); lobbyMessage(response.message); toast(response.message);
-      if (resume && !state) { saved = undefined; sessionStorage.removeItem('castle-session'); }
+      if (resume && response.fatal && !state) { saved = undefined; sessionStorage.removeItem('castle-session'); }
       if (response.fatal) { manualClose = true; connection('Disconnected'); }
     }
   };
-  ws.onerror = () => { lobbyMessage('Cannot reach the game server. Check its address and that it is running.'); };
-  ws.onclose = event => {
+  ws.onerror = () => { lobbyMessage(serverUrl === 'peer' ? 'Cannot reach matchmaking. Check your internet connection and try again.' : 'Cannot reach the game server. Check its address and that it is running.'); };
+  ws.onclose = (event: { code: number }) => {
     clearTimeout(timeout); if (socket !== ws) return;
     busy(false); connection('Disconnected'); destination = undefined;
+    if (state && state.status === 'playing') { state.status = 'paused'; render(); }
     if (event.code === 4001) { manualClose = true; toast('This adventurer was resumed in another window.'); }
     if (!manualClose && saved) {
       connection('Reconnecting… world paused');
       reconnectTimer = window.setTimeout(() => { if (saved) { serverUrl = saved.server; connect({ type: 'resume', code: saved.code, token: saved.token }, true); } }, Math.min(4000, 500 * 2 ** reconnectCount++));
-    } else if (!manualClose) lobbyMessage('Connection closed. Check the server address, then try again.');
+    } else if (!manualClose) lobbyMessage(serverUrl === 'peer' ? 'Connection closed. Check the room code and that your friend has the host tab open. Some networks block direct connections; try another network.' : 'Connection closed. Check the server address, then try again.');
   };
 }
 function enter(type: 'create' | 'join') {
   if (pending) return;
   const name = el<HTMLInputElement>('name').value.trim();
   if (!name) { el<HTMLInputElement>('name').reportValidity(); return; }
-  serverUrl = el<HTMLInputElement>('server').value.trim(); const code = el<HTMLInputElement>('code').value.trim().toUpperCase();
+  serverUrl = el<HTMLInputElement>('server').value.trim() || 'peer'; const code = el<HTMLInputElement>('code').value.trim().toUpperCase();
   if (type === 'join' && !/^[A-Z0-9]{6}$/.test(code)) { lobbyMessage('Enter a six-character expedition code.'); return; }
   localStorage.setItem('castle-name', name); lobbyMessage('Connecting to your expedition…');
   if (socket) { manualClose = true; socket.onclose = null; socket.close(); }
@@ -118,9 +115,9 @@ el('leave').onclick = () => {
 };
 el('share').onclick = async () => {
   if (!state) return;
-  const url = new URL(location.href); url.search = ''; url.searchParams.set('room', state.code); url.searchParams.set('server', serverUrl);
+  const url = new URL(location.href); url.search = ''; url.searchParams.set('room', state.code); if (serverUrl !== 'peer') url.searchParams.set('server', serverUrl);
   try { await navigator.clipboard.writeText(url.href); toast('Invite link copied. Send it to your companion.'); }
-  catch { await openDialog('invite'); el('dialog-body').textContent = `Share code ${state.code} and server ${serverUrl}.`; }
+  catch { await openDialog('invite'); el('dialog-body').textContent = `Share code ${state.code}${serverUrl === 'peer' ? '. Keep the host tab open.' : ` and server ${serverUrl}.`}`; }
 };
 el('new-menu').onclick = () => { if (state) toast(`Expedition ${state.code}. Copy invite to bring a companion, or Leave to start another.`); else el<HTMLInputElement>('name').focus(); };
 
@@ -249,7 +246,7 @@ async function openDialog(kind: string) {
       stories.forEach(s => { const section = document.createElement('details'), summary = document.createElement('summary'), text = document.createElement('p'); summary.textContent = `Story ${s.id}`; text.className = 'story-text'; text.textContent = s.text.replace(/^[^a-zA-Z]+/, '').replaceAll('#', '\n'); section.append(summary, text); body.append(section); });
     } catch { body.textContent = 'Unable to load the recovered story. Please try again.'; }
   } else if (kind !== 'invite') {
-    body.innerHTML = `<h2>Two players. No waiting for turns.</h2><p>Both adventurers must join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1: Magic Arrow (3 MP). 2: Heal (6 MP). 3: Fireball (8 MP). Spells target the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. Both players must be alive and within three tiles. Walk over loot to collect it. Experience is shared.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>A disconnect pauses the world. Refreshing reconnects the same adventurer. Saves live on the game server; it needs persistent storage to retain them across deployments.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
+    body.innerHTML = `<h2>Two players. No waiting for turns.</h2><p>Both adventurers must join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1: Magic Arrow (3 MP). 2: Heal (6 MP). 3: Fireball (8 MP). Spells target the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. Both players must be alive and within three tiles. Walk over loot to collect it. Experience is shared.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
   }
 }
 document.querySelectorAll<HTMLButtonElement>('[data-dialog]').forEach(b => { b.onclick = () => { void openDialog(b.dataset.dialog!); }; });

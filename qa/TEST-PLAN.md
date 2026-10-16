@@ -1,6 +1,25 @@
 # Castle of the Winds co-op test plan
 
-Tested on October 16, 2026, on Windows with Node 24.14 and desktop Google Chrome. Two independent browser contexts are used, each with its own storage and WebSocket connection. The headed run opens visible client windows. The multiplayer transport is real WebSocket traffic over loopback, not a mock or BroadcastChannel.
+Windows, Node 24, and desktop Google Chrome. The default game now uses browser-hosted WebRTC, with public PeerJS matchmaking. Browser tests use independent storage contexts and real data channels. The older dedicated-server regression suite remains separate.
+
+## Browser-hosted acceptance cases
+
+`tests/peer.spec.ts` opens real clients and contacts the same public matchmaking service as the published game. It verifies:
+
+- Host/Join with a six-character code; both players ready and move independently.
+- Actual open RTC data channels, sent/received messages, and a successful ICE candidate pair.
+- Unknown room and third-player rejection without affecting the existing party.
+- Guest refresh restores identity and position; host refresh restores its saved world and the companion reconnects.
+- Closing a guest pauses simulation time; its seat is reserved until it resumes with its secret token.
+- Explicit guest Leave releases the seat; a replacement joins without moving the host. Host Leave ends the session.
+- Enemies move without player input; guest spell damage, mana and shared experience agree on both clients.
+- Purchases, healing, revival, boss victory and restart synchronize over WebRTC.
+- Real movement from the recovered hamlet into the wilderness, including map snapshots exceeding 16 KB.
+- Host simulation advances while another room is foregrounded; independent expeditions remain isolated.
+- Forged coordinates, unsupported actions and client-supplied state cannot change host authority; command floods disconnect the sender.
+- Matchmaking reconnect preserves the existing data channel and does not create another simulation clock.
+
+Combat setups use a saved host-world fixture, loaded before connection. They do not expose production cheat controls. The hamlet-to-wilderness route uses the unmodified world and actual keyboard input. Engine rules are also checked independently below. Two browsers on one computer establish real WebRTC, but do not prove connectivity between different home routers or mobile carriers. TURN-only connections and mobile browser suspension require separate physical-device checks.
 
 ## Run the checks
 
@@ -11,7 +30,7 @@ npm run test:e2e:headed
 npm run build
 ```
 
-The browser suite starts a separate, ephemeral game server for each scenario. Playwright starts Vite if it is not already running. Chrome must be installed. Screenshots and failure traces go in `test-results/`; the HTML report is in `playwright-report/`.
+The dedicated-server browser suite starts an ephemeral Node server per scenario; the WebRTC suite does not start a game server. Playwright starts Vite if it is not already running. Chrome must be installed. Screenshots and failure traces go in `test-results/`; the HTML report is in `playwright-report/`.
 
 ## Engine and network cases
 
@@ -58,6 +77,6 @@ Cases 4–9 use deterministic server-side test setup for rare combat states and 
 
 ## Acceptance and limits
 
-All automated cases must pass, TypeScript and the production build must pass, and both initial-area screenshots must display the original graphics and distinct adventurers. The local launcher must open two clients on the production build and the health endpoint must respond.
+All automated cases must pass, TypeScript and the production build must pass, and both initial-area screenshots must display the original graphics and distinct adventurers. The peer launcher must open two clients on the deployed GitHub Pages build and complete a WebRTC session without a Node game server.
 
-Before internet hosting, repeat connection/reconnection from two separate external networks, test the actual TLS proxy and WSS endpoint, and check persistent disk behavior on that host. These are environment-specific checks, not covered by local results. Long-session balance, every original spell/item, and exact original-game parity are outside this reconstructed campaign's coverage.
+For additional network coverage, repeat connection/reconnection from two separate external networks and test relay-only connectivity. For optional dedicated hosting, also test its TLS/WSS endpoint and persistent disk. These are environment-specific checks, not covered by local results. Long-session balance, every original spell/item, and exact original-game parity are outside this reconstructed campaign's coverage.

@@ -1,15 +1,21 @@
-# Test results — October 16, 2026
+# Test results - October 16, 2026
 
-- `npm test`: **22 passed**, 0 failed. Includes engine rules, map connectivity at three seeds, live WebSocket protocol checks and save/restart recovery.
-- `npm run test:e2e:headed`: **11 passed**, 0 failed, in 38.7 seconds. Opened two independent visible Chrome clients per scenario, plus a third where needed.
+Browser-hosted co-op is now the default. The host runs the shared game engine; guests send intentions over real WebRTC channels. PeerJS Cloud provides public matchmaking.
+
+- `npm test`: **22 passed**. Engine rules, map connectivity, and retained dedicated-server protocol/persistence tests.
+- `npx playwright test tests/peer.spec.ts --headed`: **12 passed** in 1.6 minutes. After adding a final matchmaking-reconnect regression and its guard, the targeted headed run passed that **13th scenario** in 8.7 seconds.
+- The retained `multiplayer.spec.ts` suite: **11 passed** during the combined headed run. Includes all 14 area loads, mobile UI, combat, inventory, revival and dedicated-server recovery.
 - `npm run build`: TypeScript and Vite production build pass.
-- Production launcher verified: two independent Chrome windows opened and joined the same running expedition. `GET /health`, the root client, the LAN client address, recovered map JSON and an original sprite all returned HTTP 200 from port 8787.
-- Removed the retired Phaser/Firebase dependency stack; the remaining production dependency is `ws`.
+- `npm audit fix`: compatible dependency updates applied; **0 known vulnerabilities** reported.
 
-The browser suite covered actual hamlet-to-wilderness movement without fixture changes, automatic enemy movement, synchronized combat and inventory, loot contention, revives, network loss/recovery, all 14 area loads, victory, mobile layout and replacing a companion. Full details and reproducible commands are in [TEST-PLAN.md](TEST-PLAN.md).
+The WebRTC tests opened independent Chrome contexts, contacted the public matchmaking service, and asserted actual data-channel traffic and a successful ICE candidate pair. They exercised Host/Join, code-only invite copying, movement, unknown/full rooms, guest and host refresh, disconnect pausing, reserved-seat recovery, replacement companions, host termination, autonomous enemies, spells, purchases, healing, revival, victory, restart, background hosting, independent rooms, forged inputs and flood rejection. An additional test deliberately closed the matchmaking socket and verified that the game continued with exactly one simulation worker.
 
-Issues found and fixed during verification: unreachable exits in a disconnected outdoor region; fortress floor/door interpretation; wrong recovered map width/height orientation; a room broadcast scheduling issue; a replacement companion moving the existing player; shared level-up incorrectly reviving a fallen partner; distorted mobile map proportions and hidden mobile health bars.
+Verification found and fixed a map-transfer issue: PeerJS JSON serialization rejects messages above 16 KB. BinaryPack now chunks larger state messages. The unmodified hamlet-to-wilderness test confirms that the new area reaches both clients. Matchmaking reconnection now avoids creating duplicate simulation timers. Returning visitors' old local-server sessions no longer override the new default.
 
-The 14-area transition scenario uses server-side fixtures to position the party near each exit and to prepare the final encounter. It proves travel and state synchronization, not a full unaided campaign completion. Internet/WAN play and a second physical device were not tested. The selected run mode is this computer as the server, with LAN access available while it remains running.
+An early browser attempt was blocked by the execution sandbox's outbound-network restriction; it was repeated with network access. One intermediate full-suite run had a lobby interruption while source edits triggered Vite reloads. Its reconnect scenario passed in the subsequent uninterrupted WebRTC suite. Final successful results above do not count these interrupted runs as passes.
 
-Screenshots retained in [screenshots/](screenshots/): both tested desktop clients, the mobile layout, the shared victory screen, and both production-launcher clients. The server and two production clients were left running at the user's request; `.game-data/local-session.json` records the current PID, room code and address.
+Combat and rare-state browser cases use saved-world fixtures. The hamlet-to-wilderness route uses the unmodified map and real keyboard input. The older all-area test positions the party near exits; it does not establish a complete unaided campaign playthrough.
+
+These runs used one physical computer. Public internet matchmaking was exercised, but two different home networks, relay-only connectivity, Firefox/Safari and mobile background suspension were not tested. The host tab and computer must remain open and awake; there is no host migration. Session storage supports refresh recovery, not guaranteed recovery after closing the host tab.
+
+See [TEST-PLAN.md](TEST-PLAN.md) for reproduction. `npm run play:two` opens two independent Chrome processes on the published GitHub page without starting a game server; screenshots are written to `qa/screenshots/peer-host.png` and `peer-guest.png`, and local launch details to `.game-data/peer-session.json`.

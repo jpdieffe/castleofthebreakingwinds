@@ -1,0 +1,1 @@
+(function(){setInterval(()=>postMessage(null),100)})();
