@@ -2,6 +2,10 @@
 
 Windows, Node 24, and desktop Google Chrome. The default game now uses browser-hosted WebRTC, with public PeerJS matchmaking. Browser tests use independent storage contexts and real data channels. The older dedicated-server regression suite remains separate.
 
+## Solo acceptance cases
+
+`tests/solo.spec.ts` verifies immediate Play solo startup without PeerJS matchmaking traffic, one-player UI, walking, refresh recovery, unmodified hamlet-to-wilderness travel, autonomous enemies, spell damage and XP, defeat, automatic solo restart, and leaving the expedition. Engine tests also cover solo admission, disconnect pausing, restart mode preservation, and compatibility with older co-op saves.
+
 ## Browser-hosted acceptance cases
 
 `tests/peer.spec.ts` opens real clients and contacts the same public matchmaking service as the published game. It verifies:

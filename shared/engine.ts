@@ -7,11 +7,12 @@ export function log(game: GameState, text: string) {
   game.log.push({ id: game.nextLog++, text });
   if (game.log.length > 40) game.log.shift();
 }
-export function createGame(code: string, seed: number): GameState {
-  return { version: 1, code, seed, levels: makeWorld(seed), level: 0, players: [], status: 'waiting',
-    tick: 0, time: 0, log: [{ id: 0, text: 'A question of vengeance. This time, you need not face it alone.' }], nextLog: 1 };
+export function createGame(code: string, seed: number, mode: 'solo' | 'coop' = 'coop'): GameState {
+  return { version: 1, mode, code, seed, levels: makeWorld(seed), level: 0, players: [], status: 'waiting',
+    tick: 0, time: 0, log: [{ id: 0, text: mode === 'solo' ? 'A question of vengeance. Your adventure begins.' : 'A question of vengeance. This time, you need not face it alone.' }], nextLog: 1 };
 }
 export function addPlayer(game: GameState, id: string, name: string): Player {
+  if (game.mode === 'solo' && game.players.length) throw new Error('This is a solo expedition.');
   if (game.players.length >= 2) throw new Error('This expedition already has two players.');
   const slot = game.players.some(p => p.slot === 0) ? 1 : 0;
   const spawn = game.players[0] ?? game.levels[game.level].spawn;
@@ -40,7 +41,7 @@ function placePlayers(game: GameState, anchor: Point, players = game.players) {
 }
 export function updateStatus(game: GameState) {
   if (game.status === 'won' || game.status === 'defeated') return;
-  game.status = game.players.length !== 2 || game.players.some(p => !p.ready) ? 'waiting'
+  game.status = game.players.length !== (game.mode === 'solo' ? 1 : 2) || game.players.some(p => !p.ready) ? 'waiting'
     : game.players.some(p => !p.connected) ? 'paused' : 'playing';
 }
 export function reveal(game: GameState) {
@@ -68,8 +69,8 @@ function hit(game: GameState, player: Player, enemyId: string, damage: number, s
   if (!enemy.hp) {
     player.kills++; reward(game, enemy.boss ? 100 : 12);
     map.loot.push({ id: `${enemy.id}-drop`, x: enemy.x, y: enemy.y, kind: 'gold', amount: enemy.boss ? 100 : 8 });
-    log(game, `${enemy.name} falls. Experience is shared.`);
-    if (enemy.boss) { game.status = 'won'; log(game, 'Hrungnir is defeated. Vengeance is yours â€” together.'); }
+    log(game, game.mode === 'solo' ? `${enemy.name} falls. You gain experience.` : `${enemy.name} falls. Experience is shared.`);
+    if (enemy.boss) { game.status = 'won'; log(game, game.mode === 'solo' ? 'Hrungnir is defeated. Vengeance is yours.' : 'Hrungnir is defeated. Vengeance is yours - together.'); }
   }
 }
 function collect(game: GameState, player: Player) {
@@ -98,8 +99,9 @@ export function act(game: GameState, player: Player, action: Action): string | u
   if (action.type === 'restart') {
     if (!['defeated', 'won'].includes(game.status)) return 'The expedition is still in progress.';
     const identities = game.players.map(p => ({ id: p.id, name: p.name, connected: p.connected }));
-    Object.assign(game, createGame(game.code, game.seed));
+    Object.assign(game, createGame(game.code, game.seed, game.mode));
     identities.forEach(p => { addPlayer(game, p.id, p.name).connected = p.connected; });
+    if (game.mode === 'solo') { game.players[0].ready = true; updateStatus(game); reveal(game); }
     return;
   }
   if (game.status !== 'playing') return 'Waiting for two connected, ready adventurers.';
@@ -195,7 +197,7 @@ export function step(game: GameState, milliseconds: number) {
       const damage = Math.max(1, enemy.damage - player.armor);
       player.hp = Math.max(0, player.hp - damage);
       log(game, `${enemy.name} hits ${player.name} for ${damage}.`);
-      if (!player.hp) log(game, `${player.name} is down! Stand beside them and press R to revive.`);
+      if (!player.hp) log(game, game.mode === 'solo' ? `${player.name} has fallen.` : `${player.name} is down! Stand beside them and press R to revive.`);
     } else {
       const options = [{ x: Math.sign(player.x - enemy.x), y: 0 }, { x: 0, y: Math.sign(player.y - enemy.y) }];
       if (Math.abs(player.y - enemy.y) > Math.abs(player.x - enemy.x)) options.reverse();
@@ -206,7 +208,7 @@ export function step(game: GameState, milliseconds: number) {
       }
     }
   }
-  if (game.players.length === 2 && game.players.every(p => p.hp === 0)) { game.status = 'defeated'; log(game, 'The expedition has fallen. Begin again to try a new approach.'); }
+  if (game.players.length > 0 && game.players.every(p => p.hp === 0)) { game.status = 'defeated'; log(game, 'The expedition has fallen. Begin again to try a new approach.'); }
 }
 export function snapshot(game: GameState): Snapshot {
   const { levels, ...state } = game;

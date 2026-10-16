@@ -10,6 +10,29 @@ test('requires exactly two ready players, caps admission at two', () => {
   assert.throws(() => addPlayer(g, 'c', 'C')); assert.equal(g.status, 'waiting');
   act(g, b, { type: 'ready' }); step(g, 100); assert.equal(g.status, 'playing'); assert.equal(g.time, 100);
 });
+
+test('solo simulation runs with one ready adventurer and rejects a second seat', () => {
+  const g = createGame('SOLO01', 1, 'solo'), p = addPlayer(g, 'a', 'Astrid');
+  act(g, p, { type: 'ready' }); step(g, 100);
+  assert.equal(g.status, 'playing'); assert.equal(g.time, 100);
+  assert.throws(() => addPlayer(g, 'b', 'Bjorn'), /solo/);
+  p.connected = false; step(g, 100); assert.equal(g.status, 'paused'); assert.equal(g.time, 100);
+});
+
+test('solo defeat and restart preserve mode and resume without a missing partner', () => {
+  const g = createGame('SOLO02', 1, 'solo'), p = addPlayer(g, 'a', 'Astrid');
+  act(g, p, { type: 'ready' }); p.hp = 0; step(g, 100);
+  assert.equal(g.status, 'defeated'); act(g, p, { type: 'restart' });
+  assert.equal(g.mode, 'solo'); assert.equal(g.status, 'playing');
+  assert.equal(g.players.length, 1); assert.equal(g.players[0].hp, 60);
+  assert.equal(g.players[0].id, 'a'); assert.ok(g.levels[0].explored.length);
+});
+
+test('older saves without a mode still require two adventurers', () => {
+  const g = createGame('OLD001', 1); delete g.mode;
+  const p = addPlayer(g, 'a', 'Astrid'); act(g, p, { type: 'ready' }); step(g, 100);
+  assert.equal(g.status, 'waiting'); assert.equal(g.time, 0);
+});
 test('movement is authoritative, cooldown-limited, and rejects teleport coordinates', () => {
   const g = gameFixture(), p = g.players[0]; act(g, p, { type: 'move', dx: 1, dy: 0 }); assert.equal(p.x, 6);
   act(g, p, { type: 'move', dx: 1, dy: 0 }); assert.equal(p.x, 6);

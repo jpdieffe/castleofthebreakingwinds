@@ -20,6 +20,7 @@ export interface Level {
   explored: number[]; safe: boolean; shop?: Point;
 }
 export interface GameState {
+  mode?: 'solo' | 'coop';
   version: 1; code: string; seed: number; level: number; levels: Level[];
   players: Player[]; status: 'waiting' | 'playing' | 'paused' | 'defeated' | 'won';
   tick: number; time: number; log: { id: number; text: string }[]; nextLog: number;

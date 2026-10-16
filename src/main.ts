@@ -21,18 +21,18 @@ const image = (id: number | string) => {
   return images.get(key)!;
 };
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-<header class="masthead"><div><span class="edition">THE TWO-PLAYER EXPEDITION</span><h1>Castle of the Winds</h1></div><span class="connection" id="connection">Not connected</span></header>
+<header class="masthead"><div><span class="edition">SOLO &amp; TWO-PLAYER EXPEDITIONS</span><h1>Castle of the Winds</h1></div><span class="connection" id="connection">Not connected</span></header>
 <main class="window"><div class="titlebar"><img src="${icon(2)}" alt=""><span>Castle of the Winds — A Question of Vengeance</span><span class="window-mark">◆</span></div>
 <nav class="menubar" aria-label="Game menu"><button id="new-menu">Expedition</button><button data-dialog="inventory">Inventory <kbd>I</kbd></button><button data-dialog="journal">Journal <kbd>J</kbd></button><button data-dialog="help">Help <kbd>?</kbd></button><span id="room-label"></span><button id="share" hidden>Copy invite</button><button id="leave" hidden>Leave</button></nav>
 <div class="toolbar" aria-label="Actions">
 ${([['attack',111,'Attack','Space'],['bolt',343,'Magic Arrow','1'],['heal',227,'Heal','2'],['fireball',339,'Fireball','3'],['potion',231,'Potion','H'],['mana',233,'Mana','Q'],['interact',7,'Use / stairs','E'],['revive',269,'Revive','R']] as const).map(([action,id,name,key]) => `<button data-action="${action}"><img src="${icon(id)}" alt="">${name} <kbd>${key}</kbd></button>`).join('')}
 </div><div class="game-layout"><section class="viewport-pane" aria-label="Dungeon"><div class="pane-title"><span id="location">A Tiny Hamlet</span><span id="area-info">Original artwork · online co-op</span></div>
 <div class="canvas-wrap"><canvas id="world" width="736" height="544" tabindex="0" aria-label="Game map. Use arrows or WASD to move, Space to attack, E to use stairs."></canvas>
-<section id="lobby" class="lobby" aria-label="Join an expedition"><img class="original-logo" src="${icon('bitmap-10')}" alt="Castle of the Winds original logo"><h2>A familiar world.<br>A companion at your side.</h2><p>Host here, then share your room code. Your browser runs the expedition. Keep the host tab open.</p>
-<form id="lobby-form"><label for="name">Adventurer’s name</label><input id="name" maxlength="20" required autocomplete="nickname" placeholder="Enter your name"><button type="submit" id="create" class="primary">Host expedition</button><div class="or">or join a friend</div><div class="join-row"><label class="sr-only" for="code">Expedition code</label><input id="code" maxlength="6" placeholder="6-character code" autocomplete="off" autocapitalize="characters"><button type="button" id="join">Join</button></div><details id="connection-settings"><summary>Advanced: dedicated server</summary><label for="server">Server address</label><input id="server" placeholder="peer"><p>Leave as peer for browser-to-browser play. Optional: a dedicated wss:// server.</p></details></form><p id="lobby-status" role="status"></p><small>Browser reconstruction using recovered Castle1 resources.<br>Rick Saada / SaadaSoft · Art: Paul Canniff · Publisher: Epic MegaGames</small></section>
+<section id="lobby" class="lobby" aria-label="Join an expedition"><img class="original-logo" src="${icon('bitmap-10')}" alt="Castle of the Winds original logo"><h2>Adventure alone.<br>Or bring a companion.</h2><p>Play solo immediately, or host an expedition and share your room code with a friend.</p>
+<form id="lobby-form"><label for="name">Adventurer’s name</label><input id="name" maxlength="20" required autocomplete="nickname" placeholder="Enter your name"><button type="button" id="solo" class="primary">Play solo</button><button type="submit" id="create" class="primary">Host expedition</button><div class="or">or join a friend</div><div class="join-row"><label class="sr-only" for="code">Expedition code</label><input id="code" maxlength="6" placeholder="6-character code" autocomplete="off" autocapitalize="characters"><button type="button" id="join">Join</button></div><details id="connection-settings"><summary>Advanced: dedicated server</summary><label for="server">Server address</label><input id="server" placeholder="peer"><p>Leave as peer for browser-to-browser play. Optional: a dedicated wss:// server.</p></details></form><p id="lobby-status" role="status"></p><small>Browser reconstruction using recovered Castle1 resources.<br>Rick Saada / SaadaSoft · Art: Paul Canniff · Publisher: Epic MegaGames</small></section>
 <section id="party-overlay" class="party-overlay" hidden><strong id="party-heading"></strong><p id="party-message"></p><button id="ready" class="primary">Ready to adventure</button><button id="restart" hidden>Begin again</button></section></div>
 <div class="map-footer"><span id="position">Explore together. Move with WASD or arrow keys.</span><span id="world-clock">Enemies move every 1.4 seconds</span></div></section>
-<aside><div class="pane-title">Your expedition <span>2 PLAYERS</span></div><div id="party"><div class="empty-party"><img src="${icon(421)}" alt="Adventurer">Every journey begins<br>with a first step.</div></div><div class="pane-title">Area map <span>SHARED</span></div><canvas id="minimap" width="230" height="170" aria-label="Shared explored map"></canvas><div class="quest"><span class="eyebrow">A QUESTION OF VENGEANCE</span><h3 id="quest-title">Find the road north</h3><p id="quest-text">Meet at the stairs, then press E to travel together. Rest and trade beside the village well.</p></div><div class="legend"><span><i class="gold-dot"></i>You</span><span><i class="blue-dot"></i>Partner</span><span><i class="red-dot"></i>Enemy</span></div></aside></div>
+<aside><div class="pane-title">Your expedition <span id="party-size">1 OR 2 PLAYERS</span></div><div id="party"><div class="empty-party"><img src="${icon(421)}" alt="Adventurer">Every journey begins<br>with a first step.</div></div><div class="pane-title">Area map <span id="map-sharing">EXPLORED</span></div><canvas id="minimap" width="230" height="170" aria-label="Shared explored map"></canvas><div class="quest"><span class="eyebrow">A QUESTION OF VENGEANCE</span><h3 id="quest-title">Find the road north</h3><p id="quest-text">Meet at the stairs, then press E to travel together. Rest and trade beside the village well.</p></div><div class="legend"><span><i class="gold-dot"></i>You</span><span id="partner-legend"><i class="blue-dot"></i>Partner</span><span><i class="red-dot"></i>Enemy</span></div></aside></div>
 <section class="chronicle"><div class="pane-title">Adventure log <span id="simulation-status">WAITING FOR ADVENTURERS</span></div><div id="log" role="log" aria-live="polite"><p>Welcome to the north. Invite a friend to begin.</p></div></section><div class="touch-controls"><div class="dpad">${[['0,-1','↑','north'],['-1,0','←','west'],['0,1','↓','south'],['1,0','→','east']].map(([dir,label,name]) => `<button data-direction="${dir}" aria-label="Move ${name}">${label}</button>`).join('')}</div><span>Click an explored tile to walk there.</span></div></main>
 <footer class="page-footer"><span>CLASSIC WORLD. SHARED ADVENTURE.</span><span>Original resources recovered from CASTLE1.EXE · Co-op reconstruction</span></footer><div id="toast" role="status" hidden></div><dialog id="dialog"><div class="titlebar"><span id="dialog-title"></span><button id="close-dialog" aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>`;
 
@@ -47,7 +47,7 @@ let toastTimer = 0;
 function toast(message: string) { el('toast').textContent = message; el('toast').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { el('toast').hidden = true; }, 4000); }
 function connection(text: string, connected = false) { el('connection').textContent = text; el('connection').classList.toggle('connected', connected); }
 function lobbyMessage(text: string) { el('lobby-status').textContent = text; }
-function busy(value: boolean) { pending = value; el<HTMLButtonElement>('create').disabled = value; el<HTMLButtonElement>('join').disabled = value; }
+function busy(value: boolean) { pending = value; el<HTMLButtonElement>('solo').disabled = value; el<HTMLButtonElement>('create').disabled = value; el<HTMLButtonElement>('join').disabled = value; }
 function connect(message: object, resume = false) {
   clearTimeout(reconnectTimer);
   try {
@@ -89,18 +89,20 @@ function connect(message: object, resume = false) {
     } else if (!manualClose) lobbyMessage(serverUrl === 'peer' ? 'Connection closed. Check the room code and that your friend has the host tab open. Some networks block direct connections; try another network.' : 'Connection closed. Check the server address, then try again.');
   };
 }
-function enter(type: 'create' | 'join') {
+function enter(type: 'solo' | 'create' | 'join') {
   if (pending) return;
   const name = el<HTMLInputElement>('name').value.trim();
   if (!name) { el<HTMLInputElement>('name').reportValidity(); return; }
   serverUrl = el<HTMLInputElement>('server').value.trim() || 'peer'; const code = el<HTMLInputElement>('code').value.trim().toUpperCase();
   if (type === 'join' && !/^[A-Z0-9]{6}$/.test(code)) { lobbyMessage('Enter a six-character expedition code.'); return; }
+  if (type === 'solo') serverUrl = 'peer';
   localStorage.setItem('castle-name', name); lobbyMessage('Connecting to your expedition…');
   if (socket) { manualClose = true; socket.onclose = null; socket.close(); }
   connect({ type, name, code });
 }
 el('lobby-form').addEventListener('submit', e => { e.preventDefault(); enter('create'); });
 el('join').onclick = () => enter('join');
+el('solo').onclick = () => enter('solo');
 function send(action: Action) { if (socket?.readyState === WebSocket.OPEN && state) socket.send(JSON.stringify({ type: 'action', action })); }
 el('ready').onclick = () => send({ type: 'ready' }); el('restart').onclick = () => send({ type: 'restart' });
 document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => { button.onclick = () => { destination = undefined; send({ type: button.dataset.action } as Action); canvas.focus(); }; });
@@ -119,11 +121,19 @@ el('share').onclick = async () => {
   try { await navigator.clipboard.writeText(url.href); toast('Invite link copied. Send it to your companion.'); }
   catch { await openDialog('invite'); el('dialog-body').textContent = `Share code ${state.code}${serverUrl === 'peer' ? '. Keep the host tab open.' : ` and server ${serverUrl}.`}`; }
 };
-el('new-menu').onclick = () => { if (state) toast(`Expedition ${state.code}. Copy invite to bring a companion, or Leave to start another.`); else el<HTMLInputElement>('name').focus(); };
+el('new-menu').onclick = () => { if (state?.mode === 'solo') toast('Solo expedition. Leave to return to the menu.'); else if (state) toast(`Expedition ${state.code}. Copy invite to bring a companion, or Leave to start another.`); else el<HTMLInputElement>('name').focus(); };
 
 function me(): Player | undefined { return state?.players.find(p => p.id === playerId); }
 function render() {
   if (!state) return;
+  const solo = state.mode === 'solo';
+  el('party-size').textContent = solo ? 'SOLO' : '2 PLAYERS';
+  el('map-sharing').textContent = solo ? 'EXPLORED' : 'SHARED';
+  el('partner-legend').hidden = solo;
+  document.querySelector<HTMLButtonElement>('[data-action=revive]')!.hidden = solo;
+  el('share').hidden = solo;
+  el('room-label').textContent = solo ? 'SOLO EXPEDITION' : `ROOM ${state.code}`;
+  if (solo) connection('Solo play', true);
   const player = me(); el('location').textContent = state.map.name;
   el('area-info').textContent = state.map.safe ? 'SAFE HAVEN' : `AREA ${state.level + 1} / 14`;
   el('position').textContent = player ? `${player.name} · ${player.x}, ${player.y} · Click to walk` : '';
@@ -142,14 +152,16 @@ function render() {
     const items = document.createElement('div'); items.className = 'pocket'; items.textContent = `${p.gold} gold · ${p.potions} potions · ${p.manaPotions} mana`;
     card.append(head, health, mana, items); party.append(card);
   });
-  if (state.players.length < 2) { const waiting = document.createElement('div'); waiting.className = 'waiting-seat'; waiting.textContent = 'Companion wanted. Share your room code.'; party.append(waiting); }
+  if (!solo && state.players.length < 2) { const waiting = document.createElement('div'); waiting.className = 'waiting-seat'; waiting.textContent = 'Companion wanted. Share your room code.'; party.append(waiting); }
   const visibleLog = state.log.slice(-5), lastLogId = String(visibleLog.at(-1)?.id);
   if (el('log').dataset.last !== lastLogId) { el('log').replaceChildren(...visibleLog.map(entry => { const p = document.createElement('p'); p.textContent = entry.text; return p; })); el('log').dataset.last = lastLogId; el('log').scrollTop = el('log').scrollHeight; }
   el('party-overlay').hidden = state.status === 'playing'; el('ready').hidden = state.status !== 'waiting' || !!player?.ready; el('restart').hidden = !['won', 'defeated'].includes(state.status);
   el('party-heading').textContent = { waiting: `Expedition ${state.code}`, paused: 'Waiting for your companion', defeated: 'Your expedition has fallen', won: 'Vengeance is yours', playing: '' }[state.status];
   el('party-message').textContent = state.status === 'waiting' ? `${state.players.length}/2 adventurers. ${player?.ready ? 'You are ready. Waiting for your companion.' : 'Share the invite, then both choose Ready.'}` : state.status === 'paused' ? 'Combat is paused. Reconnecting keeps your position, equipment, and progress.' : state.status === 'won' ? 'You defeated Hrungnir together. The north will remember.' : 'You can begin again with the same companion.';
+  if (solo) el('party-message').textContent = state.status === 'won' ? 'You defeated Hrungnir. The north will remember.' : 'Your expedition has ended. Choose Begin again to restart.';
   el('quest-title').textContent = state.level === 0 ? 'Find the road north' : state.level < 7 ? 'Descend into the mine' : state.level < 10 ? 'Find Hrungnir’s stronghold' : 'Defeat the Hill Giant Lord';
   el('quest-text').textContent = player?.hp === 0 ? 'You are down. Your companion must stand beside you and press R with a healing potion.' : state.map.safe ? 'E at the well restores health and mana. Trade from your inventory. Gather at the stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1–3 for spells. Stay together at the stairs; E travels.';
+  if (solo) el('quest-text').textContent = player?.hp === 0 ? 'Your adventure has ended. Choose Begin again to restart.' : state.map.safe ? 'E at the well restores health and mana. Trade from your inventory. Use E near stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1, 2, 3 for spells. E near stairs travels to the next area.';
   draw();
 }
 
@@ -246,7 +258,7 @@ async function openDialog(kind: string) {
       stories.forEach(s => { const section = document.createElement('details'), summary = document.createElement('summary'), text = document.createElement('p'); summary.textContent = `Story ${s.id}`; text.className = 'story-text'; text.textContent = s.text.replace(/^[^a-zA-Z]+/, '').replaceAll('#', '\n'); section.append(summary, text); body.append(section); });
     } catch { body.textContent = 'Unable to load the recovered story. Please try again.'; }
   } else if (kind !== 'invite') {
-    body.innerHTML = `<h2>Two players. No waiting for turns.</h2><p>Both adventurers must join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1: Magic Arrow (3 MP). 2: Heal (6 MP). 3: Fireball (8 MP). Spells target the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. Both players must be alive and within three tiles. Walk over loot to collect it. Experience is shared.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
+    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1: Magic Arrow (3 MP). 2: Heal (6 MP). 3: Fireball (8 MP). Spells target the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
   }
 }
 document.querySelectorAll<HTMLButtonElement>('[data-dialog]').forEach(b => { b.onclick = () => { void openDialog(b.dataset.dialog!); }; });

@@ -1,5 +1,5 @@
 import Peer, { type DataConnection } from 'peerjs';
-import { act, addPlayer, createGame, snapshot, step, updateStatus } from '../shared/engine';
+import { act, addPlayer, createGame, reveal, snapshot, step, updateStatus } from '../shared/engine';
 import type { Action, GameState, ServerMessage } from '../shared/types';
 
 const SAVE = 'castle-peer-host-v1';
@@ -38,7 +38,7 @@ export class PeerSession {
   send(raw: string) {
     if (this.ended) return;
     const message = JSON.parse(raw);
-    if (message.type === 'create' || message.type === 'resume' || message.type === 'join') { this.start(message); return; }
+    if (['solo', 'create', 'resume', 'join'].includes(message.type)) { this.start(message); return; }
     if (message.type === 'leave') {
       if (this.host) { this.link?.send({ type: 'error', message: 'The host ended the expedition.', fatal: true }); sessionStorage.removeItem(SAVE); this.host = undefined; }
       else this.link?.send({ type: 'leave' });
@@ -53,13 +53,19 @@ export class PeerSession {
     let stored: HostSave | undefined;
     try { stored = JSON.parse(sessionStorage.getItem(SAVE) || 'null') || undefined; } catch { /* Ignore damaged saves. */ }
     const restoring = message.type === 'resume' && stored?.game?.code === message.code && stored?.token === message.token;
-    const hosting = message.type === 'create' || restoring;
+    const hosting = message.type === 'solo' || message.type === 'create' || restoring;
     const code = hosting ? restoring ? stored!.game.code : Array.from(crypto.getRandomValues(new Uint8Array(6)), n => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n % 31]).join('') : message.code!;
     if (hosting) {
-      this.host = restoring ? stored : { game: createGame(code, crypto.getRandomValues(new Uint32Array(1))[0]), token: uid() };
+      this.host = restoring ? stored : { game: createGame(code, crypto.getRandomValues(new Uint32Array(1))[0], message.type === 'solo' ? 'solo' : 'coop'), token: uid() };
       const game = this.host!.game;
       if (!restoring) addPlayer(game, uid(), message.name!.trim().slice(0, 20));
       game.players.forEach((p, i) => { p.connected = i === 0; }); updateStatus(game);
+      if (game.mode === 'solo') {
+        game.players[0].ready = true; updateStatus(game); reveal(game);
+        this.startHost();
+        this.timer = window.setInterval(this.checkpoint, 2000);
+        return;
+      }
     }
     this.peer = new Peer(hosting ? prefix + code : uid(), { debug: 0 });
     this.peer.on('error', error => {
@@ -79,12 +85,7 @@ export class PeerSession {
       // PeerServer reconnection also emits open; the existing RTC game keeps running.
       if (this.timer || this.ended) return;
       if (hosting) {
-        const h = this.host!;
-        this.emit({ type: 'welcome', code, token: h.token, playerId: h.game.players[0].id });
-        this.clock = new Worker(new URL('./clock.worker.ts', import.meta.url), { type: 'module' });
-        this.clock.onmessage = () => { if (this.host) { step(this.host.game, 100); if (++this.pulses % 2 === 0) this.broadcast(); } };
-        window.addEventListener('pagehide', this.checkpoint);
-        this.broadcast();
+        this.startHost();
       } else {
         // BinaryPack chunks maps above PeerJS's 16 KB message limit; JSON serialization does not.
         const conn = this.peer!.connect(prefix + code, { reliable: true, serialization: 'binary' }); this.link = conn;
@@ -103,6 +104,14 @@ export class PeerSession {
         else if (this.link?.open) this.link.send({ type: 'ping' });
       }, 2000);
     });
+  }
+  private startHost() {
+    const h = this.host!;
+    this.emit({ type: 'welcome', code: h.game.code, token: h.token, playerId: h.game.players[0].id });
+    this.clock = new Worker(new URL('./clock.worker.ts', import.meta.url), { type: 'module' });
+    this.clock.onmessage = () => { if (this.host) { step(this.host.game, 100); if (++this.pulses % 2 === 0) this.broadcast(); } };
+    window.addEventListener('pagehide', this.checkpoint);
+    this.checkpoint(); this.broadcast();
   }
   private accept(conn: DataConnection) {
     this.connections.add(conn);

@@ -1,5 +1,18 @@
 # Test results - October 16, 2026
 
+## Solo play update
+
+- Engine/network checks: **25 passed**, including one-player simulation, defeat/restart and older-save compatibility.
+- WebRTC co-op regression cases: **13 passed**.
+- Solo browser cases: **3 passed**. Verified immediate start with no matchmaking traffic, one-character UI, movement, refresh recovery, travel to the wilderness, autonomous enemies, spells and XP, defeat, restart and Leave.
+- TypeScript and production build: passed.
+
+The solo route test initially issued its first post-refresh move before the saved action cooldown expired. The test now waits for that cooldown; gameplay rules were retained. Solo is a local browser session and does not register a matchmaking room. The existing two-player mode still waits for both adventurers.
+
+Solo screenshot: [wilderness](screenshots/solo-wilderness.png).
+
+## Earlier co-op baseline
+
 Browser-hosted co-op is now the default. The host runs the shared game engine; guests send intentions over real WebRTC channels. PeerJS Cloud provides public matchmaking.
 
 - `npm test`: **22 passed**. Engine rules, map connectivity, and retained dedicated-server protocol/persistence tests.

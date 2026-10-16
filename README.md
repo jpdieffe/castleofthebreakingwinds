@@ -1,6 +1,10 @@
-# Castle of the Winds - Two-Player Expedition
+# Castle of the Winds - Solo and Co-op
 
 Play at **https://jpdieffe.github.io/castleofthebreakingwinds/**.
+
+For solo play, enter your name and choose **Play solo**. The adventure starts immediately with one character. No matchmaking connection or second player is required. Enemies move in real time; you can explore, fight, use stairs, and restart after defeat. Refreshing the same tab restores progress. Closing the tab can discard the save.
+
+For two-player co-op:
 
 1. Enter your name and choose **Host expedition**.
 2. Send your friend the six-character room code or **Copy invite** link.
@@ -29,7 +33,7 @@ This is a playable reconstruction, not a complete faithful port of the original 
 | Inventory / shop | I |
 | Original story journal | J |
 
-Both adventurers must be alive and within three tiles of the stairs to travel. Menus do not pause combat. Shops and free restoration are available near the well in safe areas.
+In co-op, both adventurers must be alive and within three tiles of the stairs to travel. Solo players use the stairs alone. Menus do not pause combat. Shops and free restoration are available near the well in safe areas.
 
 ## Development and verification
 
