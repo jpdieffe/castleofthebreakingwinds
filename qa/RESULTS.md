@@ -7,6 +7,7 @@ Browser-hosted co-op is now the default. The host runs the shared game engine; g
 - The retained `multiplayer.spec.ts` suite: **11 passed** during the combined headed run. Includes all 14 area loads, mobile UI, combat, inventory, revival and dedicated-server recovery.
 - `npm run build`: TypeScript and Vite production build pass.
 - `npm audit fix`: compatible dependency updates applied; **0 known vulnerabilities** reported.
+- GitHub Pages deployed implementation commit `3afc375` successfully. The live page returned HTTP 200 with the new build, and `npm run play:two` joined two independent visible Chrome processes on that HTTPS page over WebRTC. Both reached REAL TIME; the former local game server was stopped. Screenshots are retained below.
 
 The WebRTC tests opened independent Chrome contexts, contacted the public matchmaking service, and asserted actual data-channel traffic and a successful ICE candidate pair. They exercised Host/Join, code-only invite copying, movement, unknown/full rooms, guest and host refresh, disconnect pausing, reserved-seat recovery, replacement companions, host termination, autonomous enemies, spells, purchases, healing, revival, victory, restart, background hosting, independent rooms, forged inputs and flood rejection. An additional test deliberately closed the matchmaking socket and verified that the game continued with exactly one simulation worker.
 
