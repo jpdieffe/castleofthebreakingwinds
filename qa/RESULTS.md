@@ -1,5 +1,13 @@
 # Test results - October 16, 2026
 
+## Viewport layout update
+
+- `npx playwright test tests/layout.spec.ts --headed`: **2 passed**, 17.6 seconds.
+- Checked 1366x768, 1280x600, 880x700, 1920x1080, 390x844, 360x640, and 844x390. The spell toolbar and entire map fit without page scrolling, the map retains its aspect ratio, and mouse clicks select the intended tile after resizing.
+- Real WebRTC co-op checks at five small viewport sizes verified both health bars, all spells, and the complete map remain visible. Touch movement and inventory opening/closing also passed.
+- TypeScript and production build passed. Screenshots: [desktop](screenshots/fit-desktop.png), [phone co-op](screenshots/fit-phone-coop.png).
+
+
 ## Solo play update
 
 - Engine/network checks: **25 passed**, including one-player simulation, defeat/restart and older-save compatibility.

@@ -2,6 +2,10 @@
 
 Windows, Node 24, and desktop Google Chrome. The default game now uses browser-hosted WebRTC, with public PeerJS matchmaking. Browser tests use independent storage contexts and real data channels. The older dedicated-server regression suite remains separate.
 
+## Viewport layout acceptance cases
+
+`tests/layout.spec.ts` checks the actual bounding boxes of the map and spell toolbar at seven desktop, short-window, and phone sizes. Neither page overflow nor map distortion is allowed. Click-to-walk must continue to hit the intended tile after resizing. A live two-client co-op case also checks both health bars and touch controls. At heights below 500 pixels, the decorative header and adventure log are hidden to prioritize gameplay; the map and spell controls remain available.
+
 ## Solo acceptance cases
 
 `tests/solo.spec.ts` verifies immediate Play solo startup without PeerJS matchmaking traffic, one-player UI, walking, refresh recovery, unmodified hamlet-to-wilderness travel, autonomous enemies, spell damage and XP, defeat, automatic solo restart, and leaving the expedition. Engine tests also cover solo admission, disconnect pausing, restart mode preservation, and compatibility with older co-op saves.
