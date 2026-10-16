@@ -1,0 +1,2623 @@
+00000203 This program requires Microsoft Windows.
+0000022d $                                        Z
+000004e6 .*+7n9
+00002f7d CASTLE
+00002f84 INVENTORY
+00002f93 DLGINCLUDE
+00002f9e CASTLE
+00002fa7 ABOUTDLGPROC
+00002fb6 OPTIONSDLGPROC
+00002fc7 HELPDLGPROC
+00002fd5 EDITCHARACTERDLGPROC
+00002fec DESCRIPTIONWNDPROC
+00003001 SPELLMENUDLGPROC
+00003014 CASTSPELLDLGPROC
+00003027 STATBARWNDPROC
+00003038 REVIEWHISTORYDLGPROC
+0000304f STATUSWNDPROC
+0000305f INVENTORYWNDPROC
+00003072 SELECTOBJDLGPROC
+00003085 COPYRIGHTDLGPROC
+00003098 HIGHSCOREWNDPROC
+000030ab BUTTONWNDPROC1
+000030bc BUTTONWNDPROC2
+000030cd CREATECHARDLGPROC
+000030e1 ZOOMWNDPROC
+000030ef BUTTONWNDPROC3
+00003100 ATTRIBUTESDLGPROC
+00003114 TOOLBARWNDPROC
+00003125 OBJLISTWNDPROC
+00003136 POPUPWNDPROC
+00003145 DUNGEONWNDPROC
+00003156 CALLOBJECTDLGPROC
+0000316a STARTUPWNDPROC
+0000317b CHURCHDLGPROC
+0000318b TEXTFILEWNDPROC
+0000319d LEARNSPELLDLGPROC
+000031b1 WNDPROC
+000031bb NUMBERDLGPROC
+000031d5 KERNEL
+000031e5 COMMDLG
+00003279 Castle of the Winds
+00003350 6&=WQQ
+0000381c wB<+ty
+00003ffd Ht(Ht
+0000422a WPPPP
+00004bef .4AP+
+00004e1d PVW+6*A
+000055fb N^_MM
+0000562c n#~#~#
+00005635 #~#~#~#~#
+00005d5d FRPPV
+00005e51  DRPP
+00006793 ;6&=t
+000067e4 FRPPP
+00006852 BRPPP
+000068aa Ht-Hu
+00006995 PRPPP
+00006b4c Ht-Ht8
+00006bbc &Load Saved Game
+00006bcd &Start New Game
+00006bdd &Overview
+00006d04 t.w6<St(w
+00007be3 SaveLevelsToDisk
+00007bf4 PlayerName
+00007bff VisualEffects
+00007c0d Dexterity
+00007c17 Constitution
+00007c24 ButtonBar
+00007c2e SoundEffects
+00007c3b Intelligence
+00007c48 Strength
+00007c51 UserIcon
+00007c5a StopRunningOnSpecialSites
+00007c74 ScrollRoomsOnScreen
+00007c88 SaveFile
+00007c91 IconName
+00007c9a AutoArrange
+00007ca6 KeepBackups
+00007cb2 FastMapDisplay
+00008080 lM^_MM
+00008513 Ht,Hu
+000085c3 PRPPP
+00008ac5 Reset
+00008f80 6^_MM
+00009646 SQPS3
+00009704 PSQPS
+00009751 PSQPS3
+0000982c ,atP,
+0000a324 tX<"t$<\t
+0000a355 t'<"t
+0000a3d8 t^<"t'<\t
+0000a40c t*<"t
+0000a776 ,atX,
+0000a7b0 ,+t$,7t>
+0000aa1a , <Xw
+0000ab53 <st'<ntQ<pt`<Et
+0000c0f0 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+0000c198 Castle
+0000c1a0 Status
+0000c1a8 Description
+0000c1b4 Dungeon
+0000c1c2 Inventory
+0000c1cc Objlist
+0000c1d4 Toolbar
+0000c1dc Popup
+0000c1e2 Startup
+0000c1ea StatBar
+0000c1f2 Textfile
+0000c1fc HighScore
+0000c206 button
+0000c20e \castle1.hlp
+0000c21c Not enough memory to create inventory window
+0000c249 John Doe
+0000c252 %d-%d-%d
+0000c25b Victorious this day, %d-%d-%d
+0000c284 Can't Open Score File
+0000c29a John Doe
+0000c376 Floor
+0000c37c Store
+0000c382 &Close
+0000c389 Ctrl+F4
+0000c39b Can't load icon
+0000c3ab Create Character
+0000c3bc Undistributed points available, exit anyway?
+0000c3e9 Not Enough Memory to Init Player
+0000c568 ASSERT: File:%s Line%d %s
+0000c583 Terminating Castle
+0000c596 Warning: Low Local Memory, Freeing description strings
+0000c5ce 1234567890
+0000c5d9 1234567890
+0000c6aa  !"#$%&'()*+,-./0123456789:;
+0000c6cd ?@ABC
+0000c95a _C_FILE_INFO=
+0000ca03   0PX
+0000ca0b 000WP
+0000ca1b ``````
+0000ca23 ppxxxx
+0000ca3b (null)
+0000cab6 SunMonTueWedThuFriSat
+0000cacc JanFebMarAprMayJunJulAugSepOctNovDec
+0000cc50 <<NMSG>>
+0000cc5a R6000
+0000cc61 - stack overflow
+0000cc76 R6003
+0000cc7d - integer divide by 0
+0000cc97 R6009
+0000cc9e - not enough space for environment
+0000ccc5 R6018
+0000cccc - unexpected heap error
+0000cce8 R6020
+0000ccef - unexpected QuickWin error
+0000cd0f R6008
+0000cd16 - not enough space for arguments
+0000cd3b R6021
+0000cd42 - no main procedure
+0000cd5f run-time error 
+0000cd71 R6002
+0000cd78 - floating-point support not loaded
+00011c19 96VAt
+0001218b w!HthHu
+0001298d VRPVQW
+00012d00 `K9?t
+00013bb3 <htIw
+00016d9b Ht>Hu
+00017148 ~ 96f=}
+000171ea P)6f=
+0001743b PPPPP
+00017489 PPPPP
+000176af Ht&Hu
+00017d91 HtmHu
+00018827 <htGw
+00018837 t-,4t/
+000188a9 <ht9w
+0001895b <#t9w
+000189d5 ,,'t^,
+0001ac39 6 MF;6
+0001add3 9>&Mt!
+0001b53b .4AP+
+0001b6ec 64A@-
+0001d5bd HHtcHHu
+0001d916 HHt4HHtXHHt|
+0001fa6a u0FF;v
+0001fa90 w.r?9F
+0001fe21 > MG;>
+000205ef VRPRP+
+000207ad VRPRP
+000208d8 Times New Roman
+000208e8 Tms Rmn
+00020b1d @^_MM
+00020d09 96<Au
+00020d18 96>Au
+00020fa0 You crush %t%i's skull into jelly.
+00020fc3 Pack Slot %d: %s
+00020fd4 You smash into %t%i's shield, striking sparks.
+00021003 You decapitate %t%i with a backhand stroke.
+0002102f Fixed Weight: %lu
+00021041 %t%i opens a gate!
+00021054 Your thrust glances from %t%i's scales.
+0002107c %t%i cowers under its shield, barely avoiding your blows.
+000210b6 You skewer %t%i, which collapses, spitting blood.
+000210e8 Your Father's speech
+000210fd %i%iincreases the character's %i
+0002111e Max Weight: %lu Max Bulk %lu
+0002113b Offered price: %lu
+0002114e %t%i staggers from your furious assault.
+00021177 Your cut barely scratches %t%i's scales.
+000211a0 %t%i catches your blow on its shield.
+000211c6 You disembowel %t%i with a final cut.
+000211ec healthier
+000211f6 You look at the highway vanishing in the distance, and feel no need to continue.
+00021247 Burned Hamlet Message
+0002125d %i  %lu (%lu)
+0002126b %i, increases the character's %i, %i
+00021290 %i%iincreases the character's %i
+000212b1 Asking price: %lu
+000212c3 The dragon breath hits %t%i!
+000212e0 %t%i gasps as your weapon strikes home.
+00021308 Your strike barely mars %t%i's scales.
+0002132f %t%i cringes from your strike behind its shield.
+00021360 You slash through %t%i's throat with a neat lunge and slice.
+0002139e You sense objects
+000213b0 a mystical barrier
+000213c3 Castle only supports a single instance.
+000213eb a vegetable garden
+000213fe a poisoned well
+0002140e detect traps close by
+00021424 When pressed, this button:
+00021446 %i Chest
+0002144f %i, makes the character %i, %i
+0002146e %i%iincreases the character's %i
+0002148f %i, makes the character vulnerable %i, %i
+000214b9 Cape of %i
+000214c4 Pendant of %i
+000214d2 %t%i flinches as you score a hit.
+000214f4 %t%i's scaly hide deflects your blow.
+0002151a You stumble and miss %t%i, cleaving the air.
+00021547 You impale %t%i with a lightning stroke.
+00021570 Left Ring
+0002157a  called 
+00021584 protected
+0002158e Clairvoyance
+0002159b The shade ignores you.
+000215b2 Lesser Restore Mana
+000215ca a wagon
+000215d2 Burned Farm Message
+000215e6 The floor of the crypt
+000215fd detect objects on the current level
+00021621 Casts the spell of
+00021634 %ld piece%z of %i
+00021646 Killed by %y%i
+00021655 %i Bag
+0002165c %i, allows the character to %i, %i
+0002167f %i%iincreases the character's %i
+000216a0 %i%idecreases the character's %i
+000216c1 %t%i blocks your swing!
+000216d9 Distillation of %i %i
+000216ef Brooch of %i
+000216fc %t%i stoically ignores your shallow cut.
+00021725 %t%i laughs fiendishly at your futile attack.
+00021753 You merely bruise %t%i as it dodges to one side.
+00021784 You lunge at %t%i, but fumble the thrust.
+000217ae You don't have enough money!
+000217cb You can't move!
+000217db You feel faster
+000217eb Enchanted 
+000217f6 Helm of Storms
+00021806 a rude straw mattress
+0002181c A wealthy looking villa.
+0002183a the fortress floor
+0002184d Rat-Man
+00021855 full of mystic power
+0002186a a very large amount
+0002187e the village well
+0002188f the smoldering remains of a building
+000218b4 Examine
+000218bc &Spell
+000218c3 much heavier
+000218d0 Saves your game
+000218e0 &%d: %i (%d)
+000218ed CP: %d SP: %d GP: %d PP: %d
+00021909 %s,  Experience : %lu on %i
+00021925 %i Pack
+0002192d Weight: %lu Bulk %lu
+00021942 %i%iincreases the character's %i
+00021963 %i, decreases the character's %i, %i
+00021988 Your blow bounces off %t%i's armor!
+000219ac %t%i blocks your clumsy blow!
+000219ca Distillation of %i
+000219dd Necklace of %i
+000219ec %t%i ignores your puny attack.
+00021a0b %t%i ignores your feeble flailings.
+00021a2f You crush %t%i, splintering bone and spraying gore.
+00021a63 You slash at air as %t%i dances back.
+00021a89      %s after %d day%z, at %D:%D
+00021aaa spider
+00021ab1 SelectObject
+00021abe Nothing Selected
+00021acf Manticore
+00021ad9 buffets
+00021ae1 You feel slower
+00021af1 to cold
+00021af9 to magic
+00021b02 Normal 
+00021b0b You sense monsters
+00021b1e an ornately carved bed
+00021b35 The home of the village sage.
+00021b58 the fortress wall
+00021b6a Tunnel Wight
+00021b77 Animated Wooden Statue
+00021b8e You gain 
+00021b98 a large amount
+00021ba7 the entrance to an abandoned mine
+00021bc9 Kings
+00021bd4 Experts Only
+00021be1 the entire level
+00021bf2 Starts a Rest Until Healed command
+00021c15 %t%i is dead!
+00021c23 The %i expodes in midair!
+00021c3d You are drained to level %d!
+00021c5a %i %lu %i
+00021c64 Belt Slot %d: %s
+00021c75 Floor Slot %d: %s
+00021c87 %i, makes the character resistant %i, %i
+00021cb0 %lu (%lu)
+00021cba You hit %t%i in the head!
+00021cd4 You miss %t%i by a league!
+00021cef %t%i dodges your attack!
+00021d08 Essence of %i %i
+00021d19 Charm of %i
+00021d25 %t%i narrowly escapes your slashing attack.
+00021d51 You thrust deep into %t%i!
+00021d6c You strike %t%i a glancing blow.
+00021d8d You strike sparks from %t%i's armor.
+00021db2 You rip into %t%i with maniacal fervor.
+00021dda %d (%d)
+00021de2 %i (%d)
+00021dea Skill
+00021df2 Sapphires
+00021dff You trigger a teleport trap!
+00021e1c Adult Green Dragon
+00021e2f Teleport
+00021e38 tailspikes hit
+00021e47 Summon Undead
+00021e55 summons an undead monster
+00021e6f permanently
+00021e7b to disease
+00021e86 slower
+00021e8e frailer
+00021e96 Your mind clears
+00021ea7 a pentagram inscribed on the floor
+00021eca The door to the farm is locked.
+00021eeb an overgrown courtyard
+00021f02 Gray Wolf
+00021f0c Necromancer
+00021f18 Animated Marble Statue
+00021f2f misses
+00021f36 a medium amount
+00021f46 You see a badly neglected highway, and a trail leading into the mountains.
+00021f91 Activation
+00021f9c A wooden palisade
+00021fae Hrungnir's spell speech
+00021fc7 Difficult
+00021fd1 the current quadrant
+00021fe6 Attempts to disarm a trap on the site you click on
+00022019 Ring of %i
+00022024 %t%i resists the attack!
+0002203d The %i hit the wall!
+00022052 You are %i by %i!
+00022064 %d %i
+0002206a %i: %s
+00022071 Staff of %i %d charge%z
+00022089 %i, %i
+00022090 When activated, casts the spell of %i
+000220b6 %d: %i
+000220bd You hit %t%i in the arm!
+000220d6 Your swing goes wide!
+000220ec %t%i dodges your swing!
+00022104 Essence of %i
+00022112 Medallion of %i
+00022122 %t%i barely deflects your strike.
+00022144 You cleave %t%i wide open!
+0002215f Your mighty blow smashes through %t%i's scales!
+0002218f You smash into %t%i's shield, sending splinters flying.
+000221c7 Your weapon lays open %t%i, which suddenly recognizes its own mortality.
+00022210 %i, restores %i of a character's mana.
+00022237 %i, allows the character to %i.
+00022257 Heroism
+00022264 There are objects blocking the door
+00022289 Wild Dog
+00022292 Slime
+00022298 Mithril
+000222a0 Identify
+000222a9 You set off the trap!
+000222bf Save game before exiting?
+000222d9 Young Adult Green Dragon
+000222f2 You feel your life drain away!
+00022311 Wizard
+00022318 Summon Monster
+00022327 When used
+00022331 summons a monster
+00022343 until removed
+00022351 to poison
+0002235b Cursed 
+00022363 Uncursed 
+0002236d an open portcullis
+00022380 stupider
+00022389 You feel confused
+0002239b a river
+000223a3 You journey along the highway for a full day, and reach the village of Bjarnarhaven.
+000223fb attacks
+00022403 Evil Warrior
+00022410 Animated Iron Statue
+00022425 Shadow
+0002242c a small amount
+0002243b a badly neglected highway
+00022455 daughter
+0002245e a trampled garden
+00022470 Too many containers open. Close one first.
+0002249b Hrungnir's final speech
+000224b4 Intermediate
+000224c1 Nesting enchanted packs seems a lot like pushing like poles of a magnet together.  The closer they get the more they resist!  At last you give up.
+00022554 Searches the surrounding sites for traps and secret doors
+0002258e Suit of %i Mail
+0002259e Potion of %i %i
+000225ae %t%i missed you!
+000225bf The %i hit %t%i!
+000225d0 The %i breathes %i!
+000225e4 %i Belt
+000225ec The %i casts %i!
+000225fd %i Pack Of Holding
+00022610 %i, restores the character's %i
+00022630 Fixed Bulk %lu
+0002263f &%d: %i
+00022647 You hit %t%i in the leg!
+00022660 You scratch %t%i
+00022671 %t%i dodges your clumsy blow!
+0002268f Draught of %i %i
+000226a0 Talisman of %i
+000226af %t%i avoids your blow.
+000226c6 %t%i reels from the fury of your attack.
+000226ef Your thrust scores a shallow wound through %t%i's scales.
+00022729 Your weapon glances off of %t%i, striking sparks.
+0002275b %i, heals %i of the damage a character has taken.
+0002278d %i, fills in the character's map of %i.
+000227b5 Leather
+000227bd Levitation
+000227c8 True Sight
+000227d3 Nothing there to close!
+000227eb Not a valid save file
+00022801 a trap door
+00022811 a dart
+00022818 Giant Scorpion
+00022827 Platinum
+00022835 You failed to disarm the trap.
+00022854 Resist Acid
+00022860 A teleport trap
+00022870 Young Green Dragon
+00022883 Neutralize Poison
+00022895 Gelatinous Glob
+000228a5 Rune of Return
+000228b4 Can't write to save file
+000228cd When activated
+000228dc neutralizes poison in the character
+00022900 for a period of time
+00022915 to normal damage
+00022926 Can't rename charged objects
+00022943 burden
+0002294a Sleep
+00022950 A Rough Trail
+0002295e weaker
+00022965 You can see again
+00022977 a paved road
+00022984 On inspiration, you read the scrap of parchment.
+000229bb Overgarment
+000229c8 No stairs here
+000229d7 Bandit
+000229de Animated Bronze Statue
+000229f5 fires an arrow at
+00022a07 Not enough memory to initialize Castle
+00022a2e mountain
+00022a3b An underground lake
+00022a4f a burned wagon
+00022a5e lucky for some reason
+00022a74 Hrungnir's first speech
+00022a92 The crypt description
+00022aa8 Puts an object in your free hand
+00022ac9 Suit of %i Armor
+00022ada Potion of %i
+00022ae7 %t%i %i you!
+00022af8 You feel a loss of %i!
+00022b0f You don't have enough %i
+00022b28 Spell Book: %i
+00022b37 %t%i is immune to the attack!
+00022b55 %i%ienchanted against %i
+00022b6e %i %d charge%z
+00022b7d %ld (%ld)
+00022b87 You barely hit %t%i.
+00022b9c %t%i evades your attack!
+00022bb5 Draught of %i
+00022bc3 Scarab of %i
+00022bd0 %t%i parries your strike.
+00022bea %t%i roars in pain as you draw blood!
+00022c10 You strike a ringing blow against %t%i, which stumbles under your assault.
+00022c5b The %i misses %t%i!
+00022c6f You can %i
+00022c7a Giant Rat
+00022c84 Rusty
+00022c8a Elven Chain
+00022c96 Protection
+00022ca1 Blank
+00022ca7 The monster blocks it!
+00022cbe Insufficient Memory For Action
+00022cdd a statue
+00022ceb You are sprayed with acid!
+00022d06 Eerie Ghost
+00022d17 grass
+00022d1d You disarmed the trap.
+00022d34 You are interrupted!
+00022d49 Resist Lightning
+00022d5a Phhhhttt
+00022d63 Ancient White Dragon
+00022d78 Light
+00022d7f The charge around you prevents entry!
+00022da6 CASTLE.INI
+00022db1 When wielded
+00022dbe learn a new spell
+00022dd0 elementals
+00022ddb to confusion
+00022de8 You don't own it yet!
+00022dfe You feel lighter
+00022e0f Haste Monster
+00022e1d You fall asleep!
+00022e2e A Tiny Hamlet
+00022e3c nimbler
+00022e44 You can't see
+00022e52 farmland
+00022e5b You realize there is no reason to return to your burned home.
+00022e99 (none)
+00022ea0 Really exit with no object selected?
+00022ec5 a building
+00022ed0 Neckwear
+00022eda This demo version is expired.
+00022ef8 Dust Elemental
+00022f07 Abyss Wraith
+00022f14 Berserker
+00022f1e Castle of the Winds will only run in Protect Mode
+00022f50 the hamlet gate
+00022f60 the smoldering ruin of your farm
+00022f81 A pool of lava
+00022f90 The statues come to life!
+00022faa The charge is absorbed by the helm!
+00022fce Chest in the bandit lair
+00022fed The wizard's speech
+00023001 Puts objects in your pack
+0002301c Helmet of %i
+00023029 Welcome to Level %d
+00023042 You were hit by a %i!
+00023058 %i %i %i
+00023061 %s: %s
+00023068 %s Wt %lu (%lu) Bulk %lu (%lu)
+00023087 You feel %i %i to %i!
+0002309d %t%i falls dead with a mighty crash!
+000230c2 You deal %t%i a crushing blow!
+000230e1 %t%i evades your swing!
+000230f9 Elixir of %i %i
+00023109 Coat of %i
+00023114 %t%i easily parries your strike.
+00023135 You smite %t%i, driving it back a step.
+0002315d %t%i dodges the brunt of the %i!
+0002317e You are %i
+00023189 A blade trap
+00023196 Large Snake
+000231a2 Adornment
+000231ac Meteoric Steel Plate
+000231c1 Bracers of Defense
+000231d4 Morning Star
+000231e1 You haven't seen that location!
+00023201 You're in the way!
+00023214 Floor is Empty!
+00023224 a massive throne
+00023235 Giant Red Ant
+00023243 You feel diseased!
+00023256 You are covered with acid!
+00023271 A cloud of gas surrounds you!
+0002328f Giant Bat
+00023299 Silver
+000232a1 Nothing there to disarm!
+000232bb Command Pending: Disarm...
+000232d6 Resist Cold
+000232e2 Dead Wand
+000232ec Very Old White Dragon
+00023302 Fortress Level
+00023312 You feel yourself yanked in a direction you didn't know existed!
+00023353 Smirking Sneak Thief
+00023369 Free Hand is full
+0002337b armor value
+00023387 levitate
+00023390 dragons
+00023398 to drain life
+000233a6 No Object Selected
+000233b9 You feel burdened
+000233cb Heavily injured
+000233db Slow Monster
+000233e8 Black Dragon Blood
+000233fb It's too bulky for you
+00023412 hardier
+0002341a You float gently to the ground
+0002343e Hrungnir, The Hill Giant Lord
+0002345c It's not empty!
+0002346c You sense traps
+0002347c Your map shows:
+0002348c Resist Confusion
+0002349e Abandon game in progress?
+000234b8 Ice Elemental
+000234c6 Dark Wraith
+000234d2 Bull-Man
+000234db Restore All Mana
+000234ec The potion doesn't seem to work!
+0002350d A tangle of spider webs
+00023525 You see a monster!
+00023538 The gate is too heavy to open.
+00023557 The patrol's orders
+00023571 The bearman's speech
+00023586 Game Saved.
+00023592 Amulet of %i
+0002359f %i Helmet
+000235a9 Helmet of %i %i
+000235b9 &%c: %s
+000235c1 You learn the spell of %i
+000235db %i %i
+000235e1 Wand of %i %d charge%z
+000235f8 You feel %i!
+00023605 %t%i is destroyed!
+00023618 You deal %t%i a solid blow!
+00023634 %t%i evades your clumsy blow!
+00023652 Elixir of %i
+0002365f Mantle of %i
+0002366c You pierce through %t%i, which ignores the wound.
+0002369e %t%i attacks you %d times and misses!
+000236c4 You are %i%ivulnerable %i
+000236de You see:
+000236e7 A fire trap
+000236f3 Hobgoblin
+000236fd Confusion
+00023707 Plate
+0002370d Displacement
+0002371a Short
+00023725 Another one bites the dust...
+00023743 Nothing there to open
+00023759 You have no pack!
+0002376b a graceful fountain
+0002377f Skeleton
+00023788 No room to add spell
+0002379d poisons
+000237a5 tramples
+000237ae You fell into a pool of water!
+000237cd a portcullis
+000237da Copper
+000237e1 Fool's Gold
+000237ed C.P. to identify that. Okay?
+0002380a Utility
+00023812 Gunnhild's General Store
+0002382b poison
+00023832 Resist Fire
+0002383e You lose 
+00023848 Old White Dragon
+00023859 A Total Winner
+00023869 You feel the air charge around you...
+00023890 Vampire
+00023899 Heal Major Wounds
+000238ab damage
+000238b2 to fire
+000238ba giants
+000238c1 to fear
+000238c9 Call An Object
+000238d8 You are vulnerable to the attack!
+000238fa temporarily drained statistics
+00023919 Sleep Monster
+00023927 Blue Dragon Blood
+00023939 It's too heavy for you
+00023950 smarter
+00023958 You float into the air!
+00023975 Hrungnir
+0002397e less protected
+0002398d You detect:
+00023999 Resist Drain Life
+000239ad Magma Elemental
+000239bd Pale Wraith
+000239c9 Bear-Man
+000239d2 Greater Restore Mana
+000239e7 An open coffin
+000239f6 The gate is closed
+00023a09 Load Saved Game
+00023a19 Shrine of Odin
+00023a29 Disarm
+00023a30 The wolfman's speech
+00023a45 %s %s - Cp: %lu %iWeight: %lu(%lu) %iBulk: %lu(%lu)
+00023a79 Gauntlets of %i
+00023a89 %i Bow
+00023a90 row: %d col: %d
+00023aa0 %i Scroll
+00023aaa %ld g.p. worth of %i
+00023abf %i, makes the character strongly resistant %i, %i
+00023af1 You see %t%i %i
+00023b01 You slip past %t%i's guard and hit!
+00023b25 Your blow bounces off %t%i's shield!
+00023b4a %t%i blocks your attack!
+00023b63 You slash %t%i, opening a bloodless cut.
+00023b8c %t%i %i you and %i!
+00023ba0 You are %i%iresistant %i
+00023bbe Command Pending: Look...
+00023bd7 A pit
+00023bdd Goblin
+00023be9 Splint
+00023bf0 Invisibility
+00023c02 Dagger
+00023c09 Hammer
+00023c10 Cross
+00023c16 You can't reach it!
+00023c2a Slot is Empty!
+00023c39 an ornate column
+00023c4a Goblin Fighter
+00023c59 Command Aborted.
+00023c6a spell
+00023c70 calls lightning down on
+00023c88 bites
+00023c8e falling rocks
+00023c9c an altar
+00023ca5 Drain Life
+00023cb0 Diamonds
+00023cb9 Identify An Item
+00023cca Young Blue Dragon
+00023cdc 3 Slot
+00023ce3 Bjorn the Blacksmith
+00023cfd Experience
+00023d12 throws an iceball at
+00023d27 Church
+00023d2e Adult White Dragon
+00023d41 Ancient Green Dragon
+00023d57 paralyzes
+00023d61 Rognvald's Outfitters
+00023d77 Spectre
+00023d80 A Dead Staff
+00023d8d chance to hit
+00023d9b magic
+00023da1 magic using monsters
+00023db6 to acid
+00023dbe CallObject
+00023dc9 Restoration
+00023dd5 Create Traps
+00023de2 White Dragon Blood
+00023df5 Wand Quiver
+00023e01 stronger
+00023e0a resistant
+00023e14 Abandon hope, all ye who enter here
+00023e38 a wooden table
+00023e47 endangered!
+00023e53 fatally low 
+00023e60 You feel clairvoyant!
+00023e77 Cave Bear
+00023e81 Castle Wight
+00023e8e Wolf-Man
+00023e97 A broken stone sarcophagus
+00023eb2 A fortified wall
+00023ec3 The priest says "Your injury seems of the temporary sort, and should heal in a few hours.  Are you sure you want to spend the money?"
+00023f49 A burned shrine
+00023f5a Search
+00023f61 Only %a%s can go there!
+00023f79 Cloak of %i
+00023f85 %i Sword
+00023f8e You missed %t%i!
+00023f9f Scroll of %i
+00023fac %i %i
+00023fb2 The %i hits the door!
+00023fc8 You hit %t%i on the flank!
+00023fe3 Your blow bounces off %t%i's hide!
+00024006 You chop open %t%i's chest, splintering ribs and shredding viscera.
+0002404a %t%i attacks you %d times and %i you %d time%z!
+0002407a Your %i is critically low!
+00024095 Scroll
+0002409c Treasure
+000240a5 Inventory
+000240af An unknown trap
+000240c3 Poison Gas
+000240ce Chain
+000240d4 Stealth
+000240e1 Restore
+000240e9 Deflection
+000240f4 Flail
+000240ff No stairs down here
+00024113 sword
+00024119 an acid trap
+00024126 keyhelp
+0002412e Huge Lizard
+0002413a Command Pending: Magic Spell...
+0002415a Fireball
+00024163 freezes
+0002416b claws
+00024171 an arrow
+0002417a You fall through a trap door!
+00024198 You find a secret door!
+000241b0 Rubies
+000241b7 Snorri the Sage
+000241c7 Very Old Red Dragon
+000241db 2 Slot
+000241e2 C.P. for that. Take it?
+000241fa High Scores:
+00024207 throws a boulder at
+0002421b It's cursed! You can't move it!
+0002423b Young Adult White Dragon
+00024254 Very Old Green Dragon
+0002426b Thangbrand's Sword and Scabbard
+0002428b strange runes
+0002429e Special
+000242a6 greatly 
+000242af faster
+000242b6 electrically based monsters
+000242d2 to lightning
+000242df CreateChar
+000242ea You have no purse!
+000242fd Red Dragon Blood
+0002430e 4 Slot
+00024315 This is your last chance to save if you want to carry your character forward to part two. Exit anyway?
+0002437c vulnerable
+00024387 You can no longer sense monsters
+000243a8 speed up!
+000243b2 touches
+000243ba You feel refreshed.
+000243cf Brown Bear
+000243da Barrow Wight
+000243e7 A stone sarcophagus
+000243fb You don't have enough mana.  Casting this spell may damage your health. Continue?
+0002444d Part One
+00024456 A shrine to Odin
+0002446e %i Cloak
+00024477 Shield of %i
+00024484 You hit %t%i!
+00024495 %d%% / %d%%
+000244a1 The %i blasts open the door!
+000244be You hit %t%i in the chest!
+000244d9 You deal %t%i a final murderous cut.
+000244fe You pound %t%i until it stops moving.
+00024529 Helmet
+00024536 An open door
+00024543 Kobold
+0002454a Lightning
+00024554 Scale
+0002455a 7 League
+00024563 Broken
+0002456a Water
+00024570 Level
+00024576 Wooden
+00024582 Arrow
+00024588 No stairs up here
+0002459a player
+000245a1 a dart trap
+000245ad No space
+000245b6 Walking Corpse
+000245c5 You don't have enough mana!
+000245e1 Ball Lightning
+000245f0 burns
+000245f6 You are hit by a spell!
+0002460e a scything blade
+0002461f barely missed
+0002462d You find a trap!
+0002463e Emeralds
+00024647 Old Red Dragon
+00024656 Can't put object there. Wrong type or slot is full
+00024689 We don't buy those...
+0002469f castle1.scr
+000246ab Stone Giant
+000246b7 Remove Curse
+000246c4 Young White Dragon
+000246d7 Old Green Dragon
+000246e9 a scorch mark
+000246f7 You feel a tug on your purse
+00024714 You drop something to wield your sword with both hands
+0002474b strongly 
+00024755 normal damage
+00024763 creates a return field about the player
+0002478b EditChar
+00024794 Placing money in your pack...
+000247b2 Slowness
+000247bb A broken door
+000247c9 Mine Level
+000247d4 clumsier
+000247dd slow down!
+000247e8 A slow gas trap
+000247f8 Sit On Throne
+00024807 White Wolf
+00024812 An elemental portal
+00024826 Cast Spell
+00024831 "A Question of Vengeance"
+0002484b A farm
+00024855 %d (%d)
+0002485d Boots of %i
+00024869 %i %i Shield
+00024879 %dd,%D:%D:%D
+00024886 %i (%i)
+0002488e You crush %t%i's spine into useless pulp.
+000248b8 Mana   
+000248c0 Levitating
+000248cb Boots
+000248d1 Potion
+000248d8 You resist the attack!
+000248ef A closed door
+000248fd A poison gas trap
+00024916 Ogre Power
+00024926 Traps
+0002492c Large
+00024932 Battle Axe
+00024945 gauntlet
+0002494e a glyph of warding
+00024962 &Magic
+00024969 Cold Ball
+00024978 You can't see anything!
+00024990 You are engulfed in flames!
+000249b0 Gruesome Troll
+000249bf Adult Red Dragon
+000249d0 Free Hand
+000249da Sell An Item
+000249e7 Ripped
+000249ee Hill Giant
+000249f9 Heal Medium Wounds
+00024a0c cowardly restart
+00024a1d Temple of Odin
+00024a2c rubble
+00024a33 Something seems missing...
+00024a4e Can't use both a Two Handed Sword and a Shield
+00024a7d very 
+00024a83 hit points
+00024a8e LearnSpell
+00024a99 Can't rename save file to .bak, aborting save
+00024ac7 Transmogrify Monster
+00024adc You see a door smashed open!
+00024af9 A Small Village
+00024b09 wake up!
+00024b12 A sleep gas trap
+00024b23 Drink From Fountain
+00024b38 Parchment Message
+00024b4a An animation trap
+00024b5c You fight your way through the webs.
+00024b81 Command Pending: %s...
+00024b98 %i Boots
+00024ba1  (Once every %d hour%z)
+00024bb9 Level  
+00024bc1 Weight
+00024bc8 Gauntlets
+00024bd2 Weapon
+00024bda Stairs down
+00024be6 A deadfall
+00024bf6 Studded Leather
+00024c06 Slaying
+00024c13 Objects
+00024c1b Medium
+00024c22 Hand Axe
+00024c2b Quarter Staff
+00024c39 snake
+00024c3f Nothing there to open or close!
+00024c60 &Activate
+00024c6a Fire Bolt
+00024c74 Ancient Blue Dragon
+00024c88 You are moving slower
+00024c9e You fell into a pit!
+00024cb3 You trigger a hidden glyph!
+00024ccf Young Adult Red Dragon
+00024ce6 lashes
+00024ced Buy An Item
+00024cf9 Purse
+00024cff Frost Giant
+00024d0b Resist Fear
+00024d17 A sign that says:
+00024d29 You slip skirting the pit!
+00024d44 Your purse feels lighter...
+00024d61 Can't nest containers in a circle!
+00024d84 It hasn't recharged yet!
+00024d9e Clone Monster
+00024dac You see a door open!
+00024dc1 fall asleep!
+00024dce It shatters while being recharged!
+00024df1 A magical device
+00024e02 A scrap of parchment
+00024e17 You've sold us too much junk.  Get it identified first!
+00024e52 HP     
+00024e5a Nothing happens...
+00024e77 Castle of the Winds
+00024e8b Stairs up
+00024e95 A deep pool of water
+00024eaf Injured
+00024eb7 Detect
+00024ebe Blindness
+00024ec8 Small
+00024ece Two Handed
+00024ed9 Spear
+00024edf humanoid
+00024ee8 View command: movement keys to scroll screen, Esc to cancel
+00024f24 Detect Objects
+00024f33 Lightning Bolt
+00024f42 Ancient Red Dragon
+00024f55 You feel confused!
+00024f6d Young Red Dragon
+00024f7e Very Old Blue Dragon
+00024f93 I'll give you
+00024fa1 We don't buy worthless items!
+00024fbf Fire Giant
+00024fcf You carefully skirt the pit.
+00024fec The Thief vanishes!
+00025001 Map Level
+0002500b  (more. . .)
+00025018 Teleport Away
+00025026 knowledgable
+00025033 Meteoric Steel
+00025042 End game Message
+00025053 Barely scratched
+00025064 Speed
+0002506a Cloak
+00025070 Staff
+00025076 floor
+0002507c The dungeon floor
+0002508e An arrow trap
+0002509c Slightly injured
+000250ad Teleportation
+000250bb Healing
+000250c5 Bastard
+000250cd War Hammer
+000250d8 Huge Ogre
+000250e2 Phase Door
+000250ed Cold Bolt
+000250f7 Can't open save file
+0002510c You are stricken with fear!
+00025128 You receive a letter of credit good in the town shops
+0002515e Old Blue Dragon
+0002516e It'll cost you
+0002517d Myrkjartan's Miscellaneous Magic Shop
+000251a3 It's too heavy for your 
+000251bc Olaf's Junk Store
+000251ce Viper
+000251d4 Map Quadrant
+000251e1 Critically injured
+000251f4 Your body feels purged of toxins
+00025215 Uninjured
+0002521f Plus to Dam
+0002522b Shield
+00025232 Amulet
+00025243 Dexterity
+0002524d See Invisible
+0002525b Major Wounds
+00025268 Monsters
+00025276 Carrion Creeper
+00025286 Heal Minor Wounds
+00025298 You already know the spell
+000252b3 Detect Monsters
+000252c3 Would you like to deposit your money in the bank?
+000252f5 Adult Blue Dragon
+00025307 Sverting's Armor Shop
+0002531d There's no room in your 
+00025338 Dex    
+00025340 Plus to Hit
+0002534c Armor
+00025352 Bracers
+0002535f Constitution
+00025371 Medium Wounds
+0002537f Banishing Fear
+0002538e Giant Trapdoor Spider
+000253a4 Detect Traps
+000253b1 A Book of Spells
+000253c2 First Bank of Crossroads (branch office)
+000253eb Young Adult Blue Dragon
+00025403 Right Ring
+0002540e Con    
+00025423 Intelligence
+00025430 Steel
+00025436 Minor Wounds
+00025448 Magic Arrow
+00025459 Int    
+00025461 Command Pending: Close...
+0002547b Experience
+00025486 Strength
+00025494 carrion
+0002549c Str    
+000254a4 Command Pending: Open...
+000254bd Broad
+000254c5 ?Q<"98510
+000254d8 h<-9>5I0I+o&
+000254ec 99G5U0Y+y&
+00025500 T5^0`+
+0002558c q<F9b5|0
+00025659 03,<'
+0002566b 1\,n'-"+
+0002568d ElE)E
+00025697 B#A"?
+0002569f 9tE1E
+000256a9 B4A*?
+000256bb B:A=?
+000256cd C@AB?
+000256df CFAG?
+000256f1 CLA[?
+00025701 'Y"^Ae?
+00025765 936_E
+0002577d EAD+C
+0002578f ,OD8C
+0002581f E^DFC
+00025827 ?/=1:
+00025831 EtDVC
+00025839 ?0=2:
+0002584b @:=9:
+00025851 6*2:-X(
+0002585d @D=C:
+00025863 632@-m(
+0002586d A%@X=H:
+00025875 6;2X-u(&#
+00025880 8@n=`:
+00025887 6A2^-~(A#
+00025899 6J2l-
+000258ab 6h2u-
+000258fb C.BN@
+0002590d C>Bc@
+0002591f #MBq@
+00025984 :3&.8)
+000259b9 7;31._)
+000259cb 7[3G.`)#$
+000259dd 7i3O.h)8$u
+000259ef 7n3P.i)9$v
+00025a01 8v3].{)K$
+00025a79 @T>^;[8
+00025a8b @m>i;d8
+00025b14 N*,%i
+00025b49 /]*L%
+00025b59 4#/i*\%
+00025b6b 40/{*m%
+00025b7d 4F/|*n%
+00025b8f 4G/}*
+00025d8a ,lt ,
+0002651f E&9E$u
+00026b0b FGG.9
+00027494 cabcde
+000274b2 rZZZsq
+000274ec MMKghjiKKkKK
+000274fa ][][\][\\
+0002761f t=^MM
+00027b60 WRPRP+
+00027c35 RPRP+
+0002a069 PPPPP
+0002a1eb &`L-d
+0002a3ea PPPPP
+0002ac3f Ht@Ht]Htz
+0002acee &`L-<
+0002cec5 &M^MM
+0002d1ce M^_MM
+0002d33f Ht>Hu
+0002d4d1 M^_MM
+0002f2b8 Ht5Hu
+0002f6d8 uDFF&
+0002f720 <%u2FF
+00031079 u1Ou.
+00031c6c u:NuD
+000320bd #L$}&}&}&}&
+000320c9 $}&}&}&}&}&}&}&}&p%p%}&p%
+000320e3 %}&}&}&}&}&
+000323dc #^_MM
+0003256c $(A*n(
+0003257f ) *&*
+0003288c {&^_MM
+00032fe5 .^_MM
+0003326d rM{2P+
+00033279 2^_MM
+00033696 <-F.P/dG
+000336a4 7,F9U;dH
+000336ad 7$5.$@
+000336be 1#=@J
+000336ca 2>P+d
+000336d8 >*K3X4d6
+000342e6 tTG9~
+0003645d ,6tU+
+0003885c ?^_MM
+00038e1b QQPPQQ
+00039152 OKKJy
+000391e8 GGF9v
+000398e3 b$^_MM
+0003a3e0 2^_MM
+0003a477 0;2P+
+0003a508 3^_MM
+0003a61a f*r3W
+0003a673 C7^_MM
+0003a6e4 1B4V+
+0003a79b ?6^_MM
+0003a83e 2^_MM
+0003a8d9 0l6P+
+0003aa70 4^_MM
+0003abb6 q5^_MM
+0003afaf *.cwg
+0003afb5 Castle Files (*.cwg)
+0003d53b =^_MM
+0003dc4f M^_MM
+0003eca5 hhhhh
+0003ece5 hhhhh
+0003ed25 hhhhh
+0003ed65 hhhhh
+0003eda5 hhhhh
+0003f44c hhhhh
+0003f48c hhhhh
+0003f4cc hhhhh
+0003f50c hhhhh
+0003f54c hhhhh
+0003f78e y~~~~{
+0003f795 y~~~{
+0003f895 }}}}}w
+0003f8c9 }}}}}}}}}}}w
+0003f8ea x}}}}}}}
+0003f932 x}}}}
+00040f9d iiiiiiii
+00040fdd iiiiiiii
+0004101d iiiiiiii
+0004105d iiiiiiii
+0004109d iiiiiiii
+0004121a pppppnnn
+0004125a ppppp
+0004129a ppppp
+000412da ppppp
+0004131a ppppp
+00041d5e }}}}}}}}}}}}}}}w
+0004d231 " ///
+0006ace8 3333333333333338333333333333333
+0006ad08 333333333333338
+0006ad18 33333333333333
+0006ad28 33333333333338
+0006ad38 3333333333333
+0006ad48 3333333333338
+0006ad58 333333333333
+0006ad68 333333333338
+0006ad78 33333333333
+0006ad88 33333333338
+0006ad98 3333333333
+0006ada8 3333333338
+0006adb8 333333333
+0006adc8 333333338
+0006add8 33333333
+0006ade8 33333338
+0006adf8 3333333
+0006ae08 3333338
+0006ae18 333333
+0006ae28 333338
+0006ae38 33333
+0006ae48 33338
+0006af59 333333333333333
+0006af69 333333333333333
+0006af7a 33333333333333
+0006af8a 33333333333333
+0006af9b 3333333333333
+0006afab 3333333333333
+0006afbc 333333333333
+0006afcc 333333333333
+0006afdd 33333333333
+0006afed 33333333333
+0006affe 3333333333
+0006b00e 3333333333
+0006b01f 333333333
+0006b02f 333333333
+0006b040 33333333
+0006b050 33333333
+0006b061 3333333
+0006b071 3333333
+0006b082 333333
+0006b092 333333
+0006b0a3 33333
+0006b0b3 33333
+0006b258 33338
+0006b268 33333
+0006b278 333338
+0006b288 333333
+0006b298 3333338
+0006b2a8 3333333
+0006b2b8 33333338
+0006b2c8 33333333
+0006b2d8 333333338
+0006b2e8 333333333
+0006b2f8 3333333338
+0006b308 3333333333
+0006b318 33333333338
+0006b328 33333333333
+0006b338 333333333338
+0006b348 333333333333
+0006b358 3333333333338
+0006b368 3333333333333
+0006b378 33333333333338
+0006b388 33333333333333
+0006b398 333333333333338
+0006b3a8 333333333333333
+0006b3b8 3333333333333338
+0006b4e3 33333
+0006b4f3 33333
+0006b502 333333
+0006b512 333333
+0006b521 3333333
+0006b531 3333333
+0006b540 33333333
+0006b550 33333333
+0006b55f 333333333
+0006b56f 333333333
+0006b57e 3333333333
+0006b58e 3333333333
+0006b59d 33333333333
+0006b5ad 33333333333
+0006b5bc 333333333333
+0006b5cc 333333333333
+0006b5db 3333333333333
+0006b5eb 3333333333333
+0006b5fa 33333333333333
+0006b60a 33333333333333
+0006b619 333333333333333
+0006b629 333333333333333
+0006b6a8 33333333333333333333333333333332333333333333333"333333333333332"33333333333333""33333333333332""3333333333333"""3333333333332"""333333333333""""333333333332""""33333333333"""""33333333332"""""3333333333""""""3333333332""""""333333333"""""""333333332"""""""33333333""""""""33333332""""""""3333333"""""""""3333332"""""""""333333""""""""""333332""""""""""33333"""""""""""33332"""""""""""3333""""""""""""3332""""""""""""333"""""""""""""332"""""""""""""33""""""""""""""32""""""""""""""3"""""""""""""""2"""""""""""""""
+0006b918 """""""""""""""#"""""""""""""""3""""""""""""""#3""""""""""""""33"""""""""""""#33"""""""""""""333""""""""""""#333""""""""""""3333"""""""""""#3333"""""""""""33333""""""""""#33333""""""""""333333"""""""""#333333"""""""""3333333""""""""#3333333""""""""33333333"""""""#33333333"""""""333333333""""""#333333333""""""3333333333"""""#3333333333"""""33333333333""""#33333333333""""333333333333"""#333333333333"""3333333333333""#3333333333333""33333333333333"#33333333333333"333333333333333#3333333333333333333333333333333
+0006bb88 #333333333333333"333333333333333"#33333333333333""33333333333333""#3333333333333"""3333333333333"""#333333333333""""333333333333""""#33333333333"""""33333333333"""""#3333333333""""""3333333333""""""#333333333"""""""333333333"""""""#33333333""""""""33333333""""""""#3333333"""""""""3333333"""""""""#333333""""""""""333333""""""""""#33333"""""""""""33333"""""""""""#3333""""""""""""3333""""""""""""#333"""""""""""""333"""""""""""""#33""""""""""""""33""""""""""""""#3"""""""""""""""3"""""""""""""""#""""""""""""""""
+0006bdf8 2"""""""""""""""3"""""""""""""""32""""""""""""""33""""""""""""""332"""""""""""""333"""""""""""""3332""""""""""""3333""""""""""""33332"""""""""""33333"""""""""""333332""""""""""333333""""""""""3333332"""""""""3333333"""""""""33333332""""""""33333333""""""""333333332"""""""333333333"""""""3333333332""""""3333333333""""""33333333332"""""33333333333"""""333333333332""""333333333333""""3333333333332"""3333333333333"""33333333333332""33333333333333""333333333333332"333333333333333"33333333333333323333333333333333
+0006c068 """"""""""""""""""""""""""""""","""""""""""""""
+0006c098 """"""""""""""$
+0006c0a8 """"""""""""""
+0006c0b8 """"""""""""",L
+0006c0c8 """""""""""""
+0006c0d8 """""""""""",
+0006c0e8 """"""""""""L
+0006c0f8 """"""""""",L
+0006c108 """""""""""
+0006c118 """"""""""$
+0006c128 """"""""""
+0006c138 """"""""",L
+0006c148 """""""""
+0006c158 """""""",
+0006c168 """"""""L
+0006c178 """"""",L
+0006c188 """""""
+0006c198 """"""$
+0006c1a8 """"""
+0006c1b8 """"",L
+0006c1c8 """""
+0006c1d8 """",
+0006c1e8 """"L
+0006c1f8 """,L
+0006c354 """"L
+0006c364 """"L
+0006c372 L"""""
+0006c382 B"""""
+0006c392 """"""L
+0006c3a2 """"""L
+0006c3b0 L"""""""
+0006c3c1 """""""
+0006c3d0 """"""""L
+0006c3e0 """"""""L
+0006c3ee L"""""""""
+0006c3fe B"""""""""
+0006c40e """"""""""L
+0006c41e """"""""""L
+0006c42c L"""""""""""
+0006c43d """""""""""
+0006c44c """"""""""""L
+0006c45c """"""""""""L
+0006c46a L"""""""""""""
+0006c47a B"""""""""""""
+0006c48a """"""""""""""L
+0006c49a """"""""""""""L"""""""""""""""
+0006c4b9 """""""""""""""""""""""""""""""
+0006c548 """"""""""""""""B"""""""""""""""
+0006c569 """""""""""""""
+0006c57a """"""""""""""L
+0006c58a """"""""""""""L
+0006c59a B"""""""""""""
+0006c5aa L"""""""""""""
+0006c5bc """"""""""""L
+0006c5cc """"""""""""L
+0006c5dd """""""""""
+0006c5ed """""""""""
+0006c5fe """"""""""L
+0006c60e """"""""""L
+0006c61e B"""""""""
+0006c62e L"""""""""
+0006c640 """"""""L
+0006c650 """"""""L
+0006c661 """""""
+0006c671 """""""
+0006c682 """"""L
+0006c692 """"""L
+0006c6a2 B"""""
+0006c6b2 L"""""
+0006c6c4 """"L
+0006c6d4 """"L
+0006c838 """",
+0006c848 """""
+0006c858 """"",L
+0006c868 """"""
+0006c878 """"""$
+0006c888 """""""
+0006c898 """"""",
+0006c8a8 """"""""
+0006c8b8 """""""",
+0006c8c8 """""""""
+0006c8d8 """"""""",L
+0006c8e8 """"""""""
+0006c8f8 """"""""""$
+0006c908 """""""""""
+0006c918 """"""""""",
+0006c928 """"""""""""
+0006c938 """""""""""",
+0006c948 """""""""""""
+0006c958 """"""""""""",L
+0006c968 """"""""""""""
+0006c978 """"""""""""""$
+0006c988 """""""""""""""
+0006c998 """"""""""""""",""""""""""""""""
+0006ca29 """""""""""""""
+0006ca39 """""""""""""""
+0006ca49 """""""""""""""
+0006ca59 """""""""""""""
+0006ca69 """""""""""""""
+0006ca79 """"""""
+0006ca82 """"""
+0006ca8a """"(
+0006ca92 """"""
+0006caa0 """"""""
+0006caaf """""""""
+0006cabf """""""""
+0006cacf """""""""
+0006cadd """""""""""
+0006caee """"""""""
+0006cafe ("""""""""
+0006cb10 """"""""
+0006cb1d ""(""""""""
+0006cb30 """"""""
+0006cb41 """""""
+0006cb52 """"""
+0006cb5e ""((""
+0006cba3 """""
+0006cbb2 "(""""
+0006cc98 """""""""""""""""""""""""""""""("""""""""""""""
+0006ccc8 """"""""""""""(
+0006ccd8 """"""""""""""
+0006cce8 """""""""""""(
+0006ccf8 """""""""""""(
+0006cd08 """"""""""""((
+0006cd18 """"""""""""((
+0006cd28 """""""(
+0006cd38 """"""""(
+0006cd48 """"""""(
+0006cd58 """""""""
+0006cd68 """"""""(
+0006cd78 """""""""
+0006cd88 """""
+0006cd98 """""
+0006cda8 """""("("
+0006cdb8 """""(
+0006cdc8 """"""(
+0006cdd8 """""""
+0006cde8 """"""
+0006ce18 """"(
+0006ce28 """"(
+0006ce38 """"(
+0006ce48 """("(
+0006d8c8 """"""""""""(
+0006d8da """""
+0006e323 33333
+0006e333 33333
+0006e342 333333
+0006e352 333333
+0006e361 3333333
+0006e371 3333333
+0006e380 33333333
+0006e390 33333333
+0006e39f 333333333
+0006e3af 333333333
+0006e3be 3333333333
+0006e3ce 3333333333
+0006e3dd 33333333333
+0006e3ed 33333333333
+0006e3fc 333333333333
+0006e40c 333333333333
+0006e41b 3333333333333
+0006e42b 3333333333333
+0006e43a 33333333333333
+0006e44a 33333333333333
+0006e459 333333333333333
+0006e469 3333333333333333333333333333333
+0006e4f8 3333333333333333
+0006e509 333333333333333
+0006e519 333333333333333
+0006e52a 33333333333333
+0006e53a 33333333333333
+0006e54b 3333333333333
+0006e55b 3333333333333
+0006e56c 333333333333
+0006e57c 333333333333
+0006e58d 33333333333
+0006e59d 33333333333
+0006e5ae 3333333333
+0006e5be 3333333333
+0006e5cf 333333333
+0006e5df 333333333
+0006e5f0 33333333
+0006e600 33333333
+0006e611 3333333
+0006e621 3333333
+0006e632 333333
+0006e642 333333
+0006e653 33333
+0006e663 33333
+0006e7f8 33338
+0006e808 33333
+0006e818 333338
+0006e828 333333
+0006e838 3333338
+0006e848 3333333
+0006e858 33333338
+0006e868 33333333
+0006e878 333333338
+0006e888 333333333
+0006e898 3333333338
+0006e8a8 3333333333
+0006e8b8 33333333338
+0006e8c8 33333333333
+0006e8d8 333333333338
+0006e8e8 333333333333
+0006e8f8 3333333333338
+0006e908 3333333333333
+0006e918 33333333333338
+0006e928 33333333333333
+0006e938 333333333333338
+0006e948 333333333333333
+0006e958 3333333333333338
+0006e9d8 3333333333333338333333333333333
+0006e9f8 333333333333338
+0006ea08 33333333333333
+0006ea18 33333333333338
+0006ea28 3333333333333
+0006ea38 3333333333338
+0006ea48 333333333333
+0006ea58 333333333338
+0006ea68 33333333333
+0006ea78 33333333338
+0006ea88 3333333333
+0006ea98 3333333338
+0006eaa8 333333333
+0006eab8 333333338
+0006eac8 33333333
+0006ead8 33333338
+0006eae8 3333333
+0006eaf8 3333338
+0006eb08 333333
+0006eb18 333338
+0006eb28 33333
+0006eb38 33338
+0006ed78 """"(
+0006f128 wwwwp
+0006f413 !""""
+0006f48c """""""
+0006f49c """""
+0006f4a2 """"""
+0006f521 wxxwx
+00070fd6 mounrdll.bmp
+00070fe3 mounrdur.bmp
+00071a2c 3333(
+00072d52 333333"""""""""
+000739c7 {{{{{{{{{{p      
+000739fa {{{{{
+00073a6c {{{{{{
+00073b4d {{{{{{
+00073c70 {{{{{{{"
+00073ca8 {{{{{{{
+00073ed6 {{{{{ (
+00073f05 {{{{{(
+00074704 's0w0
+00074820 wpwpw
+00074933 Jpwwp
+000749c1  w7w7
+000749fc w7psw
+00074afa 3p37p
+00074b2a pwpwp7
+00074bc0 ( ('(
+00074c14 pwp37s
+00074c36 ( ("(
+00074d48 373w3
+00074d7a 373w3w7
+00074daf 7373w3s7
+00074de3 73w3s7s
+00074e12 373w3s70
+00075116 /"/"(
+00075156 /"(/(
+00075174 /"("(
+0007518e /"("(
+000751fe dbrnrt.rle
+00075209 bldbrnu(
+000757fe 's0w0
+0007590a wpwpw
+00075975  w7pw
+00075a27 @pwwp
+00075abd  w'w7
+00075afc w7psw
+00075c08 3p37p
+00075c36 pwpwp7
+00075cca ( ('(
+00075d16 pwp37s
+00075d38 ( ("(
+00075e46 373w3
+00075e78 373w3w7
+00075ead 7373w3s7
+00075ee1 73w3s7s
+00075f10 373w3s70
+00076218 /"/"(
+00076258 /"(/(
+00076276 /"("(
+00076296 /"("(
+00076931 3'3(3
+00076b21 37?7?
+00076b46 hhhhhhh
+00076d83 wwwww
+00077d7e "w03ps0
+00077dda "w03w
+000785ca """" 
+000795ac bpoi(
+0007a23b wwp "
+0007c3d7   32"(
+0007c498 #33"/
+0007c5b4 #33"/
+0007c602  32"/
+0007c64c #332+
+0007c750 "332+
+0007c7c8 "332/
+0007c8d8  "#32
+0007c954 "#32+
+0007c9ce "#32/
+0007cac3   "#3;
+0007cb45 "#32+
+0007cbcf   "#32(
+0007ccc6 "#3;/
+0007cd3c "#3;+
+0007cdb9   "#32
+0007d121  "#32
+0007d32a #33"/
+0007d388 +"w"r
+0007d39e #33"+
+0007d3fc #33"/
+0007d4a8 #32"/
+0007d552 #32"/
+0007d684 #332"
+0007db25 ", @"
+0007db9f ". @"
+0007e746  332+
+0007eb92  032"+
+0007f6c8 333332""(
+0007f798 J"0 &"
+0007f7a8 H"2 &"
+0007f7b8 F"4 &"
+0007f7c8 D"6 &"
+0007f7d8 B"8 &"
+0007f7e8 @": &"
+000805f0 {wwxw
+00080aac """"(
+00080b78 J"0 &"
+00080b88 H"2 &"
+00080b98 F"4 &"
+00080ba8 D"6 &"
+00080bb8 B"8 &"
+00080bc8 @": &"
+00080bdd  6 &"
+00080c88 xwxwxwxp
+000810cf wxwxw
+00081180 xwpwp
+00081198 wxwxw
+0008125b xwxwx
+000812f4 (wxwx
+0008130f wxpxp
+00081476 xpxwxw
+000815d3 wpwxw
+00081f1c 302#3
+00081f52 "3#03#3
+00081fb5 8823#2
+00081fe7 #232#7
+0008201e 28237
+00082114 83382
+000822df 83"3'
+00082b20 "#"2#
+00082b4c 833#32"32"
+00082b90 2#3"83838
+00082bb2  00 0 
+00082d4c 0000(
+00084dcd V" wxw
+00084e1a 3" wx
+00084fa5 xp#:3:
+0008509f wxp#3
+00086643 w"'xw
+00086ad6 &File
+00086ae0 &New Game
+00086aee &Load...
+00086afb &Save
+00086b05 Save &As...
+00086b15 &Options...
+00086b25 &Review Story...
+00086b3a E&xit
+00086b44 &Character!
+00086b54 &Inventory!
+00086b64 &Map!
+00086b6c &Spells
+00086b78 &Spellbook...
+00086b8a &Customize Spell Menu...
+00086ba7 &Activate
+00086bb3 &Verbs
+00086bc7 E&xamine
+00086bd4 &Free Hand
+00086be3 &Search
+00086bef &Disarm Trap
+00086c00 &Rest Until Healed
+00086c17 Sleep Until &Mana is Restored
+00086c39 &Open
+00086c43 &Close
+00086c4e &< Climb Up Stairs
+00086c65 &> Climb Down Stairs
+00086c7c &Window
+00086c88 Move &Vertical
+00086c9b Move &Horizontal
+00086cb0 &Arrange All
+00086cbe @&Help
+00086cc9 Help &Contents
+00086cdc &Keyboard Commands
+00086cf3 &Mouse Commands
+00086d07 &Spell Directory
+00086d1c &Object Directory
+00086d32 &Bestiary
+00086d40 Help On Help
+00086d51 &High Scores...
+00086d6a Order &Information
+00086d81 &About Castle of the Winds...
+00086da8 E&xit!
+00086db3 &Character!
+00086dc3 Sort &Pack!
+00086dd3 &Name Object
+00086de2 &Window
+00086dee &Open Container
+00086e02 &Arrange All
+00086e13 A&uto Arrange
+00086e22 @&Help
+00086e2d Help &Contents
+00086e40 &Inventory Help
+00086e54 &Store Help
+00086e64 &Object Directory
+00086e7a Help On Help
+00086e98 E&xit!
+00086ebf Castle Of The Winds
+00086ee3 Part One
+00086efc "A Question of Vengeance"
+00086f26 Version 1.1A
+00086f43 Copyright 
+00086f4e  1989-93, SaadaSoft
+00086f98 Designed and written by:
+00086fc1 Rick Saada
+00086fdc With additional design work by: 
+0008700d Paul Canniff, Ben Goetter, 
+00087039 Don Hacherl, and Jeff McBride
+00087067 Artwork by:
+00087083 Paul Canniff
+000870a0 Additional help and story text by:
+000870d3 Ben Goetter
+000870ef and tested by:
+0008710e A cast of thousands (well, hundreds maybe)
+00087149 Publicity by:
+00087167 John Hedtke
+0008719f Select An Object
+000871c0 Current Inventory:
+0008721f Call Object:
+00087260 Cancel
+000872a4 Heal M&inor Wounds 
+000872c8 Heal M&edium Wounds
+000872ec Heal M&ajor Wounds
+0008730f &Heal
+00087325 &Remove Curse
+00087343 &Neutralize Poison
+00087366 R&une of Return
+00087386 Restore &Strength
+000873a8 Restore &Intelligence
+000873ce Restore C&onstitution
+000873f4 Restore &Dexterity
+00087417 Restore Drained Hit &Points
+00087443 Temple of Odin
+00087462 &Cast
+00087478 E&xit
+0008748e 500 CP
+000874a5 900 CP
+000874bc 1400 CP
+000874d4 2500 CP
+000874ec 2500 CP
+00087504 1800 CP
+0008751c 1000 CP
+00087534 3000 CP
+0008754c 3000 CP
+00087564 3000 CP
+0008757c 3000 CP
+00087594 3000 CP
+000875d0 How many pieces?
+00087615 Cancel
+0008762f Customize Spell Menu
+00087653 Current Keys:
+00087671 Known Spells:
+000876b1 &Change
+000876c9 Close
+000876df &Help
+000876ff Learn Spell
+0008771a Available Spells:
+0008777f Cast Spell
+00087799 &Attack Spells
+000877b8 &Defense Spells
+000877d8 &Healing Spells
+000877f8 &Movement Spells
+00087819 Di&vination Spells
+0008783c M&iscellaneous Spells
+00087873 &Cast
+00087889 Cancel
+000878a0 &Help
+000878c7 Spell Name
+000878f7 Spell Class:
+0008792f Castle of the Winds
+00087953 Part One
+0008796c "A Question of Vengeance"
+00087996 Version 1.1A
+000879b3 Copyright 
+000879be  1989-1993 by SaadaSoft
+000879e6 Published by Epic Megagames
+00087a12 Castle of the Winds is a shareware product,  it is not freeware.  This means that if you enjoy and continue to use this product you should become a registered user.  You can register and order Castle of 
+00087aee the Winds volumes I and II (which is not available as shareware) for $25, and get a sheet of hints and tips on how to play.  For more information on how to become a registered user, see Order Information under the Help menu.
+00087bf2 You may distribute this program to your friends, as long as you distribute all the files that came in the original package.  Thanks for playing, and good luck!
+00087cbf Character Creation
+00087ce1 &Character name:
+00087d13 Available
+00087d2b Pstatbar
+00087d45 Strength
+00087d5c Pstatbar
+00087d87 Intelligence
+00087da2 Pstatbar
+00087dcd Constitution
+00087de8 Pstatbar
+00087e13 Dexterity
+00087e2b Pstatbar
+00087e56 Character Gender
+00087e8c &Male
+00087ea2 &Female
+00087eba Custom Character Icon
+00087ee0 Icon &Filename:
+00087f65 &Easy
+00087f7b &Intermediate
+00087f99 &Difficult
+00087fb4 E&xperts Only
+00087fe5 Cancel
+00087ffc &View Icon
+0008802c Game Difficulty
+0008804f Edit Character
+0008806d Character name:
+0008809e Strength
+000880b5 Pstatbar
+000880cf Intelligence
+000880ea Pstatbar
+00088104 Constitution
+0008811f Pstatbar
+00088139 Dexterity
+00088151 Pstatbar
+0008816b Custom Character Icon
+00088191 &Filename:
+000881d0 Cancel
+000881e7 &Attributes
+00088203 &View Icon
+00088231 Pstatbar
+00088249 Pstatbar
+00088261 Pstatbar
+00088279 Pstatbar
+00088293 Hit Points:
+000882af Mana Points:
+000882cc Weight: 
+000882e5 Bulk:
+000882fb Speed:
+00088312 Copper:
+0008833f Character Level:
+00088360 Character Experience:
+0008841e Armor Value:
+0008844d Next Level At:
+00088493 Experts Only
+000884b0 Game Difficulty
+000884df Review Story
+00088513 Descriptions You've Read:
+0008853d &View
+00088553 &Background
+0008856f Close
+0008858f Castle Options
+000885a0 MS Sans Serif
+000885bd Use &Fast Mapping
+000885df Stop &Running on Special Sites
+0008860e Use &Visual Effects
+00088632 &Scroll Rooms On Screen On Entry
+00088663 Show &Button Bar
+00088684 &Keep Backup Save File
+000886ab Save &Levels To Disk
+000886ef Character Attributes
+00088706 MS Sans Serif
+00088740 CWDLG.H
+000888e8 3w33s7s7373sp
+000888f8 3733s3s7373sw
+00088908 3733s3s73w3s7
+00088918 3733s737ss7s7
+00088928 37s3s733ss737p
+00088938 33s3s3s3w3733p
+00088948 wwwws3s3733s3p
+00088958 """"wws3733s3p
+00088968 """"""wwws3s3p
+00088978 """"!
+00088998 """"""'
+000889a8 ""33337
+000889fe wwwwwwwp
+00088e75 wwwwwp
+00088e85 wwwwww
+00088e94 wwwwwwwp
+00088ea4 wwwwwwww
+00088eb3 wwwwwwwwwp
+00088ec3 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+000892b6 wwwwp
+000892c5 wwwwww
+000892d5 wwwwwwp
+000892e4 wwwwwwww
+000892f4 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+00089579 wwwwwwwww
+00089589 wwwwwwwww
+00089599 wwwwwwwww
+000895a9 wwwwwwp
+000895b9 wwwwwwp
+000895c9 wwwwwwp
+000895d9 wwwwwwp
+000899d1 wwwwww
+000899e1 wwwwwwp
+00089d9d wwwwwp
+00089dac wwwwwwwp
+0008a316 wwwwx
+0008a326 wwwww
+0008a335 wwwwwwx
+0008a345 wwwwwww
+0008a354 wwwwwwwwx
+0008a364 wwwwwwwwwx
+0008a373 wwwwwwwwwwwx
+0008a382 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+0008a5d9 wwwwwwwwwwp
+0008a5ee wwwpwpp
+0008a629 wwwwwwwwwwpp
+0008a639 wwwwwwwwwwpww
+0008a659 wwwwwwwwwww
+0008a66a wwwwwwwwwwp
+0008a68b pwwwwwwppwp
+0008a6dc wwwwwwpw
+0008a6fc wwwwwww
+0008a71d {wwww
+0008ae0b wwwwx
+0008ae1a wwwwx
+0008ae29 wwwww
+0008ae4e wwwwx
+0008ae7b wwwwp
+0008ae8b wwwwp
+0008ae9b wwwwp
+0008aea1 wwwwx
+0008aeab wwwwp
+0008aeb1 wwwww
+0008aebb wwwwp
+0008aec1 wwwwww
+0008b23e wwwww
+0008b24e wwwww
+0008b3fe wwwww
+0008b40e wwwww
+0008c331 DDDDL
+0008c34c DDDLDL
+0008c35f DDDDDL
+0008cb90 03030
+0008fb76 wwwwx
+0008fb86 wwwww
+0008fb95 wwwwwwx
+0008fba5 wwwwwww
+0008fbb4 wwwwwwwwx
+0008fbc4 wwwwwwwwwx
+0008fbd3 wwwwwwwwwwwx
+0008fbe2 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+000906b9 wwwwwww
+000906c9 wwwwwwwp
+0009070a ;;;;;3;
+0009072b ;;;;;3
+0009074c ;;;;;3
+0009078f ;;;;3
+00090d78 3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333q
+00090dea 3333333333331
+00090dfa 3333333333331
+00090e0a 3333333333331
+00090e1b 33333333330
+00090e2c 1333333
+00090e3d 333333
+00090e4e 33330
+00090f42 wwwwq
+00090f4e wwwwq
+0009122e wwwwwp
+000912ef wwwwp
+000919d8 """"""""""""""""""""""""""""""""""""
+00091a06 """""+
+00091a50 888888?"""
+00091a8b 8888989888
+00091aab 8:888888:88?"""
+00091acb 8*8:*8*8:(8?"""
+00091aeb 88888888888?"""
+00091b14 88?"""
+00091b2b 88888888888?"""
+00091b55 8?"""
+00091b6b 88888888888?"""
+00091b87 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+00091eff ukrmuky
+00091f0f u^7]uY
+000920eb wwwwwwwwwp
+000920fb wwwwwwwwp
+0009210b wwwwwwwwp
+0009211b wwwwwwwwp
+0009212b wwwwwwwwp
+0009213b wwwwwwwwp
+00092148 wwwwwwwwwwwp
+00092158 wwwwwwwwwwwwp
+00092168 wwwwwwwwwwwwp
+00092178 wwwwwwwwwwwp
+00092188 wwwwwwwwwwwp
+00092198 wwwwwwwwwwwp
+000921a8 wwwwwwwwwwwp
+000921b8 wwwwwwwwwwwp
+000921c8 wwwwwwwwwwwp
+000921d8 wwwwwwwwwwwwp
+000921e8 wwwwwwwwwwwwp
+000921f8 wwwwwwwwwwwp
+00092208 wwwwwwwwwwwp
+00092218 wwwwwwwwwwwp
+00092228 wwwwwwwwwwwp
+00092238 wwwwwwwwwwwp
+00092248 wwwwwwwwwwww
+00092598 wwwwwwwwwwww
+000925a8 wwwwwwwwwwwp
+000925b8 wwwwwwwwwwwp
+000925c8 wwwwwwwwwwwp
+000925d8 wwwwwwwwwwwp
+000925e8 wwwwwwwwwwwp
+000925f8 wwwwwwwwwwwwp
+00092608 wwwwwwwwwwwwp
+00092618 wwwwwwwwwwwp
+00092628 wwwwwwwwwwwp
+00092638 wwwwwwwwwwwp
+00092648 wwwwwwwwwwwp
+00092658 wwwwwwwwwwwp
+00092668 wwwwwwwwwwwp
+00092678 wwwwwwwwwwwwp
+00092688 wwwwwwwwwwwwp
+00092698 wwwwwwwwwwwp
+000926ab wwwwwwwwp
+000926bb wwwwwwwwp
+000926cb wwwwwwwwp
+000926db wwwwwwwwp
+000926eb wwwwwwwwp
+000926fb wwwwwwwwwp
+000929bc wwwwwwwwwwww
+000929cd wwwwwwwwwww
+000929dd wwwwwwwwwww
+000929ed wwwwwwwwwww
+000929fd wwwwwwwwwww
+00092a0d wwwwwwwwwww
+00092a1c wwwwwwwwwwww
+00092a2c wwwwwwwwwwww
+00092a3d wwwwwwwwwww
+00092a4d wwwwwwwwwww
+00092a5d wwwwwwwwwww
+00092a6d wwwwwwwwwww
+00092a7d wwwwwwwwwww
+00092a8d wwwwwwwwwww
+00092a9c wwwwwwwwwwww
+00092aac wwwwwwwwwwww
+00092abd wwwwwwwwwww
+00092acd wwwwwwww
+00092add wwwwwwww
+00092aed wwwwwwww
+00092afd wwwwwwww
+00092b0d wwwwwwww
+00092b1c wwwwwwwww
+00092d4c wwwwwwwww
+00092d5d wwwwwwww
+00092d6d wwwwwwww
+00092d7d wwwwwwww
+00092d8d wwwwwwww
+00092d9d wwwwwwww
+00092dad wwwwwwwwwww
+00092dbc wwwwwwwwwwww
+00092dcc wwwwwwwwwwww
+00092ddd wwwwwwwwwww
+00092ded wwwwwwwwwww
+00092dfd wwwwwwwwwww
+00092e0d wwwwwwwwwww
+00092e1d wwwwwwwwwww
+00092e2d wwwwwwwwwww
+00092e3c wwwwwwwwwwww
+00092e4c wwwwwwwwwwww
+00092e5d wwwwwwwwwww
+00092e6d wwwwwwwwwww
+00092e7d wwwwwwwwwww
+00092e8d wwwwwwwwwww
+00092e9d wwwwwwwwwww
+00092eac wwwwwwwwwwww
+0009346c wwwww
+000934cb 3wwwww3
+000938f8 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
+00093a8b 3wwwww3
+00093aec wwwww
+00094698 """"""""""""""""""""""""3"""""""""""
+000946bd #"#33/
+000946c5 ;"""""+
+000946cd 323332
+000946d4 32""""
+00094711 3?8883""/
+00094726 ?"""8
+00094735 3?"""
+00094757 """33"
+00094770 8(838
+0009478e 3(8*3:
+00094795 832""
+000947ab 833888
+000947e7 ""3388
+000947ee 883888
+000947f5 8?""#33
+0009482d 3(8883888?""/
+0009483b /33#3
+0009484e 2""#28
+0009485a """33""3"/""""""""""3""2"/""""""""""2"""""""""""""""""""""""""
+000949fb 7wwwwwq
+00094acb 7wwwwwq
+00094d2b 7wwwwwq
+00094dfb 7wwwwwq
+0009501f wwwwws1
+000950ef wwwwws1
+000952cf wwwwws1
+0009539f wwwwws1
+0009567d wwwwwww
+00095abe ;;;;;
+00095ada ;3;333333
+00095aec ;333333
+00095afa 333333333
+00095b0a 33333
+00095b1a 33333>3330
+00095b5c >3>33>3>3
+00095b6c 333333333
+00095b7c 333333333
+00095b9b 399993
+00095bbb 399333
+00095bda 3333333330
+00095bea 333393333
+00095c2d 333330
+00095c3c 3333330
+00095c4a 333333333
+00095c5a 333333333
+00095c6a 333333333000
+00095ee9 wwwwwwwwwwx
+00095ef9 wwwwwwwwwwx
+00095f09 wwwwwwwwwwx
+00097c0d xxxxxxxp
+00097c2d xxxxxxxx
+00097c4d xxxxxxxx
+00097c6c xxxxxxxxxp
+00097c8a xpxxxxxxxxxpxp
+00097caa xpxxxxxxxxxpxp
+00097cca xpxxxxxxxxxpxp
+00097cea xpxxxxxxxxxpxp
+00097d0a xxxxxxxxxxxpxp
+00097d2a xxxxx
+00097d33 xxxxp
+000984bf tDDww
+000984eb xwDDGx
+000984fb wDDGx
+00098c2b xxxxxxxxxx
+00098c4a xxxxxxxxxxxx
+00098c6a xxxxx
+00098c71 xxxxx
+0009912e wqqww
+00099304 4,4,7
+0009988b wwwwwwwwp
+0009989b wwwwwwwwp
+000998ab wwwwwwwwp
+000998cc xxxxxx
+000998ec xxxxxx
+0009990c xxxxxx
+0009992b xxxxxxxp
+0009994a xxxxxxxxp
+0009996d xxxxxp
+0009998d xxxxxp
+00099cea wpwwpwwpwwpww
+00099d6e pwwpw
+00099d7b wwppw
+00099d8b wwpww
+00099d91 wpwwp
+0009a58f 11111
+0009ad6d 3333;
+0009ad7d 33333
+0009ad8d 33333
+0009ad9d 33333
+0009adad 3333;
+0009adbd 3333;
+0009b56d DDDDDD
+0009b57d DDDDDD
+0009b58d DDDDDD
+0009b71c DDDDDDDD
+0009b72c DDDDDDDD
+0009b73c DDDDDDDD
+0009cedb wwwwwx
+0009cefe wxwwwxxwp
+0009cf21 xwwwp
+0009d2cd UUUUUUUU
+0009d2db UUDDDDDUTEP
+0009d2fb DDDLD
+0009d301 DDEDE
+0009d311 LDEDE
+0009d31b DDDLDLDDEDE
+0009d32b TLDLD
+0009d331 LDUDU
+0009d34c DDDDDDEDU
+0009d35c TDDDDDUEP
+0009eb5d xxxxxxx
+0009eb7d xxxxxxx
+0009ebbc xxxxx
+0009ec60 xxxxx
+0009ec82 xxxxx
+0009ef8d xxxxxxx
+0009efac xxxxxxxxy
+0009efbe wwwww
+0009f06c xxwwwwxxx
+0009f08a xxxxxxxxxxx
+0009f0aa xxxxp
+0009f0b2 xxxxx
+0009f3fb qxxxxssxxp
+0009f41b qxpqxq
+0009f439 xpqxxss
+0009f4c2 xxxxp
+000a010d wwwwwp
+000a10cf 33;;;
+000a10ec 303333<
+000a10fa 033033<
+000a115e 33333
+000a116d 333333
+000a1179 303330
+000a145a ppppwww
+000a1b24 4,4,7
+000a293c xxxxxx
+000a295c xxxxxx
+000a297c xxxxxx
+000a299b xxxxxxxp
+000a29ba xxxxxxxxp
+000a29dd xxxxxp
+000a29fd xxxxxp
+000a2d5c xxxxxx
+000a2d7c xxxxxx
+000a2d9c xxxxxx
+000a2dbb xxxxxxxp
+000a2dda xxxxxxxxp
+000a2dfd xxxxxp
+000a2e1d xxxxxp
+000a314d xxxxp
+000a316c xxxxxx
+000a318b xxxxxxxp
+000a31aa xxxxxxxxp
+000a31ed xxxxxpp
+000a353c xxxxxxxxy
+000a355b xxxxxxxxxxy
+000a357a xxxxxxxxxxxxy
+000a395c xxxxxxxx~
+000a397b xxxxxxxxxx~
+000a399a xxxxxxxxxxxx~
+000a3a80 {w{x~
+000a3d7c xxxxxxxx~
+000a3d9b xxxxxxxxxx~
+000a3dba xxxxxxxxxxxx~
+000a7c6b xwDDGx
+000a7c7b wDDGx
+000aba4b xwDDG
+000aba5b wDDGxw
+000abd9c xxxxxx
+000ace7c qxxqxx
+000ace9b xxxxxx
+000acefd qqxxxp
+000ad0a4 4,4,6
+000ad0ae #d5(3
+000ad66a wpwwpwwpwwpww
+000ad70b wwpwp
+000ada4d DDDDDD
+000ada5d DDDDDD
+000ada6d DDDDDD
+000adbfc DDDDDDDD
+000adc0c DDDDDDDD
+000adc1c DDDDDDDD
+000ade6d DDDDDD
+000ade7d DDDDDD
+000ade8d DDDDDD
+000adecf D@D@@
+000adfec DDDDDD
+000adffc DDDDDD
+000ae01c DDDD@DDD
+000ae03c DDDDDDDD
+000b252e 33393330
+000b255e 3933933
+000b256c 3339393;
+000b25ab 993933
+000b25bb 39339
+000b25dd 39330
+000b2dcb xwwwx
+000b2e1e xwwwx
+000bb0c9 ;;;3;;;;;;;
+000bb0ec ;;;;;;;33;3
+000bb10d 33333;3;;;
+000bbcee 3303"""#
+000bbcfd 2""32""""0
+000bbd0d """#2"*"" 
+000bbd20 #2""""/
+000bbd2c 2""""2""!
+000bbd3c "*"""2*
+000bbd4b 32*"""
+000bbd5b 22"," 
+000bbd6a 3"#"""
+000bbd7a 2*#33 
+000bbd8a 2""" 
+000bbd9a 2,"" 
+000bbdbb 2"#2 
+000bbddc 3","0
+000bbdec "*"#2
+000bbdfc "*"#""
+000bbe0d ""2," 
+000bbe1e 3"""0
+000bc0ac ;;;;;;
+000bc0cc ;;;;;;0
+000bc10b ;;0;0;;;0;;
+000bc12b ;0;0;;
+000bc149 ;;;;;;;;;;;;0
+000bc169 ;;;;;;;;;;;0
+000bc18a ;;;;;;;;;;
+000bc1ed ;;;;0
+000bc5ef DDC330
+000bc5fd 0CDDC0
+000bc96e """"""""" 
+000bc97a """""""""""
+000bc989 """""""""
+000bc99d """" 
+000bcd3c DDDDD@
+000bd1cc DODD@
+000be1ec .""""
+000be20b ""*"""""" 
+000be22c """""""" 
+000be37a """""*"
+000be38f "."**" 
+000be6dd +""""
+000be6ee """"/" 
+000be6fe "+"""" 
+000be731 ")"""
+000bea7b 33381
+000bea88 38333383
+000bea99 83333331
+000beaa9 83333333
+000beb3d 33330
+000bee69 ;;;;7ww0
+000bee8a ;;;7;3;7w;;;;33
+000beeaa ;;;;;;;;7;7p
+000beecc ;;;;;;3{;s30w7w
+000beef1 ;;;;0w3
+000bef51 w???p
+000bf23c wwwwwwwwwwwp
+000bf2fe 33'"w
+000bf37c wwwwwwwwwwwpxs
+000bf3d8 xw333
+000bf3f8 wwwwwwwwwwwp
+000bf74f DD@;0
+000bf77d @DDDD@
+000bfef7 w33s330
+000bff08 37s370
+000bff17 w37s333
+000bff28 373339
+000bff39 73339
+000bffdd 33330
+000bffed 37w30
+000c0bab xxxxxxxxx
+000c0bd0 xxxxxxx
+000c182c wwwwpwwwww
+000c1841 wwxww
+000c1848 wwwww
+000c1878 wwwwwwwpww
+000c1888 xwwwww
+000c18aa wwwwp
+000c212d wwwwp
+000c2c1f "'w"'
+000c2c2f r"r"w
+000c2c3f w"r'p
+000c2d1e rw""'
+000c2d2f '""'p
+000c2d3f w""''p
+000c2d50 r"wrwp
+000c2d60 w'pw"p
+000c3559 xwpwx
+000c6d80 #You gaze once more at the charred ruins of the farm where you were raised. 
+000c6dce You buried the blackened skeletons of your godparents in the remains of
+000c6e17 the garden they loved; but you can't bury the anger which still seethes at
+000c6e63 the thought of how they died.  Grimly, you vow that nothing will prevent
+000c6ead you from avenging their deaths.
+000c6ed4 The marauders pillaged the farm quite thoroughly.  Nowhere in the ruins
+000c6f1d can you find the amulet left for you by your true father, whose
+000c6f5e dying words, whispered to your godfather, were supposedly of its
+000c6fa0 importance to you: of how it could lead you to your fortune and great
+000c6fe7 glory, but only if you proved your worth.  Your godparents had promised it
+000c7033 to you for your 18th birthday; now you have neither godparents nor
+000c7077 birthright, and your birthday has just passed.
+000c70ad A search for clues in the rubble finds only a confused trail of footprints,
+000c70fa leading north, towards the mountains.  Many of the footprints seem much
+000c7143 too large to have come from the boots of bandits or soldiers.
+000c7188 You look north, wondering:  Where might the amulet be by now?  To whom
+000c71d0 must you prove yourself, and how?
+000c7200 #You examine the scrap of paper carefully, which turns
+000c7238 out to be part of a message in a strange blood red script. 
+000c7275 The top part is missing, but you can make out the following:
+000c72b5           ...is dead, return to the fortress north of Bjarnarhaven and
+000c72ff           await my orders.  I repeat, stop at NOTHING to ensure this
+000c7347           danger is removed!
+000c7367 It is signed at the bottom with a single ornate 'S', with
+000c73a2 flames entwining the letter.  As you stare at the flames
+000c73dc they seem to flicker and dance, and you feel the paper grow
+000c7419 hot in your hands.  You hurriedly drop it as the paper bursts
+000c7458 into flames, and you watch in shock as the ashes fall to the
+000c7496 ground.  Your stomach feels a bit queasy with worry,
+000c74cc and you think maybe you should head back to the hamlet.
+000c7510 #You are almost home.  Ahead of you, the path winds another half
+000c7552 mile around the hills north of the hamlet.  Your pack rests heavily
+000c7597 on your shoulders, shifting slightly with each step you take.  The
+000c75db enigmas of the mine still nag at you: why were those fell creatures
+000c7620 encamped therein?  From where did they come?  And what was the meaning
+000c7668 of the scrap of parchment you recovered at the bottom?
+000c76a6 As you round the last hill, a sharp smoky smell fills your nostrils.
+000c76ec Burning thatch?  Hastily, you drop your pack and jog to the wrecked
+000c7731 gate.  Heavy smoke hangs in the air; charred timbers still smolder from
+000c777a the ruins of houses.  The air lies eerily quiet, missing the babble
+000c77bf of a living hamlet: the cries of children, the cackle of poultry.  A
+000c7805 wrecked wagon lies, overturned, in the middle of the road.  Two vultures
+000c784f start at your intrusion, and flap away heavily.
+000c7886 With horror, you suddenly understand part of the message fragment you
+000c78cd found in the mine:
+000c78e3           ...is dead, return to the fortress north of Bjarnarhaven and
+000c792d           wait my orders.  I repeat: stop at nothing to ensure that
+000c7974           this danger is removed!
+000c79b0 #This was no random act of destruction, and neither was the burning of
+000c79f8 your farm.  Somebody ordered this, somebody who saw danger in this
+000c7a3c humble hamlet... or in its inhabitants.
+000c7a6b Shocked, you realize that this savage act must have been aimed at you.
+000c7ab3 None of these villagers had traveled more than a league from home in
+000c7af9 their entire lives.  You were not born here, but far away; you lost
+000c7b3e your godparents in a similar horrific act of arson.  You must be the
+000c7b84 danger!  You wonder again at your unknown past, which again has proven
+000c7bcc deadly to those you loved; and you swear once again to exact vengeance
+000c7c14 against those responsible.
+000c7c36 Once more you ponder the scrap of parchment.  The town of Bjarnarhaven lies
+000c7c83 but a day's journey down the highway to the west; perhaps you should
+000c7cc9 exercise your growing skills against this "fortress."  You kick aside a
+000c7d12 piece of broken gate, then, remembering your dropped pack, head back up
+000c7d5b the path to recover it.  Bjarnarhaven awaits you.
+000c7da0 #You uncrumple and carefully examine the scrap of parchment,
+000c7dde finding it covered with crude handwriting in a dark 
+000c7e14 reddish-brown ink.  Laboriously, you decipher the writing:
+000c7e56           Take a Squad of Goblin Warriorf & patrol ye upper
+000c7e95           Levelf of ye Fortrefs carefully.  There be Signf of an
+000c7ed9           Intruder within ye Dunjon; & HRUNGNIR fearf we may have
+000c7f1e           mifsed our Quarry.  As HRUNGNIR haf already carried hif
+000c7f63           Tale of Succefs back to ye Caftle, we muft labor to
+000c7fa4           bring the Ring of Truth to hif Word; elfe the leaping
+000c7fe7           Flames will claim uf.
+000c800e           Should ye find human Men or Women lyrking about, slay
+000c8051           them without Delay; & bring uf the stilled Bodief.
+000c8091           Loot not their Corpfes! or elfe tafte the leaping Flames.
+000c80de The terse note prompts more questions than it answers:  Who
+000c811b is this Hrungnir?  And what castle is this mentioned, to
+000c8155 which Hrungnir reports?  Somebody ordered a dragnet;
+000c818b uneasily, you suspect that you were the target, just as you
+000c81c8 were the target of your village's arson.  Who is
+000c81fa masterminding this search?
+000c8218 Grimly, you laugh as you shred the note: at least this
+000c8250 patrol will now never loot against orders.
+000c8290 #As you examine the contents of the bandit's chests, you
+000c82ca realize with a shock that some of what is here came from your
+000c8309 farm and village!  You recognize cloths and merchandise
+000c8342 from the general store, and even a battered shield that hung
+000c8380 over the blacksmith's forge!  You root through the chests,
+000c83bc hoping against hope that your father's amulet is there, but
+000c83f9 are disappointed.
+000c840e You know for sure, however, that you are on the right track.
+000c844c These marauders you defeated must surely have been responsible
+000c848c for torching your home, and you feel a savage joy at repaying
+000c84cb them in kind.  You aren't done yet, you know, for there is still
+000c850d this Hrungnir to deal with, but his time of reckoning is fast
+000c854c approaching!
+000c8570 #Before you looms a gigantic figure out of legend.  Long ago
+000c85ae in a more peaceful time, your godparents spun tales of the
+000c85ea Nine Worlds around you: the worlds of the Aesir and Vanir
+000c8625 gods above; the world of the dead and the dark dwarfs below;
+000c8663 and grim worlds of frost and flame and stone through which
+000c869f stride the mighty Jotuns, called Giants in those rare times
+000c86dc when they walk the Earth.  The enormous being before you can
+000c871a only be such a Jotun: taller and broader than any man, or
+000c8755 even any ogre, yet equipped and accoutered in a manner which
+000c8793 suggests intelligence much beyond any mere monster.
+000c87ca Eyes which gleam with evil meet your gaze.  The giant rubs
+000c8806 his broad chin and shouts in a gravelly bass:
+000c883b          Who is the impertinent human who would visit great
+000c887a          Hrungnir with a weapon drawn?
+000c88a8 At last!  You confront the one who destroyed your foster
+000c88e2 parents' farm, who burned and pillaged the simple hamlet
+000c891c which sheltered you, who in his pursuit of you has
+000c8950 slaughtered all you held dear.  
+000c8980 #Hrungnir notes your mounting rage and chuckles:
+000c89b8          Ah.  So you are the one I was to kill, the little
+000c89f6          creature who caused such a disturbance in the upper
+000c8a36          fortress... I suspected that those villagers were too
+000c8a78          meek to have been the threat I sought.  How kind of you
+000c8abc          now to come to me so that I may finish the task properly.
+000c8b02          My lord need never know of my initial failure.
+000c8b3d          Guards!  Destroy this foolish pest!
+000c8b71 An imperious gesture from Hrungnir summons a squad of armored ogres. 
+000c8bb8 As they rush at you, the giant hefts a round boulder in one hand.
+000c8c00 #Hrungnir grimaces in annoyance, and with a quick gesture
+000c8c3b wards your spell, which shatters into coruscating sparks.
+000c8c76 He smirks and growls,
+000c8c93           So the little hero is a mage as well.  How clever.
+000c8cd3           Spare yourself the effort of your tiny human spells; I
+000c8d17           had tasted enchantments which would boil your blood
+000c8d58           before your father's father ever knew life.  And my
+000c8d99           club crushes wizards and warriors alike!
+000c8dd3 You redouble your efforts in the face of the giant's pompous
+000c8e11 laughter.
+000c8e20 #The mortally wounded Hrungnir staggers and falls to one
+000c8e5a knee, descending to your eye level.  One huge hand points at
+000c8e98 you; you brace for a counterspell as the giant traces a
+000c8ed1 serpentine pattern with a carmine glowing finger, hissing
+000c8f0c sibilantly.  Suddenly Hrungnir coughs and chokes, and the
+000c8f47 spell flickers out prematurely.  He gasps and meets your
+000c8f81 gaze again:
+000c8f94           My lord... thinks that you... dead.
+000c8fc9 A short bark of giantish laughter dies into a rattle as
+000c9002 Hrungnir's eyes glaze, and he pitches over, dead. 
+000c9036 Vengeance is yours.
+000c9051 With patience and courage worthy of the great Aesir, you
+000c908b have wrought revenge for yourself, your foster parents, and
+000c90c8 your village.  All the pain of the recent weeks came from
+000c9103 the designs of the enormous being Hrungnir; now his body
+000c913d lies dead before you.  His depredations have come to an end. 
+000c917c But who sent this Hrungnir?  To whom or what did he report? 
+000c91ba Why were you selected to receive his malign attentions?
+000c9200 #These questions haunt you as, impelled by a nagging
+000c9236 suspicion, you search the battered body of the dead giant. 
+000c9273 A familiar glint from under the giant's jerkin stops your
+000c92ae breath momentarily.  There!  With trembling hands you draw
+000c92ea forth a shining amulet, which warms immediately to your
+000c9323 touch.  Left for you by your dead and unknown father, kept
+000c935f in trust for you by your slain foster parents, stolen by
+000c9399 Hrungnir's brigands, now recovered by your heroism: you now
+000c93d6 hold in your hands the promised legacy, the key to your
+000c940f unknown birthright.  It seems to glow faintly in greeting,
+000c944b and grows unnaturally warm as you think of your father. 
+000c9485 Without hesitation you place the amulet around your neck,
+000c94c0 where it fits you perfectly.
+000c94f0 #Upon activating the amulet, you immediately feel it radiate power.  As its
+000c953d aura spreads, enveloping you, your awareness of the world around you fades.
+000c958a A warm, colorless glow obscures your vision; a watery rushing sound fills
+000c95d5 your ears; you can no longer feel the weight of your armor, or even your
+000c961f feet on the ground, as if you were floating in a warm pool.  The rushing
+000c9669 sound fades to a low burble, and then to a barely noticeable throb.  You feel
+000c96b8 warm, and protected, and somehow content.
+000c96e9 Time passes.  A minute?  An hour?  You don't know.  After an unknown time,
+000c9735 you notice a shape in the glow before you; as you watch, it coalesces into
+000c9781 the form of a man in shimmering ornate armor, who meets your gaze and smiles
+000c97cf warmly.  His features seem familiar, though you don't recognize his face.
+000c981a He opens his mouth to speak, and the low throb in your ears rises rapidly in
+000c9868 pitch until it forms words:
+000c988b          My %x, I am he who was called Prince Arvi, thy father.  The power of the
+000c98e0          amulet which thou now dost wear has summoned me from the nether realm,
+000c9933          and thee from Midgard, so that I may speak to thee this once.  Thou hast
+000c9988          done very well to have come this far against all the obstacles before thee,
+000c99e0          and I am well pleased with the manner in which thou hast shown thy mettle,
+000c9a37          avenging the deaths of thine godparents and the destruction of thy village.
+000c9a8f          Yet thy greatest test still awaits thee.
+000c9ae0 #Elation fills you at your father's words of praise, and the discovery of
+000c9b2b your royal blood; but his hint of future trials tempers your delight with
+000c9b76 foreboding.  Your father continues:
+000c9ba1          Eighteen winters ago, disaster struck our line, when we became enmeshed in
+000c9bf8          a great conflict between the Aesir Thor and trickster Loki.  On mortal Midgard,
+000c9c54          dread Surtur himself has taken a part, which was not to happen until the eve
+000c9cad          of Ragnarok; all the wise in all the nine worlds fear that his continuing
+000c9d03          intervention in mortal affairs portends the premature arrival of Ragnarok, and
+000c9d5e          doom for us all.  The attacks on thy farm and village, terrible as they were, are
+000c9dbc          then but two threads in this great pattern; for Hrungnir hunted thee at the direct
+000c9e1b          command of Surtur, who sees that thou art fated to oppose him.
+000c9e6a          It is thy task, then, as the last surviving heir to the throne, and thy fated
+000c9ec4          destiny, as my %x, to thwart Surtur's designs on Midgard.  Thou must
+000c9f15          reclaim our fallen Castle of the Winds!
+000c9f50 #         When thou dost invoke the power of thy amulet once more, it will transport
+000c9fa8          thee to a town near the Castle.  From there, wend thy way to the Castle's
+000c9ffe          ruined throne room, where even now the shade of my father, King Lifthransir,
+000ca057          thy grandfather, awaits thy arrival.
+000ca08c You notice your father's voice slur somewhat, dropping a bit in pitch, and
+000ca0d8 his mailed legs waver as if seen through a fire.  He looks away for a
+000ca11f moment, then meets your gaze again.
+000ca14a          I may tarry here no longer, but must leave thee now to fulfill thy destiny and 
+000ca1a6          so lift the doom on our bloodline.  Thy grandfather can tell thee more.  May all
+000ca203          the Aesir shield thee, dear %x.
+000ca233 With a final gentle smile, your father's image dissolves into the
+000ca276 surrounding glow, and a low rumble replaces his voice in your ears,
+000ca2bb leaving you alone, once again fatherless.  The glow reveals no other
+000ca301 figures, yields no other voices.  You float without sense of time.
+000ca34b After an indeterminable period, awareness of your surroundings returns.
+000ca394 You find yourself back on your feet, with the Amulet cooling in your hand,
+000ca3e0 and a hundred questions heating your mind.
+000ca420 #Here ends Part One of Castle of the Winds, "A Question of
+000ca45c Vengeance".  To continue your adventures in Part Two, "The
+000ca498 Fall of Surtur", save your game now and see Order Information
+000ca4d7 under the help menu.  Once you receive part two, you will be
+000ca515 able to load your character from part one and continue your
+000ca552 quest.
+000ca59c Microsoft Draw
+000ca5fd Courier New
+000cae9c Microsoft Draw
+000caefd Courier New

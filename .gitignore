@@ -8,6 +8,14 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.npm-cache/
+.tools/
+.game-data/
+test-results/
+playwright-report/
+archive/pre-rebuild/
+archive/recovered/*.bin
+archive/recovered/*.asm
 dist
 dist-ssr
 *.local

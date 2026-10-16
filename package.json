@@ -4,16 +4,28 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/dev.mjs",
+    "dev:client": "vite --host 0.0.0.0",
+    "dev:server": "node server/index.ts",
+    "start": "node server/index.ts",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "check": "tsc --noEmit",
+    "play:two": "npm run build && node scripts/play-local.mjs"
   },
+  "engines": { "node": ">=24" },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "@types/ws": "^8.18.2",
+    "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "vite": "^8.0.0"
   },
   "dependencies": {
-    "firebase": "^12.10.0",
-    "phaser": "^3.90.0"
+    "ws": "^8.22.0"
   }
 }
