@@ -1,4 +1,16 @@
-# Test results - October 16, 2026
+# Test results - October 17, 2026
+
+## Mobile browser interface
+
+- `npm test`: **28 passed**. `npx playwright test --headed`: **34 passed** (2.8 minutes). Existing solo, WebRTC, dedicated-server, inventory, layout and targeting regressions passed.
+- Mobile suite: **11 passing cases** across Android Chrome and iPhone WebKit profiles, with **3 platform-specific skips**. The combined run passed 10 cases; its Chrome unsupported-API fixture was corrected to disable the API after PeerJS's prefix shim initialized, and the affected case passed on rerun. This was a test-fixture correction, not an application failure.
+- Both browser engines passed portrait/landscape layout, actual touch taps, zoomed aiming and walking, diagonal/held movement, release stopping, inventory selection and purchase, potion use, spell mana checks, Hero, Journal, menu navigation and solo refresh. Viewports included 390x844, 360x640, 320x568, 844x390 and 667x375; map tiles stayed square, page overflow was absent, and primary controls met 44px touch-target checks.
+- Android Chrome passed real two-client WebRTC Host/Join, ready, movement, aimed shots, independent purchases and guest-refresh recovery. Real CDP multi-touch pinch and long-press input did not accidentally walk or cast.
+- This Windows WebKit build exposes **no `RTCPeerConnection` API**. Its real-WebRTC case is explicitly skipped, not counted as a pass. A separate two-client test passed over the retained WebSocket transport, including movement, shots and refresh. Chromium skips that WebKit-specific case; WebKit skips CDP multi-touch. Both engines verify an immediate unsupported-browser message with solo still available.
+- All **457 Part I icon PNGs** match the mobile reference's corrected images pixel-for-pixel. The corrected extractor excludes NE resource alignment padding before decoding the transparency mask. Existing saves display corrected player and creature sprites without resetting progress.
+- TypeScript and production build passed. Screenshots: [portrait aiming](screenshots/mobile-portrait.png), [landscape](screenshots/mobile-landscape.png), [inventory](screenshots/mobile-pack.png), [spellbook](screenshots/mobile-spells.png), [co-op](screenshots/mobile-coop.png).
+
+These are browser-engine/device-profile tests on this computer, not tests on physical Android/iPhone hardware. In particular, Safari WebRTC on an actual iPhone, cross-network connectivity, virtual-keyboard behavior and background suspension remain unverified. The native Android project's full item/quest/spell engine was not ported; this change adapts the current online campaign and fixes artwork. The reference project was read without modifying it or deploying to its connected phone.
 
 ## Classic inventory update
 

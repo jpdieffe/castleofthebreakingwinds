@@ -13,6 +13,8 @@ node_modules
 .game-data/
 test-results/
 playwright-report/
+test-results-mobile/
+playwright-mobile-report/
 archive/pre-rebuild/
 archive/recovered/*.bin
 archive/recovered/*.asm

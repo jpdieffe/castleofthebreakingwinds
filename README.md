@@ -2,6 +2,16 @@
 
 Play at **https://jpdieffe.github.io/castleofthebreakingwinds/**.
 
+## Android and iPhone browsers
+
+The phone/tablet interface follows the native `CastleWinds_Mobile` reference: a dark portrait/landscape layout, eight-way movement pad, contextual Action/Trade/Travel button, quick Magic Arrow and potion buttons, and **Pack / Spells / Hero / Journal** tabs. Tap a direction for one step or hold it to keep walking. The center crossed-swords button attacks; enemies continue moving in real time.
+
+Tap the map to walk, pinch or use **+ / −** to change tile size, and long-press a tile to inspect it. Magic Arrow changes map taps into aimed shots; **Cancel aim** returns to walking. Spells opens an icon picker with descriptions, mana costs and a cast button. On phones, Pack uses item icons: select an item, then use the fixed **Buy** or **Drink** button. Purchases and potion counts update without closing the screen.
+
+The header shows your health, mana, gold and your companion's health/connection. The menu contains the co-op invite, well-rest action, help and Leave. Browser safe-area padding keeps controls clear of notches and home indicators. Solo and Host/Join use the same simulation and saved sessions as desktop. Browser co-op still requires the host to remain open and awake; locking or backgrounding a phone can suspend its browser.
+
+All 457 Part I icons were re-extracted with the mobile project's NE-padding fix and verified pixel-for-pixel against its corrected PNGs. Creature, player, short-sword, armor and potion art assignments now follow the reference. This update adapts the online game's existing inventory and three spells; it does not port the native app's entire 310-item catalog, 37 effects or Part II campaign.
+
 For solo play, enter your name and choose **Play solo**. The adventure starts immediately with one character. No matchmaking connection or second player is required. Enemies move in real time; you can explore, fight, use stairs, and restart after defeat. Refreshing the same tab restores progress. Closing the tab can discard the save.
 
 For two-player co-op:
@@ -50,6 +60,8 @@ npm ci
 npm run dev
 npm test
 npm run test:e2e:headed
+npx playwright install webkit
+npx playwright test --config playwright.mobile.config.ts
 npm run build
 ```
 

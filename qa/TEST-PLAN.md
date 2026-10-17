@@ -2,6 +2,14 @@
 
 Windows, Node 24, and desktop Google Chrome. The default game now uses browser-hosted WebRTC, with public PeerJS matchmaking. Browser tests use independent storage contexts and real data channels. The older dedicated-server regression suite remains separate.
 
+## Mobile browser acceptance
+
+`npx playwright test --config playwright.mobile.config.ts` runs the touch suite with Android Chrome and iPhone WebKit device profiles. Test portrait and landscape at 390x844, 360x640, 320x568, 844x390 and 667x375. Require no page overflow, square map tiles, visible status/actions, and movement/action targets at least 44 CSS pixels in both dimensions. Test zoomed tap coordinates, empty-floor Magic Arrow shots, cancellation, diagonal movement, held movement and release, rotation and saved-session refresh.
+
+Use only touch controls to select and buy equipment, drink a potion, inspect the updated counts, select a spell with a mana check, cast/aim, read Hero/Journal and leave via the menu. Keep the inventory action and close controls visible in landscape. Two mobile browser clients must host/join with a code, ready, move, fire arrows, buy items independently and recover after guest refresh. Chromium additionally exercises real CDP multi-touch pinch and long press, asserting no accidental walking/casting.
+
+WebKit is an automated browser-engine check, not a physical iPhone/Safari certification. Physical-device browser chrome, notches, virtual keyboards, different-network ICE negotiation and background suspension still need device testing. The native Android reference is read-only; these tests do not install or modify its APK or phone data.
+
 ## Classic inventory
 
 `tests/inventory.spec.ts` checks the recovered drawing loads, all 15 equipment/container positions, actual equipment and empty slots, safe display of player names, purchases and price increases, affordability, potion use, live quantities and vitals, and all exit controls. Small-window tests cover 1280x600, 390x844, 360x640 and 844x390; inventory content can scroll vertically while the close button stays visible, with no horizontal overflow. The Floor pane replaces the Store away from the well. The WebRTC purchase/healing case keeps both inventories open, checks guest purchase synchronization, independent player inventories and host potion use reaching the guest.

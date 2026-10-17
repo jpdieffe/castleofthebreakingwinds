@@ -1,5 +1,6 @@
 import maps from '../public/classic/maps.json' with { type: 'json' };
 import type { Level, Tile, Enemy, Point } from './types.ts';
+import { creatureArt } from './art.ts';
 
 export function random(seed: number) {
   let value = seed >>> 0;
@@ -39,7 +40,7 @@ const enemyTypes = [
 function enemy(id: string, p: Point, depth: number, index: number): Enemy {
   const kind = enemyTypes[Math.min(enemyTypes.length - 1, Math.max(0, depth - 1 + index % 3))];
   const hp = 12 + depth * 5;
-  return { ...p, id, ...kind, hp, maxHp: hp, damage: 2 + Math.floor(depth / 2), nextMove: 1200 + index * 170 };
+  return { ...p, id, ...kind, icon: creatureArt[kind.name] ?? kind.icon, hp, maxHp: hp, damage: 2 + Math.floor(depth / 2), nextMove: 1200 + index * 170 };
 }
 function original(id: number, mapIndex: number, safe: boolean, seed: number): Level {
   const recovered = maps[mapIndex];

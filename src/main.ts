@@ -1,6 +1,10 @@
 import './style.css';
+import './mobile.css';
 import { PeerSession } from './peer-session';
 import { mountInventory } from './inventory';
+import { mountSpellbook } from './spellbook';
+import { touchMap } from './touch-map';
+import { art, creatureArt } from '../shared/art';
 import type { Action, Player, ServerMessage, Snapshot } from '../shared/types';
 
 const base = import.meta.env.BASE_URL;
@@ -12,6 +16,9 @@ let socket: WebSocket | PeerSession | undefined, state: Snapshot | undefined, pl
 let manualClose = false, pending = false, reconnectCount = 0, lastMessage = Date.now();
 let destination: { x: number; y: number } | undefined;
 let aimingArrow = false, animationFrame = 0;
+const mobileMedia = matchMedia('(max-width: 1000px), (pointer: coarse)');
+let viewColumns = 23, viewRows = 17, mapZoom = 1;
+let touchMove: [number, number] | undefined;
 const arrowStarts = new Map<string, number>();
 let saved: { code: string; token: string; playerId: string; server: string } | undefined;
 try { saved = JSON.parse(sessionStorage.getItem('castle-session') || 'null') || undefined; } catch { sessionStorage.removeItem('castle-session'); }
@@ -28,14 +35,14 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <main class="window"><div class="titlebar"><img src="${icon(2)}" alt=""><span>Castle of the Winds — A Question of Vengeance</span><span class="window-mark">◆</span></div>
 <nav class="menubar" aria-label="Game menu"><button id="new-menu">Expedition</button><button data-dialog="inventory">Inventory <kbd>I</kbd></button><button data-dialog="journal">Journal <kbd>J</kbd></button><button data-dialog="help">Help <kbd>?</kbd></button><span id="room-label"></span><button id="share" hidden>Copy invite</button><button id="leave" hidden>Leave</button></nav>
 <div class="toolbar" aria-label="Actions">
-${([['attack',111,'Attack','Space'],['bolt',343,'Magic Arrow','1'],['heal',227,'Heal','2'],['fireball',339,'Fireball','3'],['potion',231,'Potion','H'],['mana',233,'Mana','Q'],['interact',7,'Use / stairs','E'],['revive',269,'Revive','R']] as const).map(([action,id,name,key]) => `<button data-action="${action}"><img src="${icon(id)}" alt="">${name} <kbd>${key}</kbd></button>`).join('')}
+${([['attack',art.sword,'Attack','Space'],['bolt',343,'Magic Arrow','1'],['heal',227,'Heal','2'],['fireball',339,'Fireball','3'],['potion',art.potion,'Potion','H'],['mana',233,'Mana','Q'],['interact',7,'Use / stairs','E'],['revive',269,'Revive','R']] as const).map(([action,id,name,key]) => `<button data-action="${action}"><img src="${icon(id)}" alt="">${name} <kbd>${key}</kbd></button>`).join('')}
 </div><div class="game-layout"><section class="viewport-pane" aria-label="Dungeon"><div class="pane-title"><span id="location">A Tiny Hamlet</span><span id="area-info">Original artwork · online co-op</span></div>
 <div class="canvas-wrap"><canvas id="world" width="736" height="544" tabindex="0" aria-label="Game map. Use arrows or WASD to move, Space to attack, E to use stairs."></canvas>
 <section id="lobby" class="lobby" aria-label="Join an expedition"><img class="original-logo" src="${icon('bitmap-10')}" alt="Castle of the Winds original logo"><h2>Adventure alone.<br>Or bring a companion.</h2><p>Play solo immediately, or host an expedition and share your room code with a friend.</p>
 <form id="lobby-form"><label for="name">Adventurer’s name</label><input id="name" maxlength="20" required autocomplete="nickname" placeholder="Enter your name"><button type="button" id="solo" class="primary">Play solo</button><button type="submit" id="create" class="primary">Host expedition</button><div class="or">or join a friend</div><div class="join-row"><label class="sr-only" for="code">Expedition code</label><input id="code" maxlength="6" placeholder="6-character code" autocomplete="off" autocapitalize="characters"><button type="button" id="join">Join</button></div><details id="connection-settings"><summary>Advanced: dedicated server</summary><label for="server">Server address</label><input id="server" placeholder="peer"><p>Leave as peer for browser-to-browser play. Optional: a dedicated wss:// server.</p></details></form><p id="lobby-status" role="status"></p><small>Browser reconstruction using recovered Castle1 resources.<br>Rick Saada / SaadaSoft · Art: Paul Canniff · Publisher: Epic MegaGames</small></section>
 <section id="party-overlay" class="party-overlay" hidden><strong id="party-heading"></strong><p id="party-message"></p><button id="ready" class="primary">Ready to adventure</button><button id="restart" hidden>Begin again</button></section></div>
 <div class="map-footer"><span id="position">Explore together. Move with WASD or arrow keys.</span><span id="world-clock">Enemies move every 1.4 seconds</span></div></section>
-<aside><div class="pane-title">Your expedition <span id="party-size">1 OR 2 PLAYERS</span></div><div id="party"><div class="empty-party"><img src="${icon(421)}" alt="Adventurer">Every journey begins<br>with a first step.</div></div><div class="pane-title">Area map <span id="map-sharing">EXPLORED</span></div><canvas id="minimap" width="230" height="170" aria-label="Shared explored map"></canvas><div class="quest"><span class="eyebrow">A QUESTION OF VENGEANCE</span><h3 id="quest-title">Find the road north</h3><p id="quest-text">Meet at the stairs, then press E to travel together. Rest and trade beside the village well.</p></div><div class="legend"><span><i class="gold-dot"></i>You</span><span id="partner-legend"><i class="blue-dot"></i>Partner</span><span><i class="red-dot"></i>Enemy</span></div></aside></div>
+<aside><div class="pane-title">Your expedition <span id="party-size">1 OR 2 PLAYERS</span></div><div id="party"><div class="empty-party"><img src="${icon(art.hero)}" alt="Adventurer">Every journey begins<br>with a first step.</div></div><div class="pane-title">Area map <span id="map-sharing">EXPLORED</span></div><canvas id="minimap" width="230" height="170" aria-label="Shared explored map"></canvas><div class="quest"><span class="eyebrow">A QUESTION OF VENGEANCE</span><h3 id="quest-title">Find the road north</h3><p id="quest-text">Meet at the stairs, then press E to travel together. Rest and trade beside the village well.</p></div><div class="legend"><span><i class="gold-dot"></i>You</span><span id="partner-legend"><i class="blue-dot"></i>Partner</span><span><i class="red-dot"></i>Enemy</span></div></aside></div>
 <section class="chronicle"><div class="pane-title">Adventure log <span id="simulation-status">WAITING FOR ADVENTURERS</span></div><div id="log" role="log" aria-live="polite"><p>Welcome to the north. Invite a friend to begin.</p></div></section><div class="touch-controls"><div class="dpad">${[['0,-1','↑','north'],['-1,0','←','west'],['0,1','↓','south'],['1,0','→','east']].map(([dir,label,name]) => `<button data-direction="${dir}" aria-label="Move ${name}">${label}</button>`).join('')}</div><span>Click an explored tile to walk there.</span></div></main>
 <footer class="page-footer"><span>CLASSIC WORLD. SHARED ADVENTURE.</span><span>Original resources recovered from CASTLE1.EXE · Co-op reconstruction</span></footer><div id="toast" role="status" hidden></div><dialog id="dialog"><div class="titlebar"><span id="dialog-title"></span><button id="close-dialog" aria-label="Close dialog">×</button></div><div id="dialog-body"></div></dialog>`;
 
@@ -44,13 +51,21 @@ const canvas = el<HTMLCanvasElement>('world'), ctx = canvas.getContext('2d')!;
 const mini = el<HTMLCanvasElement>('minimap'), mc = mini.getContext('2d')!;
 const dialog = el<HTMLDialogElement>('dialog');
 let inventoryView: ReturnType<typeof mountInventory> | undefined;
+let spellbookView: ReturnType<typeof mountSpellbook> | undefined;
 function closeDialog() { dialog.close(); canvas.focus(); }
-dialog.addEventListener('close', () => { inventoryView = undefined; dialog.classList.remove('inventory-dialog'); canvas.focus(); });
+dialog.addEventListener('close', () => { inventoryView = undefined; spellbookView = undefined; dialog.classList.remove('inventory-dialog'); canvas.focus(); });
+dialog.setAttribute('aria-labelledby', 'dialog-title');
+document.querySelector('.window')!.insertAdjacentHTML('afterbegin', `<header class="mobile-heading"><div><small>CASTLE OF THE WINDS</small><h2 id="mobile-location">Adventure together</h2><div id="mobile-vitals"></div><div id="mobile-partner"></div></div><button data-dialog="menu" aria-label="Game menu">☰</button></header>`);
+el('world').parentElement!.insertAdjacentHTML('beforeend', `<div class="map-tools"><button id="zoom-out" aria-label="Zoom out">−</button><button id="zoom-in" aria-label="Zoom in">+</button><button id="cancel-aim" hidden>Cancel aim</button></div><span class="map-hint">Tap to walk · Pinch to zoom</span>`);
+document.querySelector('.touch-controls')!.innerHTML = `<div class="mobile-feedback"><span id="mobile-status"></span><p id="mobile-log"></p></div><div class="movement-panel"><div class="dpad">${[[-1,-1,'↖','northwest'],[0,-1,'↑','north'],[1,-1,'↗','northeast'],[-1,0,'←','west'],[0,0,'⚔','attack'],[1,0,'→','east'],[-1,1,'↙','southwest'],[0,1,'↓','south'],[1,1,'↘','southeast']].map(([dx,dy,label,name]) => `<button ${name === 'attack' ? 'id="touch-attack" aria-label="Melee attack"' : `data-direction="${dx},${dy}" aria-label="Move ${name}"`}>${label}</button>`).join('')}</div><div class="touch-actions"><button id="touch-interact">Action</button><button id="touch-arrow">Magic Arrow</button><button id="touch-potion">Potion</button></div></div>`;
+document.querySelector('.window')!.insertAdjacentHTML('beforeend', `<nav class="mobile-tabs" aria-label="Adventure screens"><button data-mobile-dialog="inventory">Pack</button><button data-mobile-dialog="spells">Spells</button><button data-mobile-dialog="hero">Hero</button><button data-mobile-dialog="journal">Journal</button></nav>`);
+function mobileLayout() { document.body.classList.toggle('mobile-ui', mobileMedia.matches); }
+mobileLayout(); mobileMedia.addEventListener('change', () => { mobileLayout(); held.clear(); destination = undefined; draw(); });
 el<HTMLInputElement>('server').value = serverUrl;
 el<HTMLInputElement>('code').value = query.get('room')?.slice(0, 6).toUpperCase() || '';
 el<HTMLInputElement>('name').value = localStorage.getItem('castle-name') || '';
 let toastTimer = 0;
-function toast(message: string) { if (dialog.open) inventoryView?.message(message); el('toast').textContent = message; el('toast').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { el('toast').hidden = true; }, 4000); }
+function toast(message: string) { if (dialog.open) { if (inventoryView) inventoryView.message(message); else { let note = dialog.querySelector<HTMLElement>('.dialog-notice'); if (!note) { note = document.createElement('p'); note.className = 'dialog-notice'; note.setAttribute('role', 'status'); el('dialog-body').append(note); } note.textContent = message; } } el('toast').textContent = message; el('toast').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { el('toast').hidden = true; }, 4000); }
 function connection(text: string, connected = false) { el('connection').textContent = text; el('connection').classList.toggle('connected', connected); }
 function lobbyMessage(text: string) { el('lobby-status').textContent = text; }
 function busy(value: boolean) { pending = value; el<HTMLButtonElement>('solo').disabled = value; el<HTMLButtonElement>('create').disabled = value; el<HTMLButtonElement>('join').disabled = value; }
@@ -112,9 +127,10 @@ el('solo').onclick = () => enter('solo');
 function send(action: Action) { if (socket?.readyState === WebSocket.OPEN && state) socket.send(JSON.stringify({ type: 'action', action })); }
 el('ready').onclick = () => send({ type: 'ready' }); el('restart').onclick = () => send({ type: 'restart' });
 function aimArrow(active: boolean) {
-  aimingArrow = active; destination = undefined; held.clear();
+  aimingArrow = active; destination = undefined; held.clear(); touchMove = undefined;
   canvas.classList.toggle('aiming-arrow', active);
   document.querySelector('[data-action="bolt"]')!.setAttribute('aria-pressed', String(active));
+  el('touch-arrow').setAttribute('aria-pressed', String(active)); el('cancel-aim').hidden = !active;
   if (state) render();
 }
 function chooseAction(type: Action['type']) {
@@ -124,7 +140,23 @@ function chooseAction(type: Action['type']) {
   } else { aimArrow(false); send({ type } as Action); }
 }
 document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => { button.onclick = () => { chooseAction(button.dataset.action as Action['type']); canvas.focus(); }; });
-document.querySelectorAll<HTMLButtonElement>('[data-direction]').forEach(button => { button.onclick = () => { aimArrow(false); const [dx, dy] = button.dataset.direction!.split(',').map(Number); send({ type: 'move', dx, dy }); }; });
+document.querySelectorAll<HTMLButtonElement>('[data-direction]').forEach(button => {
+  const move = () => { aimArrow(false); const [dx, dy] = button.dataset.direction!.split(',').map(Number); touchMove = [dx, dy]; send({ type: 'move', dx, dy }); };
+  button.onpointerdown = e => { e.preventDefault(); button.setPointerCapture(e.pointerId); move(); };
+  button.onpointerup = button.onpointercancel = button.onlostpointercapture = () => { touchMove = undefined; };
+  button.onclick = e => { if (!e.detail) { move(); touchMove = undefined; } };
+});
+el('touch-attack').onclick = () => chooseAction('attack');
+el('touch-arrow').onclick = () => chooseAction('bolt');
+el('touch-potion').onclick = () => chooseAction('potion');
+el('touch-interact').onclick = () => {
+  const p = me(), shop = state?.map.shop;
+  if (p && shop && Math.max(Math.abs(p.x - shop.x), Math.abs(p.y - shop.y)) <= 2) void openDialog('inventory');
+  else chooseAction('interact');
+};
+el('cancel-aim').onclick = () => aimArrow(false);
+function zoomMap(factor: number) { destination = undefined; mapZoom = Math.max(0.65, Math.min(2, mapZoom * factor)); draw(); }
+el('zoom-in').onclick = () => zoomMap(1.2); el('zoom-out').onclick = () => zoomMap(1 / 1.2);
 el('leave').onclick = () => {
   aimArrow(false); arrowStarts.clear();
   manualClose = true; clearTimeout(reconnectTimer);
@@ -148,6 +180,7 @@ function render() {
   if (aimingArrow && (state.status !== 'playing' || !me()?.hp)) {
     aimingArrow = false; canvas.classList.remove('aiming-arrow');
     document.querySelector('[data-action="bolt"]')!.setAttribute('aria-pressed', 'false');
+    el('touch-arrow').setAttribute('aria-pressed', 'false'); el('cancel-aim').hidden = true;
   }
   for (const id of arrowStarts.keys()) if (!state.arrows?.some(a => a.id === id)) arrowStarts.delete(id);
   const solo = state.mode === 'solo';
@@ -167,7 +200,7 @@ function render() {
   const party = el('party'); party.replaceChildren();
   state.players.forEach(p => {
     const card = document.createElement('article'); card.className = `player-card ${p.id === playerId ? 'you' : ''}`;
-    const portrait = document.createElement('img'); portrait.src = icon(p.slot === 0 ? 421 : 403); portrait.alt = '';
+    const portrait = document.createElement('img'); portrait.src = icon(p.slot === 0 ? art.hero : art.companion); portrait.alt = '';
     const title = document.createElement('strong'); title.textContent = `${p.name} ${p.id === playerId ? '(you)' : ''}`;
     const detail = document.createElement('span'); detail.textContent = `Level ${p.rank} · ${!p.connected ? 'Reconnecting' : p.hp <= 0 ? 'Down — needs revival' : p.ready ? 'Ready' : 'Preparing'}`;
     const heading = document.createElement('div'); heading.append(title, detail); const head = document.createElement('div'); head.className = 'player-heading'; head.append(portrait, heading);
@@ -187,6 +220,18 @@ function render() {
   el('quest-text').textContent = player?.hp === 0 ? 'You are down. Your companion must stand beside you and press R with a healing potion.' : state.map.safe ? 'E at the well restores health and mana. Trade from your inventory. Gather at the stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1–3 for spells. Stay together at the stairs; E travels.';
   if (solo) el('quest-text').textContent = player?.hp === 0 ? 'Your adventure has ended. Choose Begin again to restart.' : state.map.safe ? 'E at the well restores health and mana. Trade from your inventory. Use E near stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1, 2, 3 for spells. E near stairs travels to the next area.';
   if (dialog.open && player) inventoryView?.update(state, player);
+  if (dialog.open && player) spellbookView?.update(player, state.status === 'playing');
+  el('mobile-location').textContent = state.map.name;
+  el('mobile-vitals').textContent = player ? `♥ ${player.hp}/${player.maxHp}   ✦ ${player.mana}/${player.maxMana}   ◈ ${player.gold} gold` : '';
+  const partner = state.players.find(p => p.id !== playerId);
+  el('mobile-partner').textContent = partner ? `${partner.name} · HP ${partner.hp}/${partner.maxHp} · ${partner.connected ? 'Connected' : 'Reconnecting'}` : solo ? 'Solo adventure' : 'Waiting for your companion';
+  el('mobile-status').textContent = aimingArrow ? 'MAGIC ARROW · Tap a tile to shoot' : `LEVEL ${player?.rank ?? 1} · ${el('simulation-status').textContent}`;
+  el('mobile-log').textContent = state.log.at(-1)?.text ?? '';
+  const near = (p: { x: number; y: number }, radius: number) => !!player && Math.max(Math.abs(player.x - p.x), Math.abs(player.y - p.y)) <= radius;
+  el('touch-interact').textContent = state.map.shop && near(state.map.shop, 2) ? 'Trade' : state.map.portals.some(p => near(p, 1)) ? 'Travel' : 'Action';
+  el('touch-potion').textContent = `Potion (${player?.potions ?? 0})`;
+  el('touch-arrow').textContent = aimingArrow ? 'Aiming…' : 'Magic Arrow';
+  document.querySelector('.map-hint')!.textContent = aimingArrow ? 'Tap to fire · Cancel aim to walk' : 'Tap to walk · Pinch to zoom';
   draw();
 }
 
@@ -194,12 +239,20 @@ let viewX = 0, viewY = 0;
 function sprite(id: string | number, x: number, y: number, w = 32, h = 32) { const img = image(id); if (img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h); }
 function draw() {
   cancelAnimationFrame(animationFrame); animationFrame = 0;
+  if (mobileMedia.matches && state) {
+    const box = document.querySelector('.canvas-wrap')!.getBoundingClientRect(), tile = 42 * mapZoom;
+    viewColumns = Math.max(3, Math.floor(box.width / tile)); viewRows = Math.max(3, Math.floor(box.height / tile));
+  } else { viewColumns = 23; viewRows = 17; }
+  if (canvas.width !== viewColumns * 32 || canvas.height !== viewRows * 32) { canvas.width = viewColumns * 32; canvas.height = viewRows * 32; }
+  canvas.style.setProperty('--map-ratio', String(viewColumns / viewRows));
+  canvas.dataset.columns = String(viewColumns); canvas.dataset.rows = String(viewRows);
   ctx.imageSmoothingEnabled = false; ctx.fillStyle = '#101719'; ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (!state) { for (let y = 0; y < 17; y++) for (let x = 0; x < 23; x++) { ctx.fillStyle = (x + y) % 2 ? '#243b32' : '#273e35'; ctx.fillRect(x * 32, y * 32, 32, 32); } return; }
   const map = state.map, player = me() ?? state.players[0]; if (!player) return;
-  viewX = Math.max(0, Math.min(map.width - 23, player.x - 11)); viewY = Math.max(0, Math.min(map.height - 17, player.y - 8));
+  viewX = Math.max(0, Math.min(map.width - viewColumns, player.x - Math.floor(viewColumns / 2))); viewY = Math.max(0, Math.min(map.height - viewRows, player.y - Math.floor(viewRows / 2)));
+  canvas.dataset.viewX = String(viewX); canvas.dataset.viewY = String(viewY);
   const explored = new Set(map.explored);
-  for (let sy = 0; sy < 17; sy++) for (let sx = 0; sx < 23; sx++) {
+  for (let sy = 0; sy < viewRows; sy++) for (let sx = 0; sx < viewColumns; sx++) {
     const x = sx + viewX, y = sy + viewY, index = y * map.width + x;
     if (x >= map.width || y >= map.height || !explored.has(index)) continue;
     const tile = map.tiles[index], raw = map.rawTiles?.[index];
@@ -214,9 +267,9 @@ function draw() {
   const screen = (p: { x: number; y: number }) => ({ x: (p.x - viewX) * 32, y: (p.y - viewY) * 32 });
   if (map.shop) { const p = screen(map.shop); sprite(30, p.x, p.y); }
   map.portals.forEach(portal => { if (!explored.has(portal.y * map.width + portal.x)) return; const p = screen(portal); sprite(portal.to > state!.level ? 7 : 9, p.x, p.y); ctx.strokeStyle = '#e9ce55'; ctx.strokeRect(p.x + 1, p.y + 1, 30, 30); });
-  map.loot.forEach(item => { if (!explored.has(item.y * map.width + item.x)) return; const p = screen(item); sprite({ gold: 153, potion: 231, mana: 233, weapon: 111, armor: 117 }[item.kind], p.x, p.y); });
-  map.enemies.filter(e => e.hp > 0 && explored.has(e.y * map.width + e.x)).forEach(e => { const p = screen(e); sprite(e.icon, p.x, p.y); ctx.fillStyle = '#381919'; ctx.fillRect(p.x + 3, p.y + 29, 26, 3); ctx.fillStyle = '#c53727'; ctx.fillRect(p.x + 3, p.y + 29, 26 * e.hp / e.maxHp, 3); });
-  state.players.forEach(p => { const s = screen(p); ctx.strokeStyle = p.id === playerId ? '#ffec53' : '#63e6ff'; ctx.lineWidth = 2; ctx.strokeRect(s.x + 1, s.y + 1, 30, 30); ctx.lineWidth = 1; sprite(p.hp ? p.slot === 0 ? 421 : 403 : 52, s.x, s.y); });
+  map.loot.forEach(item => { if (!explored.has(item.y * map.width + item.x)) return; const p = screen(item); sprite({ gold: art.gold, potion: art.potion, mana: art.mana, weapon: art.sword, armor: art.armor }[item.kind], p.x, p.y); });
+  map.enemies.filter(e => e.hp > 0 && explored.has(e.y * map.width + e.x)).forEach(e => { const p = screen(e); sprite(creatureArt[e.name] ?? e.icon, p.x, p.y); ctx.fillStyle = '#381919'; ctx.fillRect(p.x + 3, p.y + 29, 26, 3); ctx.fillStyle = '#c53727'; ctx.fillRect(p.x + 3, p.y + 29, 26 * e.hp / e.maxHp, 3); });
+  state.players.forEach(p => { const s = screen(p); ctx.strokeStyle = p.id === playerId ? '#ffec53' : '#63e6ff'; ctx.lineWidth = 2; ctx.strokeRect(s.x + 1, s.y + 1, 30, 30); ctx.lineWidth = 1; sprite(p.hp ? p.slot === 0 ? art.hero : art.companion : 52, s.x, s.y); });
   let animating = false;
   for (const arrow of state.arrows ?? []) {
     if (arrow.level !== state.level) continue;
@@ -252,11 +305,11 @@ window.addEventListener('keydown', e => {
   if (key === 'i' || key === 'j' || key === '?') void openDialog(key === 'i' ? 'inventory' : key === 'j' ? 'journal' : 'help');
 });
 window.addEventListener('keyup', e => held.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key));
-window.addEventListener('blur', () => { held.clear(); destination = undefined; });
-document.addEventListener('visibilitychange', () => { held.clear(); destination = undefined; });
-canvas.onclick = e => {
+window.addEventListener('blur', () => { held.clear(); touchMove = undefined; destination = undefined; });
+document.addEventListener('visibilitychange', () => { held.clear(); touchMove = undefined; destination = undefined; });
+function mapTap(clientX: number, clientY: number) {
   if (!state || state.status !== 'playing') return;
-  const rect = canvas.getBoundingClientRect(); const x = Math.floor((e.clientX - rect.left) / rect.width * 23) + viewX, y = Math.floor((e.clientY - rect.top) / rect.height * 17) + viewY;
+  const { x, y } = mapPoint(clientX, clientY);
   if (aimingArrow) {
     destination = undefined;
     if ((me()?.mana ?? 0) < 3) toast('Magic Arrow costs 3 mana.');
@@ -264,11 +317,25 @@ canvas.onclick = e => {
     canvas.focus(); return;
   }
   if (state.map.explored.includes(y * state.map.width + x)) destination = { x, y }; canvas.focus();
-};
+}
+function mapPoint(clientX: number, clientY: number) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: Math.floor((clientX - rect.left) / rect.width * viewColumns) + viewX, y: Math.floor((clientY - rect.top) / rect.height * viewRows) + viewY };
+}
+canvas.onclick = e => { if (performance.now() - Number(canvas.dataset.lastTouch ?? -1000) > 500 && (!(e as PointerEvent).pointerType || (e as PointerEvent).pointerType === 'mouse')) mapTap(e.clientX, e.clientY); };
+touchMap(canvas, mapTap, (x, y) => {
+  if (!state) return; destination = undefined;
+  const p = mapPoint(x, y), index = p.y * state.map.width + p.x;
+  if (!state.map.explored.includes(index)) { toast('Unexplored ground.'); return; }
+  const enemy = state.map.enemies.find(e => e.hp > 0 && e.x === p.x && e.y === p.y);
+  toast(enemy ? `${enemy.name} · ${enemy.hp}/${enemy.maxHp} HP` : state.map.portals.find(e => e.x === p.x && e.y === p.y)?.label ?? `${state.map.tiles[index]} · ${p.x}, ${p.y}`);
+}, zoomMap);
+new ResizeObserver(() => draw()).observe(document.querySelector('.canvas-wrap')!);
 canvas.oncontextmenu = e => { if (aimingArrow) { e.preventDefault(); aimArrow(false); } };
 function walk() {
   if (aimingArrow || dialog.open || !state || state.status !== 'playing') return;
   const player = me(); if (!player || player.hp <= 0) return;
+  if (touchMove) { const [dx, dy] = touchMove; send({ type: 'move', dx, dy }); return; }
   const key = [...held].at(-1); if (key && directions[key]) { const [dx, dy] = directions[key]; send({ type: 'move', dx, dy }); return; }
   if (!destination) return;
   const target = destination, map = state.map;
@@ -292,12 +359,31 @@ setInterval(() => { if (socket?.readyState === WebSocket.OPEN && state && Date.n
 
 async function openDialog(kind: string) {
   aimArrow(false); held.clear(); destination = undefined;
-  inventoryView = undefined; dialog.classList.toggle('inventory-dialog', kind === 'inventory');
+  inventoryView = undefined; spellbookView = undefined; dialog.classList.toggle('inventory-dialog', kind === 'inventory'); dialog.classList.toggle('spellbook-dialog', kind === 'spells');
   const body = el('dialog-body'); body.replaceChildren(); el('dialog-title').textContent = kind === 'inventory' ? 'Castle Inventory' : kind === 'journal' ? 'Recovered story journal' : kind === 'invite' ? 'Invite a companion' : 'How to adventure';
   if (!dialog.open) dialog.showModal();
   if (kind === 'inventory') {
     const p = me(); if (!p || !state) { body.textContent = 'Join an expedition to view your equipment.'; return; }
     inventoryView = mountInventory(body, send, closeDialog); inventoryView.update(state, p);
+  } else if (kind === 'spells') {
+    el('dialog-title').textContent = 'Spellbook'; const p = me(); if (!p) return;
+    spellbookView = mountSpellbook(body, type => { closeDialog(); chooseAction(type); }); spellbookView.update(p, state?.status === 'playing');
+  } else if (kind === 'hero') {
+    el('dialog-title').textContent = 'Your expedition';
+    for (const p of state?.players ?? []) {
+      const section = document.createElement('section'); section.className = 'hero-details';
+      const heading = document.createElement('h2'); heading.textContent = `${p.name}${p.id === playerId ? ' (you)' : ''}`;
+      const detail = document.createElement('p'); detail.textContent = `Level ${p.rank} · XP ${p.xp}/${p.rank * 45}\nHP ${p.hp}/${p.maxHp} · Mana ${p.mana}/${p.maxMana}\n${p.gold} gold · ${p.potions} healing potions · ${p.manaPotions} mana potions\nShort sword +${p.weapon} · Armor +${p.armor}\n${p.connected ? 'Connected' : 'Reconnecting'}`;
+      section.append(heading, detail); body.append(section);
+    }
+    const revive = document.createElement('button'); revive.textContent = 'Revive companion (1 potion)'; revive.hidden = state?.mode === 'solo'; revive.onclick = () => { closeDialog(); chooseAction('revive'); }; body.append(revive);
+  } else if (kind === 'menu') {
+    el('dialog-title').textContent = 'Expedition';
+    const summary = document.createElement('p'); summary.textContent = state?.mode === 'solo' ? 'Solo adventure' : `Room ${state?.code ?? ''} · Share this code with your companion.`; body.append(summary);
+    for (const [label, callback] of [
+      ['Copy invite', () => el('share').click()], ['Rest at well', () => { closeDialog(); chooseAction('interact'); }],
+      ['How to play', () => void openDialog('help')], ['Leave expedition', () => { closeDialog(); el('leave').click(); }],
+    ] as const) { const b = document.createElement('button'); b.textContent = label; b.className = 'menu-action'; b.onclick = callback; if (label === 'Copy invite' && state?.mode === 'solo') continue; body.append(b); }
   } else if (kind === 'journal') {
     body.textContent = 'Loading the original story…';
     try {
@@ -306,10 +392,10 @@ async function openDialog(kind: string) {
       stories.forEach(s => { const section = document.createElement('details'), summary = document.createElement('summary'), text = document.createElement('p'); summary.textContent = `Story ${s.id}`; text.className = 'story-text'; text.textContent = s.text.replace(/^[^a-zA-Z]+/, '').replaceAll('#', '\n'); section.append(summary, text); body.append(section); });
     } catch { body.textContent = 'Unable to load the recovered story. Please try again.'; }
   } else if (kind !== 'invite') {
-    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1 or Magic Arrow: aim with the crosshair, then click any map tile to fire (3 MP, six-tile range). Click again to keep firing; Escape, right-click, movement, or another action cancels aiming. 2: Heal (6 MP). 3: Fireball (8 MP). Magic Arrow travels toward your chosen tile, stopping at walls or the first monster. Fireball targets the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
+    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Touch controls</dt><dd>Use the eight-way pad; hold a direction to keep moving. The center button attacks. Tap the map to walk, pinch or use + / - to zoom, and long-press to inspect. Pack, Spells, Hero and Journal open touch panels. Choose Magic Arrow, then tap a tile to shoot; Cancel aim returns to walking. Trade opens the shop near a well; Rest at well is in the menu. Rotate your phone for a side-by-side layout.</dd><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1 or Magic Arrow: aim with the crosshair, then click any map tile to fire (3 MP, six-tile range). Click again to keep firing; Escape, right-click, movement, or another action cancels aiming. 2: Heal (6 MP). 3: Fireball (8 MP). Magic Arrow travels toward your chosen tile, stopping at walls or the first monster. Fireball targets the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
   }
 }
-document.querySelectorAll<HTMLButtonElement>('[data-dialog]').forEach(b => { b.onclick = () => { void openDialog(b.dataset.dialog!); }; });
+document.querySelectorAll<HTMLButtonElement>('[data-dialog], [data-mobile-dialog]').forEach(b => { b.onclick = () => { void openDialog((b.dataset.dialog ?? b.dataset.mobileDialog)!); }; });
 el('close-dialog').onclick = closeDialog;
 draw();
 if (saved) { serverUrl = saved.server; connect({ type: 'resume', code: saved.code, token: saved.token }, true); }

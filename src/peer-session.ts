@@ -54,6 +54,10 @@ export class PeerSession {
     let stored: HostSave | undefined;
     try { stored = JSON.parse(sessionStorage.getItem(SAVE) || 'null') || undefined; } catch { /* Ignore damaged saves. */ }
     const restoring = message.type === 'resume' && stored?.game?.code === message.code && stored?.token === message.token;
+    const solo = message.type === 'solo' || (restoring && stored?.game.mode === 'solo');
+    if (!solo && typeof RTCPeerConnection === 'undefined') {
+      this.fail('This browser does not support WebRTC peer connections. Open the game in Safari or Chrome for co-op. Play solo still works here.', true); return;
+    }
     const hosting = message.type === 'solo' || message.type === 'create' || restoring;
     const code = hosting ? restoring ? stored!.game.code : Array.from(crypto.getRandomValues(new Uint8Array(6)), n => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n % 31]).join('') : message.code!;
     if (hosting) {

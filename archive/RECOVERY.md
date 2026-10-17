@@ -35,6 +35,12 @@ Segment 25's final unused row padding extends beyond its initialized bytes; the 
 
 Segment 11's dungeon code is present in the disassembly. The new generator guarantees connected rooms and uses an MS C-style random sequence. It is **not** an instruction-for-instruction translation and does not reproduce original saved games. The co-op campaign uses eight newly generated dungeon floors plus six recovered fixed areas. The original complete quest and inventory systems are not implemented.
 
+## October 17 mobile reference corrections
+
+The local `CastleWinds_Mobile` reference supplied the corrected icon-DIB sizing logic in `tools/extract_original.py`, creature assignments in `Bestiary.java`, player portrait IDs in `Game.java`, and weapon/item assignments in `Catalog.java`. The online extractor now calculates the actual header, palette, XOR plane and AND-mask payload size, excluding trailing NE resource-table alignment padding. Including that padding had shifted Pillow's transparency-mask lookup and produced black bars or missing pixels. All 457 re-extracted Part I icons were compared pixel-for-pixel against the reference's corrected icons; all matched.
+
+The renderer uses the original male/female player icons 401/403, short sword 245, leather armor 215, healing potion 227 and corrected existing creature-family icons. Saved enemy icons are repaired for display by name, without changing their stats or location. The native reference's Java game engine and registered Part II content are not loaded by the browser game.
+
 ## Inventory artwork and layout
 
 Resources of type 261, IDs 1 and 2, are standard Windows Metafile drawings created with Microsoft Draw. `scripts/recover-inventory.py` reads them directly from the executable and exports the original polylines, ellipses, rectangles, colors and equipment guide lines as `public/classic/inventory-1.svg` and `inventory-2.svg` (25 shapes each). The browser inventory uses drawing 1. These are recovered drawings, not traced screenshots or newly drawn substitutes.

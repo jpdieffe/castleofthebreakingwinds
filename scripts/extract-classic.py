@@ -34,6 +34,13 @@ while u16(pos):
         width, double_height = struct.unpack_from('<ii', blob, 4)
         height = double_height // 2
         planes, bpp = struct.unpack_from('<HH', blob, 12)
+        # CastleWinds_Mobile fixed this: NE alignment padding is not part of the
+        # icon. Including it makes ICO decoders read the transparency mask late.
+        colors = struct.unpack_from('<I', blob, 32)[0]
+        palette = (colors or (1 << bpp)) if bpp <= 8 else 0
+        payload = 40 + palette * 4 + (((width * bpp + 31) // 32) * 4 + ((width + 31) // 32) * 4) * height
+        assert payload <= len(blob)
+        blob = blob[:payload]
         ico = struct.pack('<HHHBBBBHHII', 0, 1, 1, width % 256, height % 256,
                           0, 0, planes, bpp, len(blob), 22) + blob
         im = Image.open(BytesIO(ico)).convert('RGBA')
