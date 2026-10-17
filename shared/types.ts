@@ -35,7 +35,8 @@ export type Action =
   | { type: 'move'; dx: number; dy: number }
   | { type: 'bolt'; x: number; y: number }
   | { type: 'attack' | 'heal' | 'fireball' | 'potion' | 'mana' | 'interact' | 'revive' | 'ready' | 'restart' }
-  | { type: 'buy'; item: 'potion' | 'mana' | 'weapon' | 'armor' };
+  | { type: 'buy'; item: 'potion' | 'mana' | 'weapon' | 'armor' }
+  | { type: 'sell'; item: 'potion' | 'mana' };
 export interface Snapshot extends Omit<GameState, 'levels'> { map: Level }
 export type ServerMessage =
   | { type: 'welcome'; token: string; playerId: string; code: string }

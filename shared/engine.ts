@@ -1,3 +1,4 @@
+import { buyPrice, potionSellPrice } from './shop.ts';
 import type { Action, GameState, Player, Point, Snapshot } from './types.ts';
 import { at, distance, makeWorld, passable, shopAt, MOBILE_MAP_VERSION } from './world.ts';
 
@@ -198,9 +199,17 @@ export function act(game: GameState, player: Player, action: Action): string | u
     if (!player.potions) return 'Reviving your partner requires one healing potion.';
     player.potions--; partner.hp = Math.ceil(partner.maxHp / 2); log(game, `${player.name} revives ${partner.name}.`); return;
   }
+  if (action.type === 'sell') {
+    if (!shopAt(map, player)) return 'Stand near a shop entrance to trade.';
+    if (action.item !== 'potion' && action.item !== 'mana') return 'This item cannot be sold.';
+    const field = action.item === 'potion' ? 'potions' : 'manaPotions';
+    if (player[field] <= 0) return 'None remaining in your pack.';
+    player[field]--; player.gold += potionSellPrice;
+    log(game, `${player.name} sells a ${action.item === 'potion' ? 'healing' : 'mana'} potion for ${potionSellPrice} gold.`); return;
+  }
   if (action.type === 'buy') {
     if (!shopAt(map, player)) return 'Stand near a shop entrance to trade.';
-    const cost = { potion: 10, mana: 10, weapon: 35 * player.weapon, armor: 30 * (player.armor + 1) }[action.item];
+    const cost = buyPrice(player, action.item);
     if (!cost || player.gold < cost) return 'Not enough gold.';
     player.gold -= cost;
     if (action.item === 'potion') player.potions++;

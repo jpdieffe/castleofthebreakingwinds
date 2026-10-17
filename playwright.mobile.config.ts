@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
-  testDir: './tests', testMatch: 'mobile.spec.ts', timeout: 60000, workers: 1,
+  testDir: './tests', testMatch: ['mobile.spec.ts', 'shop.spec.ts'], timeout: 60000, workers: 1,
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-mobile-report' }]],
   outputDir: 'test-results-mobile',
   use: { trace: 'retain-on-failure', screenshot: 'only-on-failure' },

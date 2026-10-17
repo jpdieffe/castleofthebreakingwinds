@@ -1,6 +1,15 @@
 # Test results - October 17, 2026
 
 
+## Mobile-reference shop interface
+
+- Replaced the inventory's store list with a dedicated native-style shop: actual location name, balance, Buy/Sell tabs, four-column pixel-art grid, selected item details and a separate commit button. Portrait and landscape follow the reference IconPopup layout. Existing online stock/prices remain; this is not a full native catalog or bank/weight-system port.
+- Added authoritative potion resale (3 gold each), equipped-item protection, empty-quantity and range checks, live price/balance updates, and refresh persistence. Trade opens from the touch action, desktop E or the inventory link. Quick slots and equipment display remain synchronized.
+- **34 engine/network tests passed**, **37 desktop/co-op browser tests passed**, and **19 distinct mobile browser cases passed** across the main run and targeted follow-ups. Three existing platform skips remain: Windows WebKit lacks WebRTC and Chromium's pinch protocol; its two-client WebSocket coverage passes.
+- An initial WebKit shop case did not open via simulated mouse input. Shop tests now use actual taps on touch profiles. Both iPhone shop cases passed three consecutive repetitions (6/6), and both Android shop cases passed again. The initial desktop shop fixture also incorrectly tried a hidden touch button; it was corrected to use desktop E. These failed attempts are not counted as passes.
+- Two independent clients verified purchases and potion sales over real WebRTC and retained WebSockets, with the buyer's state synchronized and the companion's belongings unchanged. Screen-fit checks cover 320x568, 390x844, 667x375, 844x390 and desktop. TypeScript, production build and diff checks passed.
+- Reference comparison screenshots: [portrait](screenshots/shop-portrait.png), [landscape](screenshots/shop-landscape.png). Tests use browser device emulation on Windows, not physical Android/iPhone hardware.
+
 ## Direct mobile map import (supersedes the earlier style-only update)
 
 - Replaced active geometry with the native Java reference's 13 Part I maps: northern hamlet, three mine floors, Bjarnarhaven and eight fortress floors. All **19,619 terrain cells**, decorations, named places and entity positions were exported from the unmodified mobile engine. An independent second Java export produced zero differences. Source hashes are recorded in `shared/mobile-maps.json`.

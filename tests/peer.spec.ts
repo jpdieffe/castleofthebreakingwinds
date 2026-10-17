@@ -135,11 +135,18 @@ test('guest purchases and healing update both browsers from host authority', asy
   const { a, b } = await pair(browser, game => { chamber(game); game.levels[0].shop = { x: 5, y: 5 }; game.players[0].hp = 10; });
   await key(a, '2'); await expect(b.locator('.player-card').first().locator('.health')).toContainText('30/60');
   await a.locator('[data-dialog="inventory"]').click();
-  await b.locator('[data-dialog="inventory"]').click(); await b.getByRole('button', { name: /Healing potion/ }).click();
+  await key(b, 'e'); await b.locator('[data-shop-item=potion]').click(); await b.locator('[data-shop-commit]').click();
   await expect(a.locator('.player-card').nth(1)).toContainText('10 gold');
   await expect(a.locator('.player-card').nth(1)).toContainText('4 potions');
+  await expect(b.locator('[data-shop-balance]')).toContainText('10 gold');
+  await b.locator('[data-shop-tab=sell]').click(); await b.locator('[data-shop-item=mana]').click();
+  await b.waitForTimeout(350); await b.locator('[data-shop-commit]').click();
+  await expect(a.locator('.player-card').nth(1)).toContainText('13 gold');
+  await expect(b.locator('[data-shop-balance]')).toContainText('13 gold');
+  await b.locator('#close-dialog').click(); await b.locator('[data-dialog="inventory"]').click();
   await expect(b.locator('[data-potion=potion]')).toContainText('Quantity: 4');
-  await expect(b.locator('[data-slot=purse]')).toContainText('10 gold');
+
+  await expect(b.locator('[data-slot=purse]')).toContainText('13 gold');
   await expect(a.locator('[data-slot=purse]')).toContainText('20 gold');
   await expect(a.locator('[data-potion=potion]')).toContainText('Quantity: 3');
   await a.waitForTimeout(350); await a.getByRole('button', { name: 'Drink healing potion' }).click();

@@ -47,9 +47,11 @@ test('touch spellbook, inventory selection and purchases, hero, journal and menu
   const p=addPlayer(game,'phone-host','Astrid'); Object.assign(p,{hp:10,mana:5,gold:100});
   await page.evaluate(game => { sessionStorage.setItem('castle-peer-host-v1',JSON.stringify({game,token:'phone-token'})); sessionStorage.setItem('castle-session',JSON.stringify({code:game.code,token:'phone-token',playerId:'phone-host',server:'peer'})); },game);
   await page.reload(); await expect(page.locator('#simulation-status')).toHaveText('REAL TIME');
-  await page.getByRole('button',{name:'Pack',exact:true}).tap(); await page.locator('[data-buy=weapon]').tap();
-  await expect(page.locator('[data-slot=purse]')).toContainText('100 gold');
-  await page.locator('[data-selected-action]').tap(); await expect(page.locator('[data-slot=weapon]')).toContainText('+2'); await expect(page.locator('[data-slot=purse]')).toContainText('65 gold');
+  await page.locator('#touch-interact').tap(); await page.locator('[data-shop-item=weapon]').tap();
+  await expect(page.locator('[data-shop-balance]')).toContainText('100 gold');
+  await page.locator('[data-shop-commit]').tap(); await expect(page.locator('[data-shop-balance]')).toContainText('65 gold');
+  await page.locator('#close-dialog').tap(); await page.getByRole('button',{name:'Pack',exact:true}).tap();
+  await expect(page.locator('[data-slot=weapon]')).toContainText('+2');
   await page.locator('[data-potion=potion]').tap(); await page.waitForTimeout(350); await page.locator('[data-selected-action]').tap();
   await expect(page.locator('[data-vitals]')).toContainText('45/60'); await expect(page.locator('[data-potion=potion]')).toContainText('Quantity: 2');
   await page.setViewportSize({width:844,height:390}); await expect(page.locator('[data-selected-action]')).toBeInViewport({ratio:1});
@@ -87,8 +89,8 @@ test('two touch clients host/join, synchronize movement and arrows, purchase ind
     await b.locator('#cancel-aim').tap();
     for(let i=0;i<9;i++){await b.waitForTimeout(300);await b.getByRole('button',{name:'Move north',exact:true}).tap();}
     for(let i=0;i<8;i++){await b.waitForTimeout(300);await b.getByRole('button',{name:'Move west',exact:true}).tap();}
-    await b.getByRole('button',{name:'Pack',exact:true}).tap(); await b.locator('[data-buy=potion]').tap(); await b.waitForTimeout(350); await b.locator('[data-selected-action]').tap();
-    await expect(b.locator('[data-slot=purse]')).toContainText('10 gold'); await expect(a.locator('.player-card').nth(1)).toContainText('4 potions');
+    await b.locator('#touch-interact').tap(); await b.locator('[data-shop-item=potion]').tap(); await b.waitForTimeout(350); await b.locator('[data-shop-commit]').tap();
+    await expect(b.locator('[data-shop-balance]')).toContainText('10 gold'); await expect(a.locator('.player-card').nth(1)).toContainText('4 potions');
     await b.locator('#close-dialog').tap(); await b.reload(); await expect(b.locator('#simulation-status')).toHaveText('REAL TIME',{timeout:25000});
     await expect(b.locator('#mobile-vitals')).toContainText('10 gold');
     await b.getByRole('button',{name:'Spells',exact:true}).tap(); await b.locator('[data-spell=fireball]').tap(); await b.locator('[data-assign-slot="0"]').tap(); await b.locator('#close-dialog').tap();

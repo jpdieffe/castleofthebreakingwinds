@@ -12,7 +12,7 @@ export interface Room { game: GameState; seats: Seat[]; sockets: Map<string, Web
 interface Options { port?: number; host?: string; dataDir?: string | false; origins?: string[] }
 const hash = (token: string) => createHash('sha256').update(token).digest('hex');
 const tokenMatches = (token: string, saved: string) => saved.length === 64 && timingSafeEqual(Buffer.from(hash(token), 'hex'), Buffer.from(saved, 'hex'));
-const actions = new Set(['move', 'attack', 'bolt', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart', 'buy']);
+const actions = new Set(['move', 'attack', 'bolt', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart', 'buy', 'sell']);
 const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json' };
 
 export function createGameServer(options: Options = {}) {
@@ -122,6 +122,7 @@ export function createGameServer(options: Options = {}) {
       }
       if (message.type !== 'action' || !message.action || !actions.has(message.action.type)) { fail('Unknown action.'); return; }
       if (message.action.type === 'buy' && !['potion', 'mana', 'weapon', 'armor'].includes(message.action.item)) { fail('Unknown item.'); return; }
+      if (message.action.type === 'sell' && !['potion', 'mana'].includes(message.action.item)) { fail('Unknown item.'); return; }
       const player = room.game.players.find(p => p.id === playerId);
       if (!player) return;
       room.touched = Date.now();

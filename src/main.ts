@@ -1,5 +1,7 @@
 import './style.css';
 import './mobile.css';
+import './shop.css';
+import { mountShop } from './shop';
 import { PeerSession } from './peer-session';
 import { mountInventory } from './inventory';
 import { mountSpellbook } from './spellbook';
@@ -58,10 +60,11 @@ const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElem
 const canvas = el<HTMLCanvasElement>('world'), ctx = canvas.getContext('2d')!;
 const mini = el<HTMLCanvasElement>('minimap'), mc = mini.getContext('2d')!;
 const dialog = el<HTMLDialogElement>('dialog');
+let shopView: ReturnType<typeof mountShop> | undefined;
 let inventoryView: ReturnType<typeof mountInventory> | undefined;
 let spellbookView: ReturnType<typeof mountSpellbook> | undefined;
 function closeDialog() { dialog.close(); canvas.focus(); }
-dialog.addEventListener('close', () => { inventoryView = undefined; spellbookView = undefined; dialog.classList.remove('inventory-dialog'); canvas.focus(); });
+dialog.addEventListener('close', () => { inventoryView = undefined; spellbookView = undefined; shopView = undefined; dialog.classList.remove('inventory-dialog', 'shop-dialog', 'spellbook-dialog'); canvas.focus(); });
 dialog.setAttribute('aria-labelledby', 'dialog-title');
 document.querySelector('.window')!.insertAdjacentHTML('afterbegin', `<header class="mobile-heading"><div><small>CASTLE OF THE WINDS</small><h2 id="mobile-location">Adventure together</h2><div id="mobile-vitals"></div><div id="mobile-partner"></div></div><button data-dialog="menu" aria-label="Game menu">☰</button></header>`);
 el('world').parentElement!.insertAdjacentHTML('beforeend', `<div class="map-tools"><button id="zoom-out" aria-label="Zoom out">−</button><button id="zoom-in" aria-label="Zoom in">+</button><button id="cancel-aim" hidden>Cancel aim</button></div><span class="map-hint">Tap to walk · Pinch to zoom</span>`);
@@ -73,7 +76,7 @@ el<HTMLInputElement>('server').value = serverUrl;
 el<HTMLInputElement>('code').value = query.get('room')?.slice(0, 6).toUpperCase() || '';
 el<HTMLInputElement>('name').value = localStorage.getItem('castle-name') || '';
 let toastTimer = 0;
-function toast(message: string) { if (dialog.open) { if (inventoryView) inventoryView.message(message); else { let note = dialog.querySelector<HTMLElement>('.dialog-notice'); if (!note) { note = document.createElement('p'); note.className = 'dialog-notice'; note.setAttribute('role', 'status'); el('dialog-body').append(note); } note.textContent = message; } } el('toast').textContent = message; el('toast').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { el('toast').hidden = true; }, 4000); }
+function toast(message: string) { if (dialog.open) { if (shopView) shopView.message(message); else if (inventoryView) inventoryView.message(message); else { let note = dialog.querySelector<HTMLElement>('.dialog-notice'); if (!note) { note = document.createElement('p'); note.className = 'dialog-notice'; note.setAttribute('role', 'status'); el('dialog-body').append(note); } note.textContent = message; } } el('toast').textContent = message; el('toast').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { el('toast').hidden = true; }, 4000); }
 function connection(text: string, connected = false) { el('connection').textContent = text; el('connection').classList.toggle('connected', connected); }
 function lobbyMessage(text: string) { el('lobby-status').textContent = text; }
 function busy(value: boolean) { pending = value; el<HTMLButtonElement>('solo').disabled = value; el<HTMLButtonElement>('create').disabled = value; el<HTMLButtonElement>('join').disabled = value; }
@@ -142,6 +145,8 @@ function aimArrow(active: boolean) {
   if (state) render();
 }
 function chooseAction(type: Action['type']) {
+  const player = me();
+  if (type === 'interact' && player && state && shopAt(state.map, player)) { void openDialog('shop'); return; }
   if (type === 'bolt') {
     if (state?.status !== 'playing' || !me()?.hp) { toast('Start your adventure before aiming.'); return; }
     aimArrow(!aimingArrow);
@@ -158,7 +163,7 @@ el('touch-attack').onclick = () => chooseAction('attack');
 document.querySelectorAll<HTMLButtonElement>('[data-quick-slot]').forEach(button => { button.onclick = () => chooseAction(quickSlots.get(Number(button.dataset.quickSlot) as QuickSlot)); });
 el('touch-interact').onclick = () => {
   const p = me();
-  if (p && state && shopAt(state.map,p)) void openDialog('inventory');
+  if (p && state && shopAt(state.map,p)) void openDialog('shop');
   else chooseAction('interact');
 };
 el('cancel-aim').onclick = () => aimArrow(false);
@@ -224,9 +229,9 @@ function render() {
   el('party-message').textContent = state.status === 'waiting' ? `${state.players.length}/2 adventurers. ${player?.ready ? 'You are ready. Waiting for your companion.' : 'Share the invite, then both choose Ready.'}` : state.status === 'paused' ? 'Combat is paused. Reconnecting keeps your position, equipment, and progress.' : state.status === 'won' ? 'You defeated Hrungnir together. The north will remember.' : 'You can begin again with the same companion.';
   if (solo) el('party-message').textContent = state.status === 'won' ? 'You defeated Hrungnir. The north will remember.' : 'Your expedition has ended. Choose Begin again to restart.';
   el('quest-title').textContent = state.level === 0 ? 'Find the road north' : state.level < 4 ? 'Descend into the mine' : state.level === 4 ? 'Find Hrungnir’s stronghold' : 'Defeat the Hill Giant Lord';
-  el('quest-text').textContent = player?.hp === 0 ? 'You are down. Your companion must stand beside you and press R with a healing potion.' : state.map.safe ? 'E at the sanctuary restores health and mana. Trade from your inventory. Gather at the stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1–3 for spells. Stay together at the stairs; E travels.';
-  if (solo) el('quest-text').textContent = player?.hp === 0 ? 'Your adventure has ended. Choose Begin again to restart.' : state.map.safe ? 'E at the sanctuary restores health and mana. Trade from your inventory. Use E near stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1, 2, 3 for spells. E near stairs travels to the next area.';
-  if (dialog.open && player) inventoryView?.update(state, player);
+  el('quest-text').textContent = player?.hp === 0 ? 'You are down. Your companion must stand beside you and press R with a healing potion.' : state.map.safe ? 'E at the sanctuary restores health and mana. E beside a shop opens Trade. Gather at the stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1–3 for spells. Stay together at the stairs; E travels.';
+  if (solo) el('quest-text').textContent = player?.hp === 0 ? 'Your adventure has ended. Choose Begin again to restart.' : state.map.safe ? 'E at the sanctuary restores health and mana. E beside a shop opens Trade. Use E near stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1, 2, 3 for spells. E near stairs travels to the next area.';
+  if (dialog.open && player) { inventoryView?.update(state, player); shopView?.update(state, player); }
   if (dialog.open && player) spellbookView?.update(player, state.status === 'playing');
   el('mobile-location').textContent = state.map.name;
   el('mobile-vitals').textContent = player ? `♥ ${player.hp}/${player.maxHp}   ✦ ${player.mana}/${player.maxMana}   ◈ ${player.gold} gold` : '';
@@ -408,13 +413,18 @@ setInterval(walk, 300);
 setInterval(() => { if (socket?.readyState === WebSocket.OPEN && state && Date.now() - lastMessage > 8000) socket.close(); }, 2000);
 
 async function openDialog(kind: string) {
-  aimArrow(false); held.clear(); destination = undefined;
-  inventoryView = undefined; spellbookView = undefined; dialog.classList.toggle('inventory-dialog', kind === 'inventory'); dialog.classList.toggle('spellbook-dialog', kind === 'spells');
+  aimArrow(false); held.clear(); touchMove = undefined; destination = undefined;
+  inventoryView = undefined; spellbookView = undefined; shopView = undefined; dialog.classList.toggle('inventory-dialog', kind === 'inventory'); dialog.classList.toggle('spellbook-dialog', kind === 'spells'); dialog.classList.toggle('shop-dialog', kind === 'shop');
+  el('close-dialog').textContent = kind === 'shop' ? 'Close' : '×';
   const body = el('dialog-body'); body.replaceChildren(); el('dialog-title').textContent = kind === 'inventory' ? 'Castle Inventory' : kind === 'journal' ? 'Recovered story journal' : kind === 'invite' ? 'Invite a companion' : 'How to adventure';
   if (!dialog.open) dialog.showModal();
   if (kind === 'inventory') {
     const p = me(); if (!p || !state) { body.textContent = 'Join an expedition to view your equipment.'; return; }
-    inventoryView = mountInventory(body, send, closeDialog, slotAssignments); inventoryView.update(state, p);
+    inventoryView = mountInventory(body, send, closeDialog, slotAssignments, () => void openDialog('shop')); inventoryView.update(state, p);
+  } else if (kind === 'shop') {
+    const p = me(); el('dialog-title').textContent = 'Trading post';
+    if (!p || !state) { body.textContent = 'Join an expedition to trade.'; return; }
+    shopView = mountShop(body, send, el('dialog-title')); shopView.update(state, p);
   } else if (kind === 'spells') {
     el('dialog-title').textContent = 'Spellbook'; const p = me(); if (!p) return;
     spellbookView = mountSpellbook(body, type => { closeDialog(); chooseAction(type); }, slotAssignments); spellbookView.update(p, state?.status === 'playing');
@@ -442,7 +452,7 @@ async function openDialog(kind: string) {
       stories.forEach(s => { const section = document.createElement('details'), summary = document.createElement('summary'), text = document.createElement('p'); summary.textContent = `Story ${s.id}`; text.className = 'story-text'; text.textContent = s.text.replace(/^[^a-zA-Z]+/, '').replaceAll('#', '\n'); section.append(summary, text); body.append(section); });
     } catch { body.textContent = 'Unable to load the recovered story. Please try again.'; }
   } else if (kind !== 'invite') {
-    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Touch controls</dt><dd>Use the eight-way pad; hold a direction to keep moving. The center button attacks. Tap the map to walk, pinch or use + / - to zoom, and long-press to inspect. Pack, Spells, Hero and Journal open touch panels. Select a potion in Pack or a spell in Spells, then Assign to slot 1 or 2 to customize the two icon buttons. Potion badges show quantities; assignments are saved on this device. Choose Magic Arrow, then tap a tile to shoot; Cancel aim returns to walking. Trade opens the shop near a shop; Rest at sanctuary is in the menu. Rotate your phone for a side-by-side layout.</dd><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1 or Magic Arrow: aim with the crosshair, then click any map tile to fire (3 MP, six-tile range). Click again to keep firing; Escape, right-click, movement, or another action cancels aiming. 2: Heal (6 MP). 3: Fireball (8 MP). Magic Arrow travels toward your chosen tile, stopping at walls or the first monster. Fireball targets the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E near the sanctuary restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, and story resources. Campaign maps are exported directly from CastleWinds_Mobile. Reconstructed: combat balance, online combat, item mechanics, and networking. This is not the complete original game running in an emulator.</p>`;
+    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Touch controls</dt><dd>Use the eight-way pad; hold a direction to keep moving. The center button attacks. Tap the map to walk, pinch or use + / - to zoom, and long-press to inspect. Pack, Spells, Hero and Journal open touch panels. Select a potion in Pack or a spell in Spells, then Assign to slot 1 or 2 to customize the two icon buttons. Potion badges show quantities; assignments are saved on this device. Choose Magic Arrow, then tap a tile to shoot; Cancel aim returns to walking. Trade opens the shop near a shop; Rest at sanctuary is in the menu. Rotate your phone for a side-by-side layout.</dd><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1 or Magic Arrow: aim with the crosshair, then click any map tile to fire (3 MP, six-tile range). Click again to keep firing; Escape, right-click, movement, or another action cancels aiming. 2: Heal (6 MP). 3: Fireball (8 MP). Magic Arrow travels toward your chosen tile, stopping at walls or the first monster. Fireball targets the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E near the sanctuary restores HP and MP. I opens your pack. E beside a shop opens Trade: select an icon, then Buy or Sell.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, and story resources. Campaign maps are exported directly from CastleWinds_Mobile. Reconstructed: combat balance, online combat, item mechanics, and networking. This is not the complete original game running in an emulator.</p>`;
   }
 }
 document.querySelectorAll<HTMLButtonElement>('[data-dialog], [data-mobile-dialog]').forEach(b => { b.onclick = () => { void openDialog((b.dataset.dialog ?? b.dataset.mobileDialog)!); }; });

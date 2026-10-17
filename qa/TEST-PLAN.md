@@ -125,3 +125,13 @@ For additional network coverage, repeat connection/reconnection from two separat
 - Check native line-of-sight, retained exploration and shared party visibility. Confirm high-density building artwork and readable signs in portrait and landscape.
 - Resume a legacy 14-area save. Verify one-time relocation, stats/equipment/supplies preserved, old-save backup retained, quick slots preserved and subsequent refresh does not relocate again.
 - Fixed seed 42 exports intentionally do not reproduce the random seed of an arbitrary existing native save. Full native item, trap, NPC and quest mechanics remain outside this map change.
+
+
+## Mobile-reference shops
+
+- Compare against the sibling mobile project's IconPopup.java and shop screenshots: dark panel, gold title, Buy/Sell tabs, four-column pixel-art stock, selected-item highlight, details and a separate commit button. Portrait puts details below; landscape puts them beside the grid.
+- Enter Trade using the phone action button, desktop E, and the inventory Trade link. Use the actual native shop name. Closing restores map focus; opening Pack/Spells afterward must not retain shop styles.
+- Select without spending. Buy potions and equipment; verify authoritative gold, quantities, automatic equipment upgrades, next-upgrade price and insufficient-funds state.
+- Sell owned healing/mana potions one at a time; verify gold, last-item removal, empty quantity rejection and equipped-item protection. Keep online prices and existing inventory model; full native catalog, weight, bank credit and unequipping are outside this interface change.
+- Check 320x568, 390x844, 667x375, 844x390 and desktop: Close, Buy/Sell, details and commit remain visible; icons load; no horizontal overflow. Repeat on Android Chrome and iPhone WebKit browser profiles.
+- Two WebRTC clients and two WebSocket clients: buy/sell on one client, confirm the other sees exactly the same player state and its own inventory remains independent. Reload and confirm persistence. Engine rejects selling outside shop range, while down, at zero quantity and during action cooldown.

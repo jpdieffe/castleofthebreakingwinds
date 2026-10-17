@@ -11,6 +11,7 @@ export function validAction(value: unknown): value is Action {
   const a = value as Record<string, unknown>;
   if (a.type === 'move') return Number.isInteger(a.dx) && Number.isInteger(a.dy) && Math.abs(Number(a.dx)) <= 1 && Math.abs(Number(a.dy)) <= 1;
   if (a.type === 'bolt') return Number.isInteger(a.x) && Number.isInteger(a.y);
+  if (a.type === 'sell') return ['potion', 'mana'].includes(String(a.item));
   if (a.type === 'buy') return ['potion', 'mana', 'weapon', 'armor'].includes(String(a.item));
   return ['attack', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart'].includes(String(a.type));
 }

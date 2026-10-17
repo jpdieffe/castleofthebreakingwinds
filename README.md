@@ -50,14 +50,15 @@ Existing 14-area saves migrate once when the host resumes: characters retain sta
 | Health / mana potion | H / Q |
 | Stairs / rest at sanctuary | E |
 | Revive adjacent partner | R, costs one healing potion |
-| Inventory / shop | I |
+| Inventory | I |
+| Trade beside a shop | E |
 | Original story journal | J |
 
 In co-op, both adventurers must be alive and within three tiles of the stairs to travel. Solo players use the stairs alone. Menus do not pause combat. Trade at shop entrances and use E near the sanctuary or temple for free restoration.
 
 Magic Arrow uses 3 MP per shot and travels up to six tiles toward the clicked point, including empty floor. It stops at walls or the first monster in its path. While selected, map clicks fire instead of walking; aiming stays active for repeated shots. The crosshair and highlighted button show the selected mode.
 
-Inventory now follows the original equipment-slot layout around the character outline recovered from the executable, with separate Small Pack and Floor/Store panes. Click **Drink** to use a potion or an affordable store item to buy it at a shop entrance. Equipment, quantities, gold and health update while the inventory stays open. **Exit!**, Escape or the close button returns to the map. Combat continues while inventory is open. The current item system still has automatic sword/armor upgrades; the empty accessory slots do not implement the original game's full equipment or drag-and-drop system.
+Inventory now follows the original equipment-slot layout around the character outline recovered from the executable, with separate Small Pack and Floor panes. Click **Drink** to use a potion. Beside a shop, choose **Trade** (or press E) to open the mobile-reference shop window. Its Buy/Sell tabs, four-column icon grid and fixed details panel work in portrait and landscape. Selecting an icon never spends gold: use the separate Buy or Sell button. Healing and mana potions can be sold for 3 gold each; equipped upgrades cannot be sold. The current online stock and purchase prices are retained. Equipment, quantities, gold and health update while the inventory stays open. **Exit!**, Escape or the close button returns to the map. Combat continues while inventory is open. The current item system still has automatic sword/armor upgrades; the empty accessory slots do not implement the original game's full equipment or drag-and-drop system.
 
 ## Development and verification
 

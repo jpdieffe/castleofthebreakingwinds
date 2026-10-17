@@ -85,8 +85,10 @@ test('spells, mana, healing and inventory purchases use the same authoritative s
   await cooldown(room); await key(a, 'h'); await expect.poll(() => p.hp).toBe(60); expect(p.potions).toBe(2);
   await expect(b.locator('.player-card').first()).toContainText('2 potions');
   await cooldown(room); map.shop = { x: p.x, y: p.y }; app.broadcast(room);
-  await a.locator('[data-dialog="inventory"]').click(); await a.getByRole('button', { name: 'Healing potion · 10 gold', exact: true }).click();
+  await key(a, 'e'); await a.locator('[data-shop-item=potion]').click(); await a.locator('[data-shop-commit]').click();
   await expect.poll(() => p.potions).toBe(3); expect(p.gold).toBe(10); await expect(b.locator('.player-card').first()).toContainText('10 gold');
+  await cooldown(room); await a.locator('[data-shop-tab=sell]').click(); await a.locator('[data-shop-item=potion]').click(); await a.locator('[data-shop-commit]').click();
+  await expect.poll(() => p.potions).toBe(2); expect(p.gold).toBe(13); await expect(b.locator('.player-card').first()).toContainText('13 gold');
 });
 test('simultaneous movement cannot duplicate loot or overlap players; doors synchronize', async ({ browser }) => {
   const { a, b, room } = await pair(browser); await fixture(room, [a, b]);

@@ -1,0 +1,35 @@
+/* Matches the mobile reference's IconPopup: four icons per row and a fixed
+   detail/commit panel, below in portrait and beside the stock in landscape. */
+dialog#dialog.shop-dialog { width:360px; max-width:calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 24px); max-height:86dvh; padding:10px 12px; border:1px solid #55636a; border-radius:10px; background:#101a22; color:#e7ebe8; font:14px/1.3 Arial,sans-serif; box-shadow:0 8px 32px #0008; overflow:hidden; }
+dialog#dialog.shop-dialog[open] { display:flex; flex-direction:column; }
+.shop-dialog::backdrop { background:#000a; }
+dialog#dialog.shop-dialog > .titlebar { display:flex; align-items:center; flex:none; gap:10px; min-height:46px; padding:0; background:none; color:#debb78; font:20px/1.2 Arial,sans-serif; }
+.shop-dialog #dialog-title { flex:1; min-width:0; }
+dialog#dialog.shop-dialog button { min-width:0; min-height:46px; margin:0; border:1px solid #34454f; border-radius:9px; padding:6px; background:#192831; color:#e7ebe8; font:14px/1.2 Arial,sans-serif; }
+dialog#dialog.shop-dialog button:focus-visible { outline:2px solid #debb78; outline-offset:-3px; }
+dialog#dialog.shop-dialog #close-dialog { flex:none; width:64px; font-size:14px; }
+dialog#dialog.shop-dialog #dialog-body { display:flex; flex-direction:column; flex:1; min-height:0; max-height:none; padding:0; overflow:hidden; font:12px/1.3 Arial,sans-serif; }
+.shop-dialog #dialog-body .shop-balance { flex:none; margin:0 0 8px; color:#9bafb5; }
+.shop-tabs { display:grid; grid-template-columns:1fr 1fr; gap:6px; flex:none; margin-bottom:8px; }
+dialog#dialog.shop-dialog button[aria-pressed=true] { background:#34483f; border-color:#debb78; box-shadow:inset 0 0 0 1px #debb78; }
+.shop-body { display:flex; flex-direction:column; min-height:0; gap:8px; }
+.shop-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); align-content:start; overflow:auto; min-height:0; gap:6px; padding:3px; }
+dialog#dialog.shop-dialog [data-shop-item] { display:flex; flex-direction:column; align-items:center; height:108px; padding:5px 3px; gap:2px; }
+.shop-grid img { width:44px; height:44px; padding:4px; border-radius:8px; background:#d8d9cb; object-fit:contain; image-rendering:pixelated; flex:none; }
+.shop-grid span { width:100%; min-height:28px; font-size:11px; line-height:14px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.shop-grid small { color:#debb78; font-size:11px; white-space:nowrap; }
+.shop-grid .unavailable { opacity:.65; }
+.shop-detail { display:flex; flex-direction:column; flex:none; min-height:0; height:150px; padding:8px 10px; border-radius:9px; background:#192831; }
+.shop-copy { flex:1; overflow:auto; min-height:0; }
+.shop-dialog #dialog-body .shop-detail h2 { margin:0 0 4px; color:#e7ebe8; font:16px/1.2 Arial,sans-serif; }
+.shop-dialog #dialog-body .shop-detail p { color:#9bafb5; margin:0 0 4px; font-size:12px; line-height:1.3; }
+.shop-dialog #dialog-body [data-shop-notice] { color:#debb78; }
+dialog#dialog.shop-dialog [data-shop-commit] { width:100%; flex:none; }
+dialog#dialog.shop-dialog button:disabled { opacity:.45; cursor:default; }
+#dialog-body [data-open-shop]:not([hidden]) { display:block; flex:none; min-height:44px; margin:4px; }
+@media (orientation:landscape) {
+  dialog#dialog.shop-dialog { width:720px; }
+  .shop-body { flex-direction:row; }
+  .shop-grid { flex:1; max-height:calc(86dvh - 136px); }
+  .shop-detail { width:220px; flex:none; height:auto; min-height:150px; max-height:calc(86dvh - 136px); }
+}

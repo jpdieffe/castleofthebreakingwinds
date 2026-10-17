@@ -23,16 +23,19 @@ test('classic inventory shows real equipment and updates purchases and potion us
   await expect(page.locator('[data-slot=armor]')).toContainText('None');
   await expect(page.locator('[data-slot=neck]')).toHaveAttribute('aria-label', 'Neckwear: empty');
   expect(await page.locator('.inventory-figure').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBeTruthy();
-  await page.getByRole('button', { name: 'Improve sword · 35 gold', exact: true }).click();
+  await page.locator('[data-open-shop]').click();
+  await page.locator('[data-shop-item=weapon]').click(); await page.locator('[data-shop-commit]').click();
+  await expect(page.locator('[data-shop-balance]')).toContainText('65 gold');
+  await expect(page.locator('[data-shop-commit]')).toBeDisabled();
+  await page.waitForTimeout(350); await page.locator('[data-shop-item=armor]').click(); await page.locator('[data-shop-commit]').click();
+  await expect(page.locator('[data-shop-balance]')).toContainText('35 gold');
+  await page.waitForTimeout(350); await page.locator('[data-shop-item=potion]').click(); await page.locator('[data-shop-commit]').click();
+  await expect(page.locator('[data-shop-balance]')).toContainText('25 gold');
+  await page.locator('#close-dialog').click(); await page.keyboard.press('i');
   await expect(page.locator('[data-slot=weapon]')).toContainText('+2');
-  await expect(page.locator('[data-slot=purse]')).toContainText('65 gold');
-  await expect(page.getByRole('button', { name: 'Improve sword · 70 gold', exact: true })).toBeDisabled();
-  await page.waitForTimeout(350); await page.getByRole('button', { name: 'Improve armor · 30 gold', exact: true }).click();
   await expect(page.locator('[data-slot=armor]')).toContainText('+1');
   await expect(page.locator('[data-slot=armor] img')).toBeVisible();
-  await page.waitForTimeout(350); await page.getByRole('button', { name: 'Healing potion · 10 gold', exact: true }).click();
   await expect(page.locator('[data-potion=potion]')).toContainText('Quantity: 4');
-  await expect(page.locator('[data-slot=purse]')).toContainText('25 gold');
   await page.waitForTimeout(350); await page.getByRole('button', { name: 'Drink healing potion', exact: true }).click();
   await expect(page.locator('[data-potion=potion]')).toContainText('Quantity: 3');
   await expect(page.locator('[data-vitals]')).toContainText('HP 45/60');
@@ -54,7 +57,7 @@ test('inventory fits small windows, scrolls on phones, and shows Floor away from
   for (let i = 0; i < 4; i++) { await page.keyboard.press('ArrowUp'); await page.waitForTimeout(350); }
   await page.keyboard.press('i'); await expect(page.locator('[data-floor-title]')).toHaveText('Floor');
   await expect(page.locator('[data-floor]')).toContainText('Floor is empty');
-  await expect(page.locator('[data-store]')).toBeHidden();
+  await expect(page.locator('[data-open-shop]')).toBeHidden();
   await expect(page.getByRole('button', { name: 'Drink healing potion' })).toBeDisabled();
   for (const [width, height] of [[1280, 600], [390, 844], [360, 640], [844, 390]]) {
     await page.setViewportSize({ width, height });

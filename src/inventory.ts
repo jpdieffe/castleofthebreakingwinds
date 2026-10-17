@@ -15,7 +15,7 @@ const slots = [
 ] as const;
 
 /** A view of authoritative player state; opening inventory never creates or equips items. */
-export function mountInventory(body: HTMLElement, send: (action: Action) => void, close: () => void, assignments: SlotAssignments) {
+export function mountInventory(body: HTMLElement, send: (action: Action) => void, close: () => void, assignments: SlotAssignments, trade: () => void) {
   body.innerHTML = `<nav class="inventory-menu" aria-label="Inventory menu"><button type="button" data-exit>Exit!</button><span>Equipment &amp; belongings</span></nav>
     <div class="inventory-summary"><strong data-character></strong><span data-stats></span></div>
     <div class="inventory-layout">
@@ -27,9 +27,7 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
       <div class="inventory-containers">
         <section class="inventory-child" aria-labelledby="inventory-floor-title"><h2 id="inventory-floor-title"><img src="${asset(2)}" alt=""><span data-floor-title>Floor</span></h2>
           <div class="inventory-items" data-floor></div>
-          <div class="inventory-items" data-store hidden>
-            ${(['potion', 'mana', 'weapon', 'armor'] as const).map((kind, i) => `<button type="button" class="inventory-row" data-buy="${kind}"><img src="${asset([art.potion, art.mana, art.sword, art.armor][i])}" alt=""><span></span><small></small></button>`).join('')}
-          </div>
+          <button type="button" data-open-shop hidden>Trade at shop</button>
           <p class="container-note" data-trade-note></p>
         </section>
         <section class="inventory-child" aria-labelledby="inventory-pack-title"><h2 id="inventory-pack-title"><img src="${asset(143)}" alt="">Small Pack<span data-pack-count></span></h2>
@@ -41,21 +39,20 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
         </section>
       </div>
     </div>
-    <section class="inventory-selection"><strong data-selected-title>Choose an item</strong><p data-selected-detail>Tap equipment, a potion, or a store item to inspect it.</p><button data-selected-action disabled>Select an item</button><div data-slot-picker></div></section>
+    <section class="inventory-selection"><strong data-selected-title>Choose an item</strong><p data-selected-detail>Tap equipment, or a potion to inspect it.</p><button data-selected-action disabled>Select an item</button><div data-slot-picker></div></section>
     <div class="inventory-description"><span data-inventory-message role="status">Combat continues while inventory is open.</span><span data-vitals></span></div>`;
   const find = <T extends HTMLElement = HTMLElement>(selector: string) => body.querySelector<T>(selector)!;
   const picker = mountSlotPicker(find('[data-slot-picker]'), assignments);
-  let selected: { kind: 'store' | 'pack' | 'slot'; key: string } | undefined;
+  let selected: { kind: 'pack' | 'slot'; key: string } | undefined;
   let current: Snapshot | undefined, player: Player | undefined;
-  const mobile = () => document.body.classList.contains('mobile-ui');
-  function select(kind: 'store' | 'pack' | 'slot', key: string) { selected = { kind, key }; updateSelection(); }
+  function select(kind: 'pack' | 'slot', key: string) { selected = { kind, key }; updateSelection(); }
   function updateSelection() {
     const quickItem = selected?.kind === 'pack' ? selected.key as 'potion' | 'mana' : undefined;
     picker.select(quickItem); find('.inventory-selection').classList.toggle('has-quick-item', !!quickItem);
     const button = find<HTMLButtonElement>('[data-selected-action]'); button.disabled = true; button.onclick = null;
     if (!selected || !player || !current) return;
     const p = player, active = current.status === 'playing' && p.hp > 0;
-    body.querySelectorAll('[data-buy], [data-potion], [data-slot]').forEach(el => el.classList.toggle('selected-item', el.getAttribute(selected!.kind === 'store' ? 'data-buy' : selected!.kind === 'pack' ? 'data-potion' : 'data-slot') === selected!.key));
+    body.querySelectorAll('[data-buy], [data-potion], [data-slot]').forEach(el => el.classList.toggle('selected-item', el.getAttribute(selected!.kind === 'pack' ? 'data-potion' : 'data-slot') === selected!.key));
     if (selected.kind === 'slot') {
       const slot = find(`[data-slot="${selected.key}"]`);
       find('[data-selected-title]').textContent = slot.getAttribute('aria-label');
@@ -67,19 +64,10 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
       find('[data-selected-detail]').textContent = `${count} in your pack. Restores up to ${type === 'potion' ? '35 health' : '20 mana'}.`;
       button.textContent = !count ? 'None remaining' : full ? `${type === 'potion' ? 'Health' : 'Mana'} is full` : 'Drink potion';
       button.disabled = !active || !count || full; button.onclick = () => send({ type });
-    } else {
-      const type = selected.key as 'potion' | 'mana' | 'weapon' | 'armor', cost = { potion: 10, mana: 10, weapon: 35 * p.weapon, armor: 30 * (p.armor + 1) }[type];
-      const inRange = !!shopAt(current.map,p);
-      find('[data-selected-title]').textContent = { potion: 'Healing potion', mana: 'Mana potion', weapon: 'Short sword upgrade', armor: 'Armor upgrade' }[type];
-      find('[data-selected-detail]').textContent = `${cost} gold. You have ${p.gold} gold. ${type === 'weapon' || type === 'armor' ? 'Equips automatically.' : 'Adds one potion to your pack.'}`;
-      button.textContent = p.gold < cost ? `Need ${cost - p.gold} more gold` : `Buy for ${cost} gold`;
-      button.disabled = !active || !inRange || p.gold < cost; button.onclick = () => send({ type: 'buy', item: type });
     }
   }
   find('[data-exit]').onclick = close;
-  body.querySelectorAll<HTMLButtonElement>('[data-buy]').forEach(button => {
-    button.onclick = () => { if (mobile()) select('store', button.dataset.buy!); else send({ type: 'buy', item: button.dataset.buy as 'potion' | 'mana' | 'weapon' | 'armor' }); };
-  });
+  find('[data-open-shop]').onclick = trade;
   body.querySelectorAll<HTMLElement>('[data-potion], [data-slot]').forEach(el => {
     el.tabIndex = 0;
     const inspect = () => select(el.dataset.slot ? 'slot' : 'pack', el.dataset.slot ?? el.dataset.potion!);
@@ -115,19 +103,8 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
         button.title = !active ? 'Resume adventuring to use items.' : !count ? 'None remaining.' : full ? `Your ${type === 'potion' ? 'health' : 'mana'} is full.` : 'Drink one potion.';
       }
       const trading = !!shopAt(state.map,p);
-      find('[data-floor-title]').textContent = trading ? 'Store · Trading post' : 'Floor';
-      find('[data-store]').hidden = !trading; find('[data-floor]').hidden = trading;
-      find('[data-trade-note]').textContent = trading ? 'Click an item to buy. E near the sanctuary restores health and mana.' : 'Walk over items to collect them. Trade beside a shop entrance.';
-      const prices = { potion: 10, mana: 10, weapon: 35 * p.weapon, armor: 30 * (p.armor + 1) };
-      const labels = { potion: 'Healing potion', mana: 'Mana potion', weapon: 'Improve sword', armor: 'Improve armor' };
-      for (const kind of ['potion', 'mana', 'weapon', 'armor'] as const) {
-        const button = find<HTMLButtonElement>(`[data-buy="${kind}"]`), price = prices[kind];
-        button.querySelector('span')!.textContent = labels[kind];
-        button.querySelector('small')!.textContent = `${price} gold`;
-        button.setAttribute('aria-label', `${labels[kind]} · ${price} gold`);
-        button.disabled = !mobile() && (!active || !trading || p.gold < price);
-        button.title = p.gold < price ? `You need ${price - p.gold} more gold.` : `Buy for ${price} gold.`;
-      }
+      find('[data-open-shop]').hidden = !trading;
+      find('[data-trade-note]').textContent = trading ? 'Use Trade to browse the shop.' : 'Walk over items to collect them. Trade beside a shop entrance.';
       const floor = state.map.loot.filter(item => item.x === p.x && item.y === p.y);
       const key = JSON.stringify(floor);
       if (key !== floorKey) {
