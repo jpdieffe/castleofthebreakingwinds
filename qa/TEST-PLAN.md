@@ -115,3 +115,13 @@ For additional network coverage, repeat connection/reconnection from two separat
 - Replace assignments, rotate between portrait and short landscape, verify both assignment buttons remain reachable, and reload to verify saved choices.
 - Two WebRTC clients: guest changes its slot, host retains its own choice, and guest reconnect restores its assignment.
 - Invalid saved slot data falls back to defaults without crashing. Run on Chrome and WebKit phone profiles; physical phone limitations are unchanged.
+
+
+## Imported native map layouts
+
+- Run `scripts/import-mobile-maps.py` against the read-only sibling Java project. Compare all 19,619 tiles and every building/sign with the direct export; check all 13 maps' spawns and exits are reachable.
+- Verify the burned-farm start (18,24), three-wide road, mine entrance (18,4), shop (10,14), sanctuary (24,14), west gate (2,16), city river/bridge and fortress entrance (10,5). Native terrain must agree with collision and touch pathfinding.
+- Walk both clients north to the mine using real controls, then exercise the route 0-1-2-3-2-1-0-4-5-6-7-8-9-10-11-12; confirm arrival, return travel, two-player proximity rules, final boss and restart.
+- Check native line-of-sight, retained exploration and shared party visibility. Confirm high-density building artwork and readable signs in portrait and landscape.
+- Resume a legacy 14-area save. Verify one-time relocation, stats/equipment/supplies preserved, old-save backup retained, quick slots preserved and subsequent refresh does not relocate again.
+- Fixed seed 42 exports intentionally do not reproduce the random seed of an arbitrary existing native save. Full native item, trap, NPC and quest mechanics remain outside this map change.

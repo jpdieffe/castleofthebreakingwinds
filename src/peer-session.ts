@@ -1,5 +1,5 @@
 import Peer, { type DataConnection } from 'peerjs';
-import { act, addPlayer, createGame, reveal, snapshot, step, updateStatus } from '../shared/engine';
+import { act, addPlayer, createGame, migrateMaps, reveal, snapshot, step, updateStatus } from '../shared/engine';
 import type { Action, GameState, ServerMessage } from '../shared/types';
 
 const SAVE = 'castle-peer-host-v1';
@@ -63,6 +63,10 @@ export class PeerSession {
     if (hosting) {
       this.host = restoring ? stored : { game: createGame(code, crypto.getRandomValues(new Uint32Array(1))[0], message.type === 'solo' ? 'solo' : 'coop'), token: uid() };
       const game = this.host!.game;
+      if(restoring && game.mapVersion !== 2 && game.levels.length===14) {
+        try { sessionStorage.setItem('castle-peer-before-mobile-maps-v1', JSON.stringify(this.host)); } catch { /* Continue if storage is full. */ }
+        migrateMaps(game);
+      }
       if (!restoring) addPlayer(game, uid(), message.name!.trim().slice(0, 20));
       game.players.forEach((p, i) => { p.connected = i === 0; }); updateStatus(game);
       if (game.mode === 'solo') {

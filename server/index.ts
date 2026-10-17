@@ -5,7 +5,7 @@ import { resolve, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer, WebSocket } from 'ws';
 import type { Action, GameState, Player } from '../shared/types.ts';
-import { act, addPlayer, createGame, log, reveal, snapshot, step, updateStatus } from './engine.ts';
+import { act, addPlayer, createGame, log, migrateMaps, reveal, snapshot, step, updateStatus } from './engine.ts';
 
 interface Seat { id: string; hash: string }
 export interface Room { game: GameState; seats: Seat[]; sockets: Map<string, WebSocket>; touched: number }
@@ -26,6 +26,7 @@ export function createGameServer(options: Options = {}) {
       try {
         const saved = JSON.parse(readFileSync(resolve(dataDir, name), 'utf8'));
         if (saved.game?.version !== 1 || !Array.isArray(saved.seats) || Date.now() - saved.touched > 86400000) continue;
+        if(saved.game.mapVersion!==2 && saved.game.levels.length===14) { writeFileSync(resolve(dataDir, name+'.before-mobile'), JSON.stringify(saved)); migrateMaps(saved.game); }
         saved.game.players.forEach((p: Player) => { p.connected = false; });
         updateStatus(saved.game);
         rooms.set(saved.game.code, { ...saved, sockets: new Map() });

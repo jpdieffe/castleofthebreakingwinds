@@ -1,5 +1,5 @@
 export type Point = { x: number; y: number };
-export type Tile = 'wall' | 'floor' | 'grass' | 'tree' | 'water' | 'door' | 'open';
+export type Tile = 'wall' | 'floor' | 'grass' | 'road' | 'bridge' | 'tree' | 'water' | 'door' | 'open';
 export interface Player extends Point {
   id: string; name: string; slot: number; connected: boolean; ready: boolean;
   hp: number; maxHp: number; mana: number; maxMana: number; potions: number;
@@ -16,6 +16,9 @@ export interface Portal extends Point { to: number; label: string }
 export interface MagicArrow { id: string; level: number; from: Point; to: Point; created: number; duration: number }
 export interface Level {
   id: number; name: string; width: number; height: number; tiles: Tile[];
+  mobileTiles?: number[]; visible?: number[];
+  places?: { name: string; sign: string; role: string; x: number; y: number; width: number; height: number; doorX: number; doorY: number }[];
+  shops?: Point[]; restPoints?: Point[];
   rawTiles?: number[]; source?: string; decorations: Decoration[];
   enemies: Enemy[]; loot: Loot[]; portals: Portal[]; spawn: Point;
   explored: number[]; safe: boolean; shop?: Point;
@@ -23,6 +26,7 @@ export interface Level {
 export interface GameState {
   arrows?: MagicArrow[];
   mode?: 'solo' | 'coop';
+  mapVersion?: number;
   version: 1; code: string; seed: number; level: number; levels: Level[];
   players: Player[]; status: 'waiting' | 'playing' | 'paused' | 'defeated' | 'won';
   tick: number; time: number; log: { id: number; text: string }[]; nextLog: number;

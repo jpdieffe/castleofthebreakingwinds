@@ -1,5 +1,5 @@
 import type { Action, GameState, Player, Point, Snapshot } from './types.ts';
-import { at, distance, makeWorld, passable } from './world.ts';
+import { at, distance, makeWorld, passable, shopAt, MOBILE_MAP_VERSION } from './world.ts';
 
 export const PLAYER_INTERVAL = 240;
 export const ENEMY_INTERVAL = 1400;
@@ -8,7 +8,7 @@ export function log(game: GameState, text: string) {
   if (game.log.length > 40) game.log.shift();
 }
 export function createGame(code: string, seed: number, mode: 'solo' | 'coop' = 'coop'): GameState {
-  return { version: 1, mode, code, seed, levels: makeWorld(seed), level: 0, players: [], arrows: [], status: 'waiting',
+  return { version: 1, mapVersion: MOBILE_MAP_VERSION, mode, code, seed, levels: makeWorld(seed), level: 0, players: [], arrows: [], status: 'waiting',
     tick: 0, time: 0, log: [{ id: 0, text: mode === 'solo' ? 'A question of vengeance. Your adventure begins.' : 'A question of vengeance. This time, you need not face it alone.' }], nextLog: 1 };
 }
 export function addPlayer(game: GameState, id: string, name: string): Player {
@@ -45,14 +45,31 @@ export function updateStatus(game: GameState) {
     : game.players.some(p => !p.connected) ? 'paused' : 'playing';
 }
 export function reveal(game: GameState) {
-  const map = game.levels[game.level], seen = new Set(map.explored);
-  // The mobile reference shows the whole safe settlement immediately.
-  if (map.safe) { map.explored = Array.from({ length: map.width * map.height }, (_, i) => i); return; }
-  for (const p of game.players) for (let y = p.y - 7; y <= p.y + 7; y++) for (let x = p.x - 7; x <= p.x + 7; x++) {
-    if (x >= 0 && y >= 0 && x < map.width && y < map.height && Math.hypot(x - p.x, y - p.y) <= 7.5) seen.add(y * map.width + x);
+  const map=game.levels[game.level], seen=new Set(map.explored), visible=new Set<number>();
+  const radius=map.safe?12:7;
+  for(const p of game.players) for(let y=Math.max(0,p.y-radius);y<=Math.min(map.height-1,p.y+radius);y++) for(let x=Math.max(0,p.x-radius);x<=Math.min(map.width-1,p.x+radius);x++) {
+    if(map.mobileTiles) {
+      let ax=p.x,ay=p.y,dx=Math.abs(x-ax),dy=Math.abs(y-ay),sx=ax<x?1:-1,sy=ay<y?1:-1,err=dx-dy,clear=true;
+      while(ax!==x||ay!==y) { const e=2*err;if(e>-dy){err-=dy;ax+=sx;}if(e<dx){err+=dx;ay+=sy;}if(ax===x&&ay===y)break;if(['wall','tree','door'].includes(at(map,ax,ay))){clear=false;break;} }
+      if(!clear)continue;
+    } else if(Math.hypot(x-p.x,y-p.y)>7.5)continue;
+    seen.add(y*map.width+x);visible.add(y*map.width+x);
   }
-  map.explored = [...seen];
+  map.explored=map.safe?Array.from({length:map.width*map.height},(_,i)=>i):[...seen];
+  if(map.mobileTiles) map.visible=[...visible];
 }
+
+/** Rebuild legacy geometry once while retaining adventurers and their equipment. */
+export function migrateMaps(game: GameState) {
+  if(game.mapVersion===MOBILE_MAP_VERSION || game.levels.length!==14) return false;
+  const mapping=[0,1,1,1,2,3,3,4,5,6,9,10,11,12];
+  game.level=mapping[game.level]??0; game.levels=makeWorld(game.seed);game.mapVersion=MOBILE_MAP_VERSION;game.arrows=[];
+  placePlayers(game,game.levels[game.level].spawn);reveal(game);
+  if(game.status==='won')game.levels[12].enemies.filter(e=>e.boss).forEach(e=>e.hp=0);
+  log(game,'Maps updated to the mobile campaign. Your adventurers and equipment are retained; you have moved to a safe entry point.');
+  return true;
+}
+
 function reward(game: GameState, amount: number) {
   game.players.forEach(p => {
     p.xp += amount;
@@ -119,7 +136,7 @@ export function act(game: GameState, player: Player, action: Action): string | u
     if (dx && dy && (!passable(map, player.x + dx, player.y) || !passable(map, player.x, player.y + dy))) return;
     const target = map.enemies.find(e => e.hp > 0 && e.x === x && e.y === y);
     if (target) { hit(game, player, target.id, 6 + player.weapon * 2 + player.rank); return; }
-    if (at(map, x, y) === 'door') { map.tiles[y * map.width + x] = 'open'; log(game, `${player.name} opens a door.`); return; }
+    if (at(map, x, y) === 'door') { map.tiles[y * map.width + x] = 'open'; log(game, `${player.name} opens a door.`); reveal(game); return; }
     if (!passable(map, x, y) || game.players.some(p => p.id !== player.id && p.x === x && p.y === y)) return;
     player.x = x; player.y = y; collect(game, player); reveal(game); return;
   }
@@ -182,7 +199,7 @@ export function act(game: GameState, player: Player, action: Action): string | u
     player.potions--; partner.hp = Math.ceil(partner.maxHp / 2); log(game, `${player.name} revives ${partner.name}.`); return;
   }
   if (action.type === 'buy') {
-    if (!map.shop || distance(player, map.shop) > 2) return 'Stand near the village well to trade.';
+    if (!shopAt(map, player)) return 'Stand near a shop entrance to trade.';
     const cost = { potion: 10, mana: 10, weapon: 35 * player.weapon, armor: 30 * (player.armor + 1) }[action.item];
     if (!cost || player.gold < cost) return 'Not enough gold.';
     player.gold -= cost;
@@ -202,11 +219,11 @@ export function act(game: GameState, player: Player, action: Action): string | u
       placePlayers(game, entry); reveal(game);
       log(game, `You enter ${next.name}.`); return;
     }
-    if (map.shop && distance(player, map.shop) <= 2) {
-      player.hp = player.maxHp; player.mana = player.maxMana; log(game, `${player.name} rests at the village well.`); return;
+    if ((map.restPoints ?? (map.shop ? [map.shop] : [])).some(p=>distance(player,p)<=2)) {
+      player.hp = player.maxHp; player.mana = player.maxMana; log(game, `${player.name} rests at the sanctuary.`); return;
     }
     collect(game, player);
-    return 'Move onto treasure to collect it. Use E near stairs or the village well.';
+    return 'Move onto treasure to collect it. Use E near stairs, a road exit or the sanctuary.';
   }
 }
 export function step(game: GameState, milliseconds: number) {

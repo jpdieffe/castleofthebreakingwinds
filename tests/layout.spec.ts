@@ -31,11 +31,11 @@ test('map and spells stay fully visible through laptop, small-window, phone and 
     // Click the neighboring tile after scaling; letterboxing must not offset movement.
     const target = await page.evaluate(() => {
       const c = document.querySelector<HTMLCanvasElement>('#world')!, r = c.getBoundingClientRect();
-      return { x: r.x + (14 - Number(c.dataset.viewX) + 0.5) * r.width / Number(c.dataset.columns), y: r.y + (16 - Number(c.dataset.viewY) + 0.5) * r.height / Number(c.dataset.rows) };
+      return { x: r.x + (19 - Number(c.dataset.viewX) + 0.5) * r.width / Number(c.dataset.columns), y: r.y + (24 - Number(c.dataset.viewY) + 0.5) * r.height / Number(c.dataset.rows) };
     });
-    await page.mouse.click(target.x, target.y); await expect(page.locator('#position')).toHaveAttribute('data-x', '14');
+    await page.mouse.click(target.x, target.y); await expect(page.locator('#position')).toHaveAttribute('data-x', '19');
     await page.waitForTimeout(350); await page.locator('#world').focus(); await page.keyboard.press('ArrowLeft');
-    await expect(page.locator('#position')).toHaveAttribute('data-x', '13'); await page.waitForTimeout(350);
+    await expect(page.locator('#position')).toHaveAttribute('data-x', '18'); await page.waitForTimeout(350);
     if (width === 1366 || width === 390) await page.screenshot({ path: info.outputPath(`fit-${width}.png`) });
   }
   await page.getByRole('button', { name: 'Pack', exact: true }).click(); await expect(page.locator('#dialog')).toBeVisible();
@@ -61,7 +61,7 @@ test('two-player spells, map and health remain visible in small windows', async 
     }
     await a.setViewportSize({ width: 390, height: 844 });
     await a.getByRole('button', { name: 'Move east', exact: true }).click();
-    await expect(a.locator('#position')).toHaveAttribute('data-x', '14');
+    await expect(a.locator('#position')).toHaveAttribute('data-x', '19');
     await expect(b.locator('#simulation-status')).toHaveText('REAL TIME');
   } finally { await a.close(); await b.close(); }
 });

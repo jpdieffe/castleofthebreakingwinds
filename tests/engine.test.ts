@@ -171,7 +171,7 @@ test('MS C generator is deterministic and bounded', () => {
 });
 test('all campaign areas have reachable exits, collision-safe spawns and a final boss', () => {
   for (const seed of [1, 12345, 99999]) {
-    const world = makeWorld(seed); assert.equal(world.length, 14);
+    const world = makeWorld(seed); assert.equal(world.length, 13);
     world.forEach(map => {
       assert.ok(passable(map, map.spawn.x, map.spawn.y), `${map.name} spawn`);
       const queue = [map.spawn], seen = new Set([`${map.spawn.x},${map.spawn.y}`]);

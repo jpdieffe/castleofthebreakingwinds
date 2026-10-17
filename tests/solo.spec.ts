@@ -27,15 +27,15 @@ test('solo starts without matchmaking, moves, restores on refresh, and travels a
   await expect(page.locator('#party-size')).toHaveText('SOLO');
   await expect(page.locator('#share')).toBeHidden(); await expect(page.locator('.waiting-seat')).toHaveCount(0);
   await expect(page.locator('[data-action=revive]')).toBeHidden();
-  await key(page, 'ArrowUp'); await expect(page.locator('#position')).toHaveAttribute('data-y', '15');
+  await key(page, 'ArrowUp'); await expect(page.locator('#position')).toHaveAttribute('data-y', '23');
   const identity = await page.evaluate(() => sessionStorage.getItem('castle-session'));
   await page.reload(); await expect(page.locator('#simulation-status')).toHaveText('REAL TIME');
-  await expect(page.locator('#position')).toHaveAttribute('data-y', '15');
+  await expect(page.locator('#position')).toHaveAttribute('data-y', '23');
   expect(await page.evaluate(() => sessionStorage.getItem('castle-session'))).toBe(identity);
   // Refresh retains the last action's cooldown along with the character position.
   await page.waitForTimeout(350);
-  for (let i = 0; i < 12; i++) { await key(page, 'ArrowUp'); await page.waitForTimeout(340); }
-  await key(page, 'e'); await expect(page.locator('#location')).toHaveText('The Wilderness');
+  for (let i = 0; i < 18; i++) { await key(page, 'ArrowUp'); await page.waitForTimeout(340); }
+  await key(page, 'e'); await expect(page.locator('#location')).toHaveText('Abandoned mine \u00b7 1');
   await page.screenshot({ path: info.outputPath('solo-wilderness.png'), fullPage: true });
   expect(matchmaking).toEqual([]);
 });
@@ -57,9 +57,9 @@ test('solo defeat and restart remain playable without another client', async ({ 
   await expect(page.locator('#simulation-status')).toHaveText('EXPEDITION FALLEN');
   await expect(page.locator('#quest-text')).not.toContainText('companion');
   await page.locator('#restart').click(); await expect(page.locator('#simulation-status')).toHaveText('REAL TIME');
-  await expect(page.locator('#location')).toHaveText('A Tiny Hamlet'); await expect(page.locator('.player-card')).toHaveCount(1);
+  await expect(page.locator('#location')).toHaveText('The northern hamlet'); await expect(page.locator('.player-card')).toHaveCount(1);
   await expect(page.locator('.health')).toContainText('60/60'); await expect(page.locator('#ready')).toBeHidden();
-  await key(page, 'ArrowRight'); await expect(page.locator('#position')).toHaveAttribute('data-x', '14');
+  await key(page, 'ArrowRight'); await expect(page.locator('#position')).toHaveAttribute('data-x', '19');
   await page.locator('#leave').click(); await expect(page.locator('#solo')).toBeVisible();
   expect(await page.evaluate(() => sessionStorage.getItem('castle-peer-host-v1'))).toBeNull();
 });

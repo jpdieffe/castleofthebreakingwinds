@@ -39,11 +39,11 @@ async function cooldown(room: Room) { room.game.players.forEach(p => p.nextActio
 
 test('two independent clients create, join, ready, walk and see each other on the recovered hamlet', async ({ browser }, info) => {
   const { a, b, room } = await pair(browser);
-  expect(room.game.levels[0].source).toContain('segment 25');
+  expect(room.game.levels[0].source).toContain('CastleWinds_Mobile');
   await expect(a.locator('#party')).toContainText('Bjorn'); await expect(b.locator('#party')).toContainText('Astrid');
   const before = room.game.players[0].x;
   await key(a, 'ArrowRight'); await expect(a.locator('#position')).toHaveAttribute('data-x', String(before + 1));
-  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '11');
+  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '16');
   await expect(a.locator('.player-card')).toHaveCount(2); await expect(b.locator('.player-card')).toHaveCount(2);
   await a.screenshot({ path: info.outputPath('client-a-hamlet.png'), fullPage: true });
   await b.screenshot({ path: info.outputPath('client-b-hamlet.png'), fullPage: true });
@@ -54,14 +54,14 @@ test('invalid rooms and third players receive visible errors without disrupting 
   await c.locator('#code').fill(code); await c.locator('#join').click(); await expect(c.locator('#lobby-status')).toContainText('two players');
   await expect(a.locator('#simulation-status')).toHaveText('REAL TIME');
 });
-test('unmodified campaign: both players walk from the hamlet to the wilderness using real controls', async ({ browser }) => {
+test('unmodified campaign: both players walk from the hamlet to the mine using real controls', async ({ browser }) => {
   const { a, b, room } = await pair(browser);
-  for (let i = 0; i < 13; i++) {
+  for (let i = 0; i < 19; i++) {
     await Promise.all([key(a, 'ArrowUp'), key(b, 'ArrowUp')]);
     await a.waitForTimeout(330);
   }
-  expect(room.game.players[0].y).toBe(3); expect(room.game.players[1].y).toBe(2);
-  await key(a, 'e'); await expect(a.locator('#location')).toHaveText('The Wilderness'); await expect(b.locator('#location')).toHaveText('The Wilderness');
+  expect(room.game.players[0].y).toBe(5); expect(room.game.players[1].y).toBe(4);
+  await key(a, 'e'); await expect(a.locator('#location')).toHaveText('Abandoned mine \u00b7 1'); await expect(b.locator('#location')).toHaveText('Abandoned mine \u00b7 1');
   expect(room.game.level).toBe(1); expect(room.game.players.every(p => p.hp > 0)).toBeTruthy();
 });
 test('enemies advance without input; attacks and shared experience synchronize', async ({ browser }, info) => {
@@ -103,7 +103,7 @@ test('revival, total-party defeat and restart work in both clients', async ({ br
   q.x = 6; q.hp = 0; app.broadcast(room); await key(b, 'ArrowRight'); expect(q.x).toBe(6);
   await key(a, 'r'); await expect.poll(() => q.hp).toBe(30); expect(p.potions).toBe(2); await expect(b.locator('#log')).toContainText('revives');
   p.hp = 0; q.hp = 0; await expect(a.locator('#simulation-status')).toHaveText('EXPEDITION FALLEN'); await expect(b.locator('#restart')).toBeVisible();
-  await a.locator('#restart').click(); await expect(b.locator('#location')).toHaveText('A Tiny Hamlet'); await expect(a.locator('#ready')).toBeVisible(); expect(room.game.players[0].hp).toBe(60);
+  await a.locator('#restart').click(); await expect(b.locator('#location')).toHaveText('The northern hamlet'); await expect(a.locator('#ready')).toBeVisible(); expect(room.game.players[0].hp).toBe(60);
 });
 test('refresh and network interruption restore the same adventurer and pause the world', async ({ browser }) => {
   const { a, b, room } = await pair(browser); const id = room.game.players[1].id;
@@ -115,18 +115,20 @@ test('refresh and network interruption restore the same adventurer and pause the
   await b.context().setOffline(false); await expect(b.locator('#connection')).toHaveText('Connected', { timeout: 10000 });
   await expect(a.locator('#simulation-status')).toHaveText('REAL TIME'); expect(room.game.players.length).toBe(2); expect(room.game.players[1].gold).toBe(71);
 });
-test('travel requires both partners and all fourteen areas load in both clients', async ({ browser }, info) => {
+test('travel requires both partners and all thirteen native areas load in both clients', async ({ browser }, info) => {
   test.setTimeout(60000); const { a, b, room } = await pair(browser);
-  for (let area = 0; area < 13; area++) {
-    const map = room.game.levels[area], portal = map.portals.find(p => p.to === area + 1)!;
+  const route=[0,1,2,3,2,1,0,4,5,6,7,8,9,10,11,12];
+  for (let step=0;step<route.length-1;step++) {
+    const area=route[step], destination=route[step+1];
+    const map = room.game.levels[area], portal = map.portals.find(p => p.to === destination)!;
     Object.assign(room.game.players[0], { x: portal.x, y: portal.y, nextAction: 0, hp: 60 });
     let partner = { x: portal.x, y: portal.y };
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (passable(map, portal.x + dx, portal.y + dy)) { partner = { x: portal.x + dx, y: portal.y + dy }; break; }
     Object.assign(room.game.players[1], { ...partner, hp: 60 });
     reveal(room.game); app.broadcast(room); await key(a, 'e');
-    await expect.poll(() => room.game.level).toBe(area + 1); await expect(b.locator('#location')).toHaveText(room.game.levels[area + 1].name);
+    await expect.poll(() => room.game.level).toBe(destination); await expect(b.locator('#location')).toHaveText(room.game.levels[destination].name);
   }
-  const map = room.game.levels[13], boss = map.enemies.find(e => e.boss)!;
+  const map = room.game.levels[12], boss = map.enemies.find(e => e.boss)!;
   map.enemies.filter(e => !e.boss).forEach(e => e.hp = 0);
   const p = room.game.players[0]; boss.x = p.x + 1; boss.y = p.y; boss.hp = 1; map.tiles[boss.y * map.width + boss.x] = 'floor'; p.nextAction = 0; reveal(room.game); app.broadcast(room);
   await key(a, 'Space'); await expect(a.locator('#simulation-status')).toHaveText('VENGEANCE IS YOURS'); await expect(b.locator('#simulation-status')).toHaveText('VENGEANCE IS YOURS');
@@ -138,7 +140,7 @@ test('journal, help, touch controls and mobile layout are usable without runtime
   await a.locator('#close-dialog').click(); await a.locator('[data-dialog="help"]').click(); await expect(a.locator('#dialog-body')).toContainText('Opening a menu does not pause combat'); await a.locator('#close-dialog').click();
   await a.setViewportSize({ width: 390, height: 844 });
   await expect(a.getByRole('button', { name: 'Move east', exact: true })).toBeVisible(); await a.getByRole('button', { name: 'Move east', exact: true }).click();
-  await expect(a.locator('#position')).toHaveAttribute('data-x', '14');
+  await expect(a.locator('#position')).toHaveAttribute('data-x', '19');
   expect(await a.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   await a.screenshot({ path: info.outputPath('mobile.png'), fullPage: true }); expect(errors).toEqual([]);
   await expect(b.locator('#simulation-status')).toHaveText('REAL TIME');

@@ -32,7 +32,7 @@ test('real sockets: two-player admission, room isolation, malformed messages, to
     c.send({ type: 'create', name: '<script>C</script>' }); const wc = await c.wait(m => m.type === 'welcome'); assert.notEqual(wc.code, wa.code);
     a.send({ type: 'action', action: { type: 'ready' } }); b.send({ type: 'action', action: { type: 'ready' } });
     await a.wait(m => m.type === 'state' && m.state.status === 'playing');
-    const room = app.rooms.get(wa.code)!; const before = room.game.players[0].gold;
+    const room = app.rooms.get(wa.code)!; Object.assign(room.game.players[0],room.game.levels[0].shop!); const before = room.game.players[0].gold;
     a.send({ type: 'action', playerId: wb.playerId, action: { type: 'buy', item: 'potion', cost: -1000 } });
     await a.wait(m => m.type === 'state' && m.state.players[0].gold !== before);
     assert.equal(room.game.players[0].gold, before - 10); assert.equal(room.game.players[1].gold, 20);

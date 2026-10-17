@@ -31,15 +31,15 @@ test('portrait and landscape keep map, eight-way controls and actions visible; z
   await page.setViewportSize({width:390,height:844});
   const before = Number(await page.locator('#world').getAttribute('data-columns')); await page.locator('#zoom-in').tap();
   await expect.poll(async () => Number(await page.locator('#world').getAttribute('data-columns'))).toBeLessThan(before);
-  await page.locator('#touch-arrow').tap(); await tapTile(page,14,16);
-  await expect(page.locator('#mobile-vitals')).toContainText('27/30'); await expect(page.locator('#position')).toHaveAttribute('data-x','13');
+  await page.locator('#touch-arrow').tap(); await tapTile(page,19,24);
+  await expect(page.locator('#mobile-vitals')).toContainText('27/30'); await expect(page.locator('#position')).toHaveAttribute('data-x','18');
   await page.screenshot({path:info.outputPath('phone-aim.png')});
-  await page.locator('#cancel-aim').tap(); await page.waitForTimeout(350); await tapTile(page,14,16);
-  await expect(page.locator('#position')).toHaveAttribute('data-x','14');
+  await page.locator('#cancel-aim').tap(); await page.waitForTimeout(350); await tapTile(page,19,24);
+  await expect(page.locator('#position')).toHaveAttribute('data-x','19');
   await page.waitForTimeout(350); await page.getByRole('button',{name:'Move northwest',exact:true}).tap();
-  await expect(page.locator('#position')).toHaveAttribute('data-x','13'); await expect(page.locator('#position')).toHaveAttribute('data-y','15');
+  await expect(page.locator('#position')).toHaveAttribute('data-x','18'); await expect(page.locator('#position')).toHaveAttribute('data-y','23');
   await page.setViewportSize({width:844,height:390}); await fits(page); await page.screenshot({path:info.outputPath('phone-landscape.png')});
-  await page.reload(); await expect(page.locator('#position')).toHaveAttribute('data-y','15'); expect(errors).toEqual([]);
+  await page.reload(); await expect(page.locator('#position')).toHaveAttribute('data-y','23'); expect(errors).toEqual([]);
 });
 
 test('touch spellbook, inventory selection and purchases, hero, journal and menu work without keyboard', async ({ page }, info) => {
@@ -66,7 +66,7 @@ test('touch spellbook, inventory selection and purchases, hero, journal and menu
 test('held movement stops on release and opening a menu cancels it', async ({ page }) => {
   await start(page); const north=await page.getByRole('button',{name:'Move north',exact:true}).boundingBox();
   await page.mouse.move(north!.x+north!.width/2,north!.y+north!.height/2); await page.mouse.down(); await page.waitForTimeout(750); await page.mouse.up();
-  const y=Number(await page.locator('#position').getAttribute('data-y')); expect(y).toBeLessThan(15);
+  const y=Number(await page.locator('#position').getAttribute('data-y')); expect(y).toBeLessThan(23);
   await page.waitForTimeout(700); await expect(page.locator('#position')).toHaveAttribute('data-y',String(y));
   await page.getByRole('button',{name:'Pack',exact:true}).tap(); await page.waitForTimeout(400); await expect(page.locator('#position')).toHaveAttribute('data-y',String(y));
 });
@@ -81,10 +81,13 @@ test('two touch clients host/join, synchronize movement and arrows, purchase ind
     await b.goto(url); await b.locator('#name').fill('Bjorn'); await b.locator('#code').fill(code); await b.locator('#join').tap(); await expect(b.locator('#ready')).toBeVisible({timeout:25000});
     await a.locator('#ready').tap(); await b.locator('#ready').tap(); await expect(b.locator('#simulation-status')).toHaveText('REAL TIME');
     await fits(a); await fits(b); await expect(a.locator('#mobile-partner')).toContainText('Bjorn');
-    await b.getByRole('button',{name:'Move east',exact:true}).tap(); await expect(b.locator('#position')).toHaveAttribute('data-x','13');
-    await b.waitForTimeout(350); await b.locator('#touch-arrow').tap(); await tapTile(b,14,15);
+    await b.getByRole('button',{name:'Move east',exact:true}).tap(); await expect(b.locator('#position')).toHaveAttribute('data-x','18');
+    await b.waitForTimeout(350); await b.locator('#touch-arrow').tap(); await tapTile(b,19,23);
     await expect(b.locator('#mobile-vitals')).toContainText('27/30'); await expect(a.locator('#mobile-log')).toContainText('Bjorn fires a Magic Arrow');
-    await b.locator('#cancel-aim').tap(); await b.getByRole('button',{name:'Pack',exact:true}).tap(); await b.locator('[data-buy=potion]').tap(); await b.waitForTimeout(350); await b.locator('[data-selected-action]').tap();
+    await b.locator('#cancel-aim').tap();
+    for(let i=0;i<9;i++){await b.waitForTimeout(300);await b.getByRole('button',{name:'Move north',exact:true}).tap();}
+    for(let i=0;i<8;i++){await b.waitForTimeout(300);await b.getByRole('button',{name:'Move west',exact:true}).tap();}
+    await b.getByRole('button',{name:'Pack',exact:true}).tap(); await b.locator('[data-buy=potion]').tap(); await b.waitForTimeout(350); await b.locator('[data-selected-action]').tap();
     await expect(b.locator('[data-slot=purse]')).toContainText('10 gold'); await expect(a.locator('.player-card').nth(1)).toContainText('4 potions');
     await b.locator('#close-dialog').tap(); await b.reload(); await expect(b.locator('#simulation-status')).toHaveText('REAL TIME',{timeout:25000});
     await expect(b.locator('#mobile-vitals')).toContainText('10 gold');
@@ -113,8 +116,8 @@ test('WebKit touch clients synchronize using the retained dedicated WebSocket tr
     await a.goto(address); await a.locator('#name').fill('Astrid'); await a.locator('#create').tap(); await expect(a.locator('#ready')).toBeVisible();
     const code = (await a.locator('#room-label').innerText()).split(' ')[1]; await b.goto(address); await b.locator('#name').fill('Bjorn'); await b.locator('#code').fill(code); await b.locator('#join').tap(); await expect(b.locator('#ready')).toBeVisible();
     await a.locator('#ready').tap(); await b.locator('#ready').tap(); await expect(b.locator('#simulation-status')).toHaveText('REAL TIME');
-    await b.getByRole('button',{name:'Move east',exact:true}).tap(); await expect(b.locator('#position')).toHaveAttribute('data-x','13');
-    await b.waitForTimeout(350); await b.locator('#touch-arrow').tap(); await tapTile(b,14,15);
+    await b.getByRole('button',{name:'Move east',exact:true}).tap(); await expect(b.locator('#position')).toHaveAttribute('data-x','18');
+    await b.waitForTimeout(350); await b.locator('#touch-arrow').tap(); await tapTile(b,19,23);
     await expect(a.locator('#mobile-log')).toContainText('Bjorn fires a Magic Arrow'); await expect(b.locator('#mobile-vitals')).toContainText('27/30');
     await b.reload(); await expect(b.locator('#simulation-status')).toHaveText('REAL TIME'); await expect(a.locator('#mobile-partner')).toContainText('Connected');
   } finally {await ctx.close(); await a.close(); await app.close();}
@@ -122,14 +125,14 @@ test('WebKit touch clients synchronize using the retained dedicated WebSocket tr
 
 test('real multi-touch pinch and long press do not move or cast', async ({ page, context, browserName }) => {
   test.skip(browserName !== 'chromium','CDP multi-touch input is available in Chromium; WebKit exercises taps and zoom buttons.');
-  await start(page); const cdp=await context.newCDPSession(page), center=await tile(page,13,16);
+  await start(page); const cdp=await context.newCDPSession(page), center=await tile(page,18,24);
   const cols=Number(await page.locator('#world').getAttribute('data-columns'));
   const input=async (type:string,spread:number) => cdp.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x:center.x-spread,y:center.y,id:1},{x:center.x+spread,y:center.y,id:2}]});
   await input('touchStart',25); await input('touchMove',60); await input('touchEnd',0);
   await expect.poll(async()=>Number(await page.locator('#world').getAttribute('data-columns'))).toBeLessThan(cols);
-  await expect(page.locator('#position')).toHaveAttribute('data-x','13');
-  const target=await tile(page,14,16); await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:target.x,y:target.y,id:1}]}); await page.waitForTimeout(650);
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]}); await expect(page.locator('#toast')).toBeVisible(); await expect(page.locator('#position')).toHaveAttribute('data-x','13');
+  await expect(page.locator('#position')).toHaveAttribute('data-x','18');
+  const target=await tile(page,19,24); await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:target.x,y:target.y,id:1}]}); await page.waitForTimeout(650);
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]}); await expect(page.locator('#toast')).toBeVisible(); await expect(page.locator('#position')).toHaveAttribute('data-x','18');
 });
 
 

@@ -55,8 +55,8 @@ test('public matchmaking connects two browsers over real WebRTC; both walk and s
   const { a, b } = await pair(browser);
   await expect(a.locator('#connection')).toContainText('WebRTC');
   await expect(b.locator('#party')).toContainText('Astrid');
-  await key(a, 'ArrowRight'); await expect(a.locator('#position')).toHaveAttribute('data-x', '14');
-  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '11');
+  await key(a, 'ArrowRight'); await expect(a.locator('#position')).toHaveAttribute('data-x', '19');
+  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '16');
   const stats = await b.evaluate(async () => {
     const peers = (window as unknown as { testPeers: RTCPeerConnection[] }).testPeers;
     const reports = await Promise.all(peers.map(p => p.getStats()));
@@ -84,15 +84,15 @@ test('unknown rooms and full rooms do not disrupt the expedition', async ({ brow
 
 test('guest refresh restores identity and host refresh restores world and reconnects the guest', async ({ browser }) => {
   const { a, b } = await pair(browser);
-  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '11');
+  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '16');
   const identity = await b.evaluate(() => sessionStorage.getItem('castle-session'));
   await b.reload(); await expect(b.locator('#simulation-status')).toHaveText('REAL TIME', { timeout: 25000 });
   expect(await b.evaluate(() => sessionStorage.getItem('castle-session'))).toBe(identity);
-  await expect(b.locator('#position')).toHaveAttribute('data-x', '11');
-  await expect.poll(async () => (await saved(a)).players[1].x).toBe(11);
+  await expect(b.locator('#position')).toHaveAttribute('data-x', '16');
+  await expect.poll(async () => (await saved(a)).players[1].x).toBe(16);
   await a.reload(); await expect(a.locator('#simulation-status')).toHaveText('REAL TIME', { timeout: 30000 });
   await expect(b.locator('#simulation-status')).toHaveText('REAL TIME', { timeout: 30000 });
-  await expect(b.locator('#position')).toHaveAttribute('data-x', '11');
+  await expect(b.locator('#position')).toHaveAttribute('data-x', '16');
 });
 
 test('disconnect pauses simulation, reserves the guest seat, and resumes with its token', async ({ browser }) => {
@@ -148,10 +148,10 @@ test('guest purchases and healing update both browsers from host authority', asy
   await expect(a.getByRole('button', { name: 'Drink healing potion' })).toBeDisabled();
 });
 
-test('unmodified campaign transitions to the wilderness in both WebRTC clients', async ({ browser }) => {
+test('unmodified campaign transitions to the mine in both WebRTC clients', async ({ browser }) => {
   const { a, b } = await pair(browser);
-  for (let i = 0; i < 13; i++) { await Promise.all([key(a, 'ArrowUp'), key(b, 'ArrowUp')]); await a.waitForTimeout(340); }
-  await key(a, 'e'); await expect(a.locator('#location')).toHaveText('The Wilderness'); await expect(b.locator('#location')).toHaveText('The Wilderness');
+  for (let i = 0; i < 19; i++) { await Promise.all([key(a, 'ArrowUp'), key(b, 'ArrowUp')]); await a.waitForTimeout(340); }
+  await key(a, 'e'); await expect(a.locator('#location')).toHaveText('Abandoned mine \u00b7 1'); await expect(b.locator('#location')).toHaveText('Abandoned mine \u00b7 1');
 });
 
 test('guest revives the fallen host and synchronizes the potion cost', async ({ browser }) => {
@@ -169,7 +169,7 @@ test('boss victory and restart are shared across the data channel', async ({ bro
   await key(b, '1'); await clickTile(b, 6, 5); await expect(a.locator('#simulation-status')).toHaveText('VENGEANCE IS YOURS');
   await expect(b.locator('#restart')).toBeVisible(); await b.locator('#restart').click();
   await expect(a.locator('#ready')).toBeVisible(); await expect(b.locator('#ready')).toBeVisible();
-  await expect(a.locator('#location')).toHaveText('A Tiny Hamlet');
+  await expect(a.locator('#location')).toHaveText('The northern hamlet');
 });
 
 test('background host keeps ticking and independent rooms remain isolated', async ({ browser }) => {
@@ -179,8 +179,8 @@ test('background host keeps ticking and independent rooms remain isolated', asyn
   const before = (await saved(a)).time;
   await second.b.bringToFront();
   await expect.poll(async () => (await saved(a)).time, { timeout: 7000 }).toBeGreaterThan(before + 2000);
-  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '11');
-  await expect(second.b.locator('#position')).toHaveAttribute('data-x', '12');
+  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '16');
+  await expect(second.b.locator('#position')).toHaveAttribute('data-x', '17');
 });
 
 test('host rejects forged actions over the actual guest data channel and disconnects floods', async ({ browser }) => {
@@ -196,10 +196,10 @@ test('host rejects forged actions over the actual guest data channel and disconn
       { type: 'state', state: { status: 'won' } },
     ]) channel.send(await util.pack(message));
   }, moduleUrl);
-  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '11');
-  await expect.poll(async () => (await saved(a)).players[1].x).toBe(11);
+  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '16');
+  await expect.poll(async () => (await saved(a)).players[1].x).toBe(16);
   expect((await saved(a)).players[1].gold).toBe(20);
-  await expect(a.locator('#position')).toHaveAttribute('data-x', '13');
+  await expect(a.locator('#position')).toHaveAttribute('data-x', '18');
   await b.evaluate(async moduleUrl => {
     const { util } = await import(moduleUrl);
     const channel = (window as unknown as { testChannels: RTCDataChannel[] }).testChannels.find(c => c.readyState === 'open')!;
@@ -219,6 +219,6 @@ test('matchmaking reconnect preserves the existing game and starts no duplicate 
   await expect.poll(() => a.evaluate(() => (window as unknown as { testSockets: WebSocket[] }).testSockets.filter(s => s.url.includes('0.peerjs.com')).length), { timeout: 10000 }).toBe(2);
   await expect.poll(() => a.evaluate(() => (window as unknown as { testSockets: WebSocket[] }).testSockets.filter(s => s.url.includes('0.peerjs.com')).at(-1)?.readyState)).toBe(1);
   expect(await a.evaluate(() => (window as unknown as { testWorkers: Worker[] }).testWorkers.length)).toBe(1);
-  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '11');
+  await key(b, 'ArrowLeft'); await expect(b.locator('#position')).toHaveAttribute('data-x', '16');
   await expect(a.locator('#simulation-status')).toHaveText('REAL TIME');
 });

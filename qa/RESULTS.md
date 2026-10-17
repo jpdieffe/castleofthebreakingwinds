@@ -1,6 +1,18 @@
 # Test results - October 17, 2026
 
 
+## Direct mobile map import (supersedes the earlier style-only update)
+
+- Replaced active geometry with the native Java reference's 13 Part I maps: northern hamlet, three mine floors, Bjarnarhaven and eight fortress floors. All **19,619 terrain cells**, decorations, named places and entity positions were exported from the unmodified mobile engine. An independent second Java export produced zero differences. Source hashes are recorded in `shared/mobile-maps.json`.
+- Matched burned-farm spawn, road widths, footprints, shop/sanctuary doors, gates, mine/fortress stairs, river/bridge, signs, native line-of-sight and shared fog. Full-density canvas rendering preserves building bitmap detail; 34 CSS-pixel default tiles follow the native view.
+- **33 engine/network tests passed**, including exact export equality, all exits reachable, native service coordinates, sight blocking and legacy map migration. **35 desktop/responsive browser cases passed** across the main run and targeted follow-up: the main run passed 33/34; its one failure retained an old companion spawn expectation (12 instead of 17), which was corrected and passed. The additional migration browser test passed.
+- **15 mobile browser cases passed**, with the existing 3 platform-specific skips. The first run exposed missing road/bridge handling in click-to-walk; those types were added and the full mobile suite passed. Includes real two-client WebRTC, movement, purchases at the imported shop, quick slots and reconnect.
+- Both clients walked from the farm to the mine using real controls. Dedicated-server clients traversed every native area and return route, then defeated the boss. A legacy browser save migrated once, retained gold/equipment/potions/quick slots, backed up the old campaign and preserved subsequent movement through another refresh.
+- Visual production checks: [hamlet](screenshots/native-map-hamlet.png), [mine](screenshots/native-map-mine.png), [city](screenshots/native-map-city.png), [city landscape](screenshots/native-map-city-landscape.png). Build and diff checks passed.
+
+The exported world uses fixed seed 42/difficulty 1, not the seed of an arbitrary native saved game. Native quest gating, bank/sage services, full item catalog, traps/secrets and Part II are not implemented by this layout import. Online combat and simplified item mechanics remain. Legacy map exploration/enemies/ground loot are rebuilt; adventurer stats and equipment are preserved. These browser checks do not certify physical-phone behavior.
+
+
 ## Configurable quick slots
 
 - Both touch quick slots accept Magic Arrow, Heal, Fireball, healing potion or mana potion. Selecting a spell/pack potion offers explicit slot-1/slot-2 assignment, independently of casting/drinking. Buttons show icon artwork, slot number and live potion quantity, with accessible action names and current aiming state.

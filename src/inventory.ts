@@ -1,3 +1,4 @@
+import { shopAt } from '../shared/world';
 import { mountSlotPicker, type SlotAssignments } from './quick-slots';
 import { art } from '../shared/art';
 import type { Action, Player, Snapshot } from '../shared/types';
@@ -58,7 +59,7 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
     if (selected.kind === 'slot') {
       const slot = find(`[data-slot="${selected.key}"]`);
       find('[data-selected-title]').textContent = slot.getAttribute('aria-label');
-      find('[data-selected-detail]').textContent = selected.key === 'weapon' || selected.key === 'armor' ? 'Equipped. Buy an upgrade at the village well or collect better equipment while exploring.' : selected.key === 'pack' ? 'Your healing and mana potions are in the Small Pack pane.' : selected.key === 'purse' ? 'Gold buys potions and equipment upgrades at the village well.' : 'This slot is empty.';
+      find('[data-selected-detail]').textContent = selected.key === 'weapon' || selected.key === 'armor' ? 'Equipped. Buy an upgrade at the shop entrance or collect better equipment while exploring.' : selected.key === 'pack' ? 'Your healing and mana potions are in the Small Pack pane.' : selected.key === 'purse' ? 'Gold buys potions and equipment upgrades at the shop entrance.' : 'This slot is empty.';
       button.textContent = 'Inspected';
     } else if (selected.kind === 'pack') {
       const type = selected.key as 'potion' | 'mana', count = type === 'potion' ? p.potions : p.manaPotions, full = type === 'potion' ? p.hp === p.maxHp : p.mana === p.maxMana;
@@ -68,7 +69,7 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
       button.disabled = !active || !count || full; button.onclick = () => send({ type });
     } else {
       const type = selected.key as 'potion' | 'mana' | 'weapon' | 'armor', cost = { potion: 10, mana: 10, weapon: 35 * p.weapon, armor: 30 * (p.armor + 1) }[type];
-      const shop = current.map.shop, inRange = shop && Math.max(Math.abs(p.x - shop.x), Math.abs(p.y - shop.y)) <= 2;
+      const inRange = !!shopAt(current.map,p);
       find('[data-selected-title]').textContent = { potion: 'Healing potion', mana: 'Mana potion', weapon: 'Short sword upgrade', armor: 'Armor upgrade' }[type];
       find('[data-selected-detail]').textContent = `${cost} gold. You have ${p.gold} gold. ${type === 'weapon' || type === 'armor' ? 'Equips automatically.' : 'Adds one potion to your pack.'}`;
       button.textContent = p.gold < cost ? `Need ${cost - p.gold} more gold` : `Buy for ${cost} gold`;
@@ -113,10 +114,10 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
         button.disabled = !active || count === 0 || full;
         button.title = !active ? 'Resume adventuring to use items.' : !count ? 'None remaining.' : full ? `Your ${type === 'potion' ? 'health' : 'mana'} is full.` : 'Drink one potion.';
       }
-      const shop = state.map.shop, trading = !!shop && Math.max(Math.abs(p.x - shop.x), Math.abs(p.y - shop.y)) <= 2;
-      find('[data-floor-title]').textContent = trading ? 'Store · Village well' : 'Floor';
+      const trading = !!shopAt(state.map,p);
+      find('[data-floor-title]').textContent = trading ? 'Store · Trading post' : 'Floor';
       find('[data-store]').hidden = !trading; find('[data-floor]').hidden = trading;
-      find('[data-trade-note]').textContent = trading ? 'Click an item to buy. E at the well restores health and mana.' : 'Walk over items to collect them. Trade beside a village well.';
+      find('[data-trade-note]').textContent = trading ? 'Click an item to buy. E near the sanctuary restores health and mana.' : 'Walk over items to collect them. Trade beside a shop entrance.';
       const prices = { potion: 10, mana: 10, weapon: 35 * p.weapon, armor: 30 * (p.armor + 1) };
       const labels = { potion: 'Healing potion', mana: 'Mana potion', weapon: 'Improve sword', armor: 'Improve armor' };
       for (const kind of ['potion', 'mana', 'weapon', 'armor'] as const) {

@@ -8,7 +8,7 @@ The phone/tablet interface follows the native `CastleWinds_Mobile` reference: a 
 
 Tap the map to walk, pinch or use **+ / −** to change tile size, and long-press a tile to inspect it. Magic Arrow changes map taps into aimed shots; **Cancel aim** returns to walking. Spells opens an icon picker with descriptions, mana costs and a cast button. On phones, Pack uses item icons: select an item, then use the fixed **Buy** or **Drink** button. Purchases and potion counts update without closing the screen. Select a spell in **Spells** or a potion in **Pack**, then choose **Assign to slot 1** or **Assign to slot 2**. Assigning does not cast or drink. Slots show icons, slot numbers and potion quantities; choices persist on this browser after refresh and each player chooses independently. Unusable actions are dimmed; you can still assign an empty potion or a spell you cannot currently afford.
 
-The header shows your health, mana, gold and your companion's health/connection. The menu contains the co-op invite, well-rest action, help and Leave. Browser safe-area padding keeps controls clear of notches and home indicators. Solo and Host/Join use the same simulation and saved sessions as desktop. Browser co-op still requires the host to remain open and awake; locking or backgrounding a phone can suspend its browser.
+The header shows your health, mana, gold and your companion's health/connection. The menu contains the co-op invite, sanctuary-rest action, help and Leave. Browser safe-area padding keeps controls clear of notches and home indicators. Solo and Host/Join use the same simulation and saved sessions as desktop. Browser co-op still requires the host to remain open and awake; locking or backgrounding a phone can suspend its browser.
 
 All 457 Part I icons were re-extracted with the mobile project's NE-padding fix and verified pixel-for-pixel against its corrected PNGs. Creature, player, short-sword, armor and potion art assignments now follow the reference. This update adapts the online game's existing inventory and three spells; it does not port the native app's entire 310-item catalog, 37 effects or Part II campaign.
 
@@ -25,9 +25,17 @@ No Node process, server address, router setup, or installation is needed to play
 
 Keep the host tab open and its computer awake. Disconnects pause combat. Refreshing the same tab restores the expedition and reconnects the companion. Host saves are kept in that tab's session storage every two seconds and on page exit. Closing the tab or clearing browser storage can lose progress. There is no host migration. Guest seats remain reserved during disconnects; **Leave** releases the seat. Host **Leave** ends the expedition.
 
-A browser reconstruction using artwork, map planes and story resources recovered from `Castle1/CASTLE1.EXE`. Both players move independently; enemies act every 1.4 seconds. Includes melee, spells, potions, shared experience, upgrades, shops, revival, shared exploration, 14 connected areas and Hrungnir.
+A browser reconstruction using artwork, map planes and story resources recovered from `Castle1/CASTLE1.EXE`. Both players move independently; enemies act every 1.4 seconds. Includes melee, spells, potions, shared experience, upgrades, shops, revival, shared exploration, 13 mobile-reference areas and Hrungnir.
 
-This is a playable reconstruction, not a complete faithful port of the original executable. Combat balance, procedural dungeons, area connections and multiplayer are new. See [recovery details](archive/RECOVERY.md).
+This is a playable reconstruction, not a complete faithful port of the original executable. Combat balance, item mechanics and multiplayer remain the online reconstruction. The current map geometry is imported from the mobile reference, as described below. See [recovery details](archive/RECOVERY.md).
+
+## Maps imported from the mobile project
+
+The campaign uses actual exported map data from `CastleWinds_Mobile`, replacing the previous Castle1 tile-plane interpretation and unrelated dungeon generator. It includes the 37x31 northern hamlet and Bjarnarhaven, three 45x35 mine floors and eight 45x35 fortress floors. Roads, buildings, shop/temple entrances, signs, river, bridges, burned farm, stair positions and blocked terrain come directly from the reference. The player starts at (18,24), beside the burned farm; the mine entrance is at (18,4), and the west gate at (2,16) leads to Bjarnarhaven. The mine ends at floor 3; return to town to use the west gate. The city fortress entrance leads to its eight floors.
+
+`scripts/import-mobile-maps.py` compiles and runs the sibling project's unmodified Java engine, exporting `shared/mobile-maps.json`. Source hashes are recorded with the data. The import uses seed 42 and difficulty 1, so these dungeon layouts and scattered trees are fixed reference instances, not newly randomized for every online expedition. The existing online combat balance, five loot categories and shop inventory remain; native NPC services, traps, secret-door interactions, quest gating and Part II are not ported by this map update.
+
+Existing 14-area saves migrate once when the host resumes: characters retain stats, equipment and supplies, and move to the corresponding area's entry point. Old map exploration/enemies/ground loot are replaced by the imported campaign. A browser backup is kept in `castle-peer-before-mobile-maps-v1`; dedicated-server saves keep a `.before-mobile` copy. Quick-slot assignments remain unchanged.
 
 ## Controls
 
@@ -40,16 +48,16 @@ This is a playable reconstruction, not a complete faithful port of the original 
 | Cancel aiming | Escape, right-click, press 1 again, or choose another action |
 | Heal / Fireball | 2 / 3 |
 | Health / mana potion | H / Q |
-| Stairs / rest at well | E |
+| Stairs / rest at sanctuary | E |
 | Revive adjacent partner | R, costs one healing potion |
 | Inventory / shop | I |
 | Original story journal | J |
 
-In co-op, both adventurers must be alive and within three tiles of the stairs to travel. Solo players use the stairs alone. Menus do not pause combat. Shops and free restoration are available near the well in safe areas.
+In co-op, both adventurers must be alive and within three tiles of the stairs to travel. Solo players use the stairs alone. Menus do not pause combat. Trade at shop entrances and use E near the sanctuary or temple for free restoration.
 
 Magic Arrow uses 3 MP per shot and travels up to six tiles toward the clicked point, including empty floor. It stops at walls or the first monster in its path. While selected, map clicks fire instead of walking; aiming stays active for repeated shots. The crosshair and highlighted button show the selected mode.
 
-Inventory now follows the original equipment-slot layout around the character outline recovered from the executable, with separate Small Pack and Floor/Store panes. Click **Drink** to use a potion or an affordable store item to buy it beside the well. Equipment, quantities, gold and health update while the inventory stays open. **Exit!**, Escape or the close button returns to the map. Combat continues while inventory is open. The current item system still has automatic sword/armor upgrades; the empty accessory slots do not implement the original game's full equipment or drag-and-drop system.
+Inventory now follows the original equipment-slot layout around the character outline recovered from the executable, with separate Small Pack and Floor/Store panes. Click **Drink** to use a potion or an affordable store item to buy it at a shop entrance. Equipment, quantities, gold and health update while the inventory stays open. **Exit!**, Escape or the close button returns to the map. Combat continues while inventory is open. The current item system still has automatic sword/armor upgrades; the empty accessory slots do not implement the original game's full equipment or drag-and-drop system.
 
 ## Development and verification
 
