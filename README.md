@@ -39,6 +39,8 @@ In co-op, both adventurers must be alive and within three tiles of the stairs to
 
 Magic Arrow uses 3 MP per shot and travels up to six tiles toward the clicked point, including empty floor. It stops at walls or the first monster in its path. While selected, map clicks fire instead of walking; aiming stays active for repeated shots. The crosshair and highlighted button show the selected mode.
 
+Inventory now follows the original equipment-slot layout around the character outline recovered from the executable, with separate Small Pack and Floor/Store panes. Click **Drink** to use a potion or an affordable store item to buy it beside the well. Equipment, quantities, gold and health update while the inventory stays open. **Exit!**, Escape or the close button returns to the map. Combat continues while inventory is open. The current item system still has automatic sword/armor upgrades; the empty accessory slots do not implement the original game's full equipment or drag-and-drop system.
+
 ## Development and verification
 
 Requires Node 24+. Google Chrome is needed for browser tests and the two-window launcher.

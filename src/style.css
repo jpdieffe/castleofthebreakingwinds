@@ -76,3 +76,49 @@ body:has(.window.in-game) .page-footer,
   .window.in-game .chronicle { display: none; }
   .window.in-game .map-footer { padding: 3px 4px; }
 }
+/* Castle1 inventory: original equipment drawing, white panes, and MDI-style windows. */
+dialog.inventory-dialog { width: 820px; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); padding: 3px; border: 3px outset #ddd; background: #c0c0c0; color: #000; overflow: hidden; }
+dialog.inventory-dialog[open] { display: flex; flex-direction: column; }
+.inventory-dialog > .titlebar { flex: none; min-height: 26px; padding: 2px 4px; background: #000080; color: #fff; font: bold 13px Tahoma, sans-serif; }
+.inventory-dialog #close-dialog { background: #c0c0c0; color: #000; border-color: #fff #555 #555 #fff; }
+.inventory-dialog #dialog-body { padding: 0; max-height: none; min-height: 0; overflow: auto; font: 12px/1.25 Tahoma, 'Segoe UI', sans-serif; }
+.inventory-menu { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #808080; padding: 2px 4px; }
+#dialog-body .inventory-menu button { margin: 0; min-height: 26px; padding: 2px 8px; background: transparent; border: 1px solid transparent; color: #000; }
+#dialog-body .inventory-menu button:hover { border-color: #fff #808080 #808080 #fff; }
+.inventory-menu span { color: #444; }
+.inventory-summary { display: flex; flex-wrap: wrap; gap: 3px 12px; justify-content: space-between; padding: 6px; }
+.inventory-summary strong { overflow-wrap: anywhere; }
+.inventory-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.paper-doll { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); grid-template-rows: repeat(6, minmax(0,1fr)); aspect-ratio: 5 / 6; background: #fff; border: 1px solid #000; }
+.inventory-figure { grid-column: 2 / 5; grid-row: 2 / 6; width: 100%; height: 100%; min-width: 0; min-height: 0; }
+.equipment-slot { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; border: 1px solid #000; padding: 2px; min-width: 0; font: 12px/1.1 'Times New Roman', serif; }
+.equipment-slot img { width: 32px; height: 32px; image-rendering: pixelated; }
+.equipment-slot small { font: 10px/1.1 Tahoma, sans-serif; }
+.equipment-caption { grid-column: 2 / 5; grid-row: 6; align-self: center; padding: 6px; text-align: center; font: 12px 'Times New Roman', serif; }
+.equipment-caption span { display: inline-block; max-width: 180px; margin-top: 4px; font: 10px/1.25 Tahoma, sans-serif; color: #555; }
+.inventory-containers { display: grid; grid-template-rows: 1fr 1fr; gap: 4px; min-width: 0; }
+.inventory-child { display: flex; flex-direction: column; background: #fff; border: 2px solid; border-color: #fff #555 #555 #fff; min-width: 0; }
+#dialog-body .inventory-child h2 { display: flex; align-items: center; gap: 4px; margin: 0; padding: 3px 4px; color: #fff; background: #808080; font: bold 12px/1.2 Tahoma, sans-serif; }
+.inventory-child h2 img { width: 16px; height: 16px; image-rendering: pixelated; }
+.inventory-child h2 [data-pack-count] { margin-left: auto; font-weight: normal; }
+.inventory-items { padding: 4px; }
+#dialog-body .inventory-items p { margin: 8px 5px; color: #555; }
+#dialog-body .inventory-row { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0; padding: 5px; text-align: left; min-height: 42px; border: 0; background: #fff; color: #000; font: 12px/1.2 Tahoma, sans-serif; }
+#dialog-body button.inventory-row:hover:enabled { color: #fff; background: #000080; }
+#dialog-body button.inventory-row:disabled { opacity: 1; color: #777; cursor: default; }
+.inventory-row > img { width: 32px; height: 32px; image-rendering: pixelated; flex: none; }
+.inventory-row > span { flex: 1; }
+.inventory-row > small { flex: none; font-size: 11px; }
+.inventory-row span small { display: block; color: #555; font-size: 10px; margin-top: 4px; }
+#dialog-body .inventory-row button { margin: 0; padding: 4px 8px; min-height: 30px; background: #c0c0c0; color: #000; border-color: #fff #555 #555 #fff; }
+#dialog-body .inventory-row button:disabled { cursor: default; }
+#dialog-body .container-note { margin: auto 0 0; padding: 7px; color: #555; font: 10px/1.3 Tahoma, sans-serif; }
+.inventory-description { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 6px; margin-top: 4px; border: 1px inset #ddd; font-size: 11px; }
+.inventory-description [data-vitals] { white-space: nowrap; }
+@media (max-width: 620px) {
+  .inventory-layout { grid-template-columns: 1fr; }
+  .inventory-containers { grid-template-rows: auto auto; }
+  .inventory-child { min-height: 135px; }
+  .inventory-menu span { font-size: 11px; }
+  .inventory-summary { font-size: 11px; }
+}

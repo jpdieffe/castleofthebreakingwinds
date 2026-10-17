@@ -1,5 +1,6 @@
 import './style.css';
 import { PeerSession } from './peer-session';
+import { mountInventory } from './inventory';
 import type { Action, Player, ServerMessage, Snapshot } from '../shared/types';
 
 const base = import.meta.env.BASE_URL;
@@ -42,11 +43,14 @@ const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElem
 const canvas = el<HTMLCanvasElement>('world'), ctx = canvas.getContext('2d')!;
 const mini = el<HTMLCanvasElement>('minimap'), mc = mini.getContext('2d')!;
 const dialog = el<HTMLDialogElement>('dialog');
+let inventoryView: ReturnType<typeof mountInventory> | undefined;
+function closeDialog() { dialog.close(); canvas.focus(); }
+dialog.addEventListener('close', () => { inventoryView = undefined; dialog.classList.remove('inventory-dialog'); canvas.focus(); });
 el<HTMLInputElement>('server').value = serverUrl;
 el<HTMLInputElement>('code').value = query.get('room')?.slice(0, 6).toUpperCase() || '';
 el<HTMLInputElement>('name').value = localStorage.getItem('castle-name') || '';
 let toastTimer = 0;
-function toast(message: string) { el('toast').textContent = message; el('toast').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { el('toast').hidden = true; }, 4000); }
+function toast(message: string) { if (dialog.open) inventoryView?.message(message); el('toast').textContent = message; el('toast').hidden = false; clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { el('toast').hidden = true; }, 4000); }
 function connection(text: string, connected = false) { el('connection').textContent = text; el('connection').classList.toggle('connected', connected); }
 function lobbyMessage(text: string) { el('lobby-status').textContent = text; }
 function busy(value: boolean) { pending = value; el<HTMLButtonElement>('solo').disabled = value; el<HTMLButtonElement>('create').disabled = value; el<HTMLButtonElement>('join').disabled = value; }
@@ -182,6 +186,7 @@ function render() {
   el('quest-title').textContent = state.level === 0 ? 'Find the road north' : state.level < 7 ? 'Descend into the mine' : state.level < 10 ? 'Find Hrungnir’s stronghold' : 'Defeat the Hill Giant Lord';
   el('quest-text').textContent = player?.hp === 0 ? 'You are down. Your companion must stand beside you and press R with a healing potion.' : state.map.safe ? 'E at the well restores health and mana. Trade from your inventory. Gather at the stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1–3 for spells. Stay together at the stairs; E travels.';
   if (solo) el('quest-text').textContent = player?.hp === 0 ? 'Your adventure has ended. Choose Begin again to restart.' : state.map.safe ? 'E at the well restores health and mana. Trade from your inventory. Use E near stairs to travel.' : 'Bump an enemy or press Space to attack. Use 1, 2, 3 for spells. E near stairs travels to the next area.';
+  if (dialog.open && player) inventoryView?.update(state, player);
   draw();
 }
 
@@ -287,14 +292,12 @@ setInterval(() => { if (socket?.readyState === WebSocket.OPEN && state && Date.n
 
 async function openDialog(kind: string) {
   aimArrow(false); held.clear(); destination = undefined;
-  const body = el('dialog-body'); body.replaceChildren(); el('dialog-title').textContent = kind === 'inventory' ? 'Character & inventory' : kind === 'journal' ? 'Recovered story journal' : kind === 'invite' ? 'Invite a companion' : 'How to adventure';
+  inventoryView = undefined; dialog.classList.toggle('inventory-dialog', kind === 'inventory');
+  const body = el('dialog-body'); body.replaceChildren(); el('dialog-title').textContent = kind === 'inventory' ? 'Castle Inventory' : kind === 'journal' ? 'Recovered story journal' : kind === 'invite' ? 'Invite a companion' : 'How to adventure';
   if (!dialog.open) dialog.showModal();
   if (kind === 'inventory') {
-    const p = me(); if (!p) { body.textContent = 'Join an expedition to view your equipment.'; return; }
-    const title = document.createElement('h2'); title.textContent = p.name; body.append(title);
-    const stats = document.createElement('p'); stats.textContent = `Level ${p.rank} · XP ${p.xp}/${p.rank * 45} · ${p.gold} gold`; body.append(stats);
-    body.insertAdjacentHTML('beforeend', `<div class="equipment"><div><img src="${icon(111)}" alt="Sword">Sword +${p.weapon}</div><div><img src="${icon(117)}" alt="Armor">Armor +${p.armor}</div><div><img src="${icon(231)}" alt="Potion">${p.potions} healing</div><div><img src="${icon(233)}" alt="Mana potion">${p.manaPotions} mana</div></div><h3>Trade at the village well</h3><p>Stand within two tiles of the well. E restores health and mana for free.</p>`);
-    for (const [item, label] of [['potion', 'Healing potion · 10 gold'], ['mana', 'Mana potion · 10 gold'], ['weapon', `Improve sword · ${35 * p.weapon} gold`], ['armor', `Improve armor · ${30 * (p.armor + 1)} gold`]]) { const button = document.createElement('button'); button.textContent = label; button.onclick = () => { send({ type: 'buy', item: item as 'potion' }); dialog.close(); }; body.append(button); }
+    const p = me(); if (!p || !state) { body.textContent = 'Join an expedition to view your equipment.'; return; }
+    inventoryView = mountInventory(body, send, closeDialog); inventoryView.update(state, p);
   } else if (kind === 'journal') {
     body.textContent = 'Loading the original story…';
     try {
@@ -307,6 +310,6 @@ async function openDialog(kind: string) {
   }
 }
 document.querySelectorAll<HTMLButtonElement>('[data-dialog]').forEach(b => { b.onclick = () => { void openDialog(b.dataset.dialog!); }; });
-el('close-dialog').onclick = () => { dialog.close(); canvas.focus(); };
+el('close-dialog').onclick = closeDialog;
 draw();
 if (saved) { serverUrl = saved.server; connect({ type: 'resume', code: saved.code, token: saved.token }, true); }

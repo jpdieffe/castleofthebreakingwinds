@@ -1,5 +1,16 @@
 # Test results - October 16, 2026
 
+## Classic inventory update
+
+- Recovered both original type-261 inventory WMF drawings directly from `CASTLE1.EXE`, exporting 25 vector shapes per drawing. Compared the displayed equipment arrangement with the original Castle1 inventory screenshot linked in [recovery notes](../archive/RECOVERY.md).
+- Inventory and layout browser checks: **4 passed**. Verified equipment and empty slots, recovered art loading, purchases, changing upgrade prices, affordability, potion use, live quantities/gold/vitals, safe player-name rendering, exit controls, Floor/Store switching and responsive dialog bounds. Tested inventory at 1280x600, 390x844, 360x640 and 844x390. Existing map/spell layout checks also passed.
+- Affected WebRTC, solo, journal/help/mobile and Magic Arrow regression cases: **4 passed**. Both co-op clients kept inventory open; guest purchases and host potion use synchronized, while each inventory retained its own player's items and gold.
+- Dedicated-server inventory purchase regression: **1 passed**.
+- TypeScript and production build passed. Visual review: [desktop](screenshots/inventory-desktop.png), [phone](screenshots/inventory-phone.png). On narrow screens, the inventory body scrolls vertically while its title bar and close button stay visible.
+- Read-only map audit: all six fixed areas had **zero raw-tile differences** from their recovered planes. Eight dungeon floors still use the reconstruction's generator; original scripted progression and full inventory mechanics are not ported.
+
+This update changes inventory presentation and exposes existing potion actions. Equipment upgrades still equip automatically. Empty accessory slots do not add drag-and-drop, new item types, or weight/bulk mechanics. Engine rules and map generation were unchanged; the earlier 28 engine/network passes are the existing baseline, not a new test run for this update.
+
 ## Magic Arrow targeting update
 
 - `npm test`: **28 passed**. Aimed arrows spend mana on empty-floor shots, stop at walls and the first monster, enforce range and cooldown, reject invalid coordinates and insufficient mana, and expire their shared visual effects.

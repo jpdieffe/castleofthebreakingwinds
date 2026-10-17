@@ -35,6 +35,14 @@ Segment 25's final unused row padding extends beyond its initialized bytes; the 
 
 Segment 11's dungeon code is present in the disassembly. The new generator guarantees connected rooms and uses an MS C-style random sequence. It is **not** an instruction-for-instruction translation and does not reproduce original saved games. The co-op campaign uses eight newly generated dungeon floors plus six recovered fixed areas. The original complete quest and inventory systems are not implemented.
 
+## Inventory artwork and layout
+
+Resources of type 261, IDs 1 and 2, are standard Windows Metafile drawings created with Microsoft Draw. `scripts/recover-inventory.py` reads them directly from the executable and exports the original polylines, ellipses, rectangles, colors and equipment guide lines as `public/classic/inventory-1.svg` and `inventory-2.svg` (25 shapes each). The browser inventory uses drawing 1. These are recovered drawings, not traced screenshots or newly drawn substitutes.
+
+The equipment-slot arrangement and separate Floor/Store and Small Pack panes were compared with this [original Castle1 inventory screenshot](https://shrines.rpgclassics.com/pc/castle1/images/howtopics/inventory.gif). The converter uses the [Microsoft WMF specification](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wmf/). The new UI retains this reconstruction's existing sword/armor upgrades, potion counts and gold. Empty accessory slots are visual placeholders; drag-and-drop equipment, weight/bulk limits, item naming and the original full item system remain unimplemented.
+
+An audit of `makeWorld(42)` found zero raw-tile differences between each of the six fixed areas and its recovered plane (using the original 64-byte source stride). This verifies use of the recovered tile data, not complete original gameplay fidelity: terrain meanings, building assignments, exits, encounters, scripts and dungeon generation still have the limitations described above. The burned-hamlet plane is recovered but not used in the current route.
+
 ## Reproduce
 
 Requires Python with Pillow; Capstone is needed only for the assembly listings.
@@ -46,6 +54,7 @@ python scripts/extract-classic.py
 python scripts/recover-executable.py
 python scripts/recover-content.py
 python scripts/recover-maps.py
+python scripts/recover-inventory.py
 ```
 
 Generated binary and assembly dumps are ignored by Git but remain in this workspace. The decoded game assets and map/story JSON are tracked. [The Castle of the Winds Shrine's technical research](https://castleofthewinds.com/technical.html) provided useful leads; the fixed-map offsets above were established from this local executable's loader instructions rather than copied from that page.

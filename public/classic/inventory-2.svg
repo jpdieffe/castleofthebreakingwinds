@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -8 1132 1781" preserveAspectRatio="none">
+<!-- Original Castle of the Winds inventory artwork, resource 261; Rick Saada / SaadaSoft, Paul Canniff. -->
+<polyline points="660,650 660,642 654,619 638,605 622,602 595,597 552,602" fill="none" stroke="#0000ff" stroke-width="8"/>
+<polyline points="420,605 399,603 357,605 327,612 306,632 300,674" fill="none" stroke="#0000ff" stroke-width="8"/>
+<polyline points="273,1765 481,1756 483,1635 468,1416 501,1219 534,1422 552,1752 744,1752 753,1729 756,1704 747,1684 723,1675 687,1675 654,1672 648,1639 660,1452 672,1386 660,1164 642,1078 627,1024 645,871 645,805 636,762 739,950 763,912 739,951 847,1028 863,1010 844,1029 862,1058 882,1077 907,1091 919,1085 898,1077 889,1055 900,1071 921,1080 931,1074 913,1068 900,1049 915,1061 939,1070 945,1059 922,1055 909,1037 927,1050 955,1055 957,1047 933,1043 907,1022 925,1017 949,1025 951,1016 927,1005 889,996 866,1007 886,998 803,896 769,909 804,893 678,660 561,631 546,577 494,593 546,577 564,529 576,466 573,409 558,382 525,358 450,358 414,388 399,421 396,466 408,523 435,574 494,594 429,571 426,631 314,658 175,900 217,906 174,902 96,1038 110,1052 98,1040 69,1052 48,1068 56,1076 74,1064 83,1070 65,1091 44,1103 47,1113 65,1103 84,1089 72,1106 50,1119 53,1130 81,1112 95,1094 80,1112 60,1130 71,1134 90,1121 104,1103 92,1125 80,1136 89,1139 101,1128 119,1101 131,1071 114,1050 131,1068 239,954 220,906 238,951 344,755 333,814 339,886 366,1026 327,1165 330,1404 373,1632 378,1673 351,1685 324,1692 289,1694 273,1700 261,1718 262,1753 273,1765" fill="none" stroke="#000000" stroke-width="8"/>
+<polyline points="0,0 366,752" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="192,0 492,788" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="420,638 498,758 558,638" fill="none" stroke="#ffff00" stroke-width="8"/>
+<ellipse cx="503" cy="795" rx="34" ry="26" fill="#ffffff" stroke="#00ff00" stroke-width="8"/>
+<polyline points="588,408 930,0" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="762,834 1104,0" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="756,1700 1110,1470" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="0,1524 426,1050" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="0,1170 90,1115" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="0,686 102,1079" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="0,252 198,930" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="366,1033 618,1033" fill="none" stroke="#000000" stroke-width="8"/>
+<polyline points="354,1075 638,1073" fill="none" stroke="#000000" stroke-width="8"/>
+<rect x="470" y="1028" width="62" height="56" fill="#ffffff" stroke="#000000" stroke-width="8"/>
+<polyline points="378,1638 480,1638" fill="none" stroke="#000000" stroke-width="8"/>
+<polyline points="552,1638 645,1639" fill="none" stroke="#000000" stroke-width="8"/>
+<polyline points="612,600 540,0" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="858,984 1116,210" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="1116,600 888,1032" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="1116,1062 924,1068" fill="none" stroke="#ff0000" stroke-width="8" stroke-dasharray="8 24"/>
+<polyline points="690,1266 708,1301 732,1265 780,1266 840,1331 774,984" fill="none" stroke="#0000ff" stroke-width="8"/>
+<polyline points="216,972 108,1326 192,1266 264,1268 294,1334 324,1272" fill="none" stroke="#0000ff" stroke-width="8"/>
+</svg>

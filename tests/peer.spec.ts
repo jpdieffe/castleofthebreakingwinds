@@ -134,9 +134,18 @@ test('enemies move without input and guest spell damage, shared experience and l
 test('guest purchases and healing update both browsers from host authority', async ({ browser }) => {
   const { a, b } = await pair(browser, game => { chamber(game); game.levels[0].shop = { x: 5, y: 5 }; game.players[0].hp = 10; });
   await key(a, '2'); await expect(b.locator('.player-card').first().locator('.health')).toContainText('30/60');
+  await a.locator('[data-dialog="inventory"]').click();
   await b.locator('[data-dialog="inventory"]').click(); await b.getByRole('button', { name: /Healing potion/ }).click();
   await expect(a.locator('.player-card').nth(1)).toContainText('10 gold');
   await expect(a.locator('.player-card').nth(1)).toContainText('4 potions');
+  await expect(b.locator('[data-potion=potion]')).toContainText('Quantity: 4');
+  await expect(b.locator('[data-slot=purse]')).toContainText('10 gold');
+  await expect(a.locator('[data-slot=purse]')).toContainText('20 gold');
+  await expect(a.locator('[data-potion=potion]')).toContainText('Quantity: 3');
+  await a.waitForTimeout(350); await a.getByRole('button', { name: 'Drink healing potion' }).click();
+  await expect(b.locator('.player-card').first().locator('.health')).toContainText('60/60');
+  await expect(a.locator('[data-potion=potion]')).toContainText('Quantity: 2');
+  await expect(a.getByRole('button', { name: 'Drink healing potion' })).toBeDisabled();
 });
 
 test('unmodified campaign transitions to the wilderness in both WebRTC clients', async ({ browser }) => {

@@ -2,6 +2,10 @@
 
 Windows, Node 24, and desktop Google Chrome. The default game now uses browser-hosted WebRTC, with public PeerJS matchmaking. Browser tests use independent storage contexts and real data channels. The older dedicated-server regression suite remains separate.
 
+## Classic inventory
+
+`tests/inventory.spec.ts` checks the recovered drawing loads, all 15 equipment/container positions, actual equipment and empty slots, safe display of player names, purchases and price increases, affordability, potion use, live quantities and vitals, and all exit controls. Small-window tests cover 1280x600, 390x844, 360x640 and 844x390; inventory content can scroll vertically while the close button stays visible, with no horizontal overflow. The Floor pane replaces the Store away from the well. The WebRTC purchase/healing case keeps both inventories open, checks guest purchase synchronization, independent player inventories and host potion use reaching the guest.
+
 ## Magic Arrow targeting
 
 `tests/targeting.spec.ts` verifies button/hotkey crosshair selection without an immediate cast, empty-floor shots with mana cost and no walking, visible cyan projectile pixels on the canvas, repeated shots, Escape/right-click/other-action cancellation, normal walking after cancellation, cancellation of an existing walk destination, and low-mana feedback. A real WebRTC guest fires while both clients verify the visible projectile and the host-authoritative mana cost. Engine cases cover range, the first enemy along the selected path, unrelated nearer monsters, walls, diagonal corners, invalid coordinates, cooldowns and effect expiry.
