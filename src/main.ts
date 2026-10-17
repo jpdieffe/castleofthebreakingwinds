@@ -4,6 +4,7 @@ import { PeerSession } from './peer-session';
 import { mountInventory } from './inventory';
 import { mountSpellbook } from './spellbook';
 import { touchMap } from './touch-map';
+import { drawTerrain, mapColors, terrainColor, buildingArt } from './map-style';
 import { art, creatureArt } from '../shared/art';
 import type { Action, Player, ServerMessage, Snapshot } from '../shared/types';
 
@@ -246,7 +247,7 @@ function draw() {
   if (canvas.width !== viewColumns * 32 || canvas.height !== viewRows * 32) { canvas.width = viewColumns * 32; canvas.height = viewRows * 32; }
   canvas.style.setProperty('--map-ratio', String(viewColumns / viewRows));
   canvas.dataset.columns = String(viewColumns); canvas.dataset.rows = String(viewRows);
-  ctx.imageSmoothingEnabled = false; ctx.fillStyle = '#101719'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.imageSmoothingEnabled = false; ctx.fillStyle = mapColors.unseen; ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (!state) { for (let y = 0; y < 17; y++) for (let x = 0; x < 23; x++) { ctx.fillStyle = (x + y) % 2 ? '#243b32' : '#273e35'; ctx.fillRect(x * 32, y * 32, 32, 32); } return; }
   const map = state.map, player = me() ?? state.players[0]; if (!player) return;
   viewX = Math.max(0, Math.min(map.width - viewColumns, player.x - Math.floor(viewColumns / 2))); viewY = Math.max(0, Math.min(map.height - viewRows, player.y - Math.floor(viewRows / 2)));
@@ -256,20 +257,40 @@ function draw() {
     const x = sx + viewX, y = sy + viewY, index = y * map.width + x;
     if (x >= map.width || y >= map.height || !explored.has(index)) continue;
     const tile = map.tiles[index], raw = map.rawTiles?.[index];
-    ctx.fillStyle = { wall: map.rawTiles ? '#62615b' : '#55504a', floor: '#d3cbb6', grass: '#138311', tree: '#075600', water: '#0000a8', door: '#d3cbb6', open: '#d3cbb6' }[tile];
-    if (raw === 3) ctx.fillStyle = '#a59c47'; ctx.fillRect(sx * 32, sy * 32, 32, 32);
-    if (tile === 'wall' && !map.rawTiles) { ctx.strokeStyle = '#35342f'; ctx.strokeRect(sx * 32, sy * 32, 32, 16); ctx.strokeRect(sx * 32 - 8, sy * 32 + 16, 24, 16); }
-    if (tile === 'tree') { ctx.fillStyle = '#003800'; ctx.fillRect(sx * 32 + 7, sy * 32 + 4, 19, 21); ctx.fillStyle = '#006d00'; ctx.fillRect(sx * 32 + 3, sy * 32 + 10, 25, 12); }
+    // Like the mobile room view, show wall faces bordering passages;
+    // solid rock beyond those faces stays dark instead of filling the screen.
+    if (tile === 'wall' && !map.rawTiles && ![-1, 0, 1].some(dy => [-1, 0, 1].some(dx => {
+      const nx = x + dx, ny = y + dy;
+      return nx >= 0 && ny >= 0 && nx < map.width && ny < map.height && map.tiles[ny * map.width + nx] !== 'wall';
+    }))) continue;
+    drawTerrain(ctx, tile, raw, map.safe, sx * 32, sy * 32);
     if (tile === 'door') sprite(4, sx * 32, sy * 32); if (tile === 'open') sprite(6, sx * 32, sy * 32); if (raw === 86) sprite(65, sx * 32, sy * 32);
-    ctx.strokeStyle = 'rgba(0,0,0,.05)'; ctx.strokeRect(sx * 32, sy * 32, 32, 32);
   }
-  for (const d of map.decorations) if (explored.has(d.y * map.width + d.x)) sprite(d.image, (d.x - viewX) * 32, (d.y - viewY) * 32, d.width * 32, d.height * 32);
+  for (const d of map.decorations) if (explored.has(d.y * map.width + d.x)) {
+    const img = image(buildingArt(map, d.image));
+    if (!img.complete || !img.naturalWidth) continue;
+    const scale = Math.min(d.width * 32 / img.naturalWidth, d.height * 32 / img.naturalHeight);
+    const width = img.naturalWidth * scale, height = img.naturalHeight * scale;
+    ctx.drawImage(img, (d.x - viewX) * 32 + (d.width * 32 - width) / 2, (d.y - viewY) * 32 + d.height * 32 - height, width, height);
+  }
   const screen = (p: { x: number; y: number }) => ({ x: (p.x - viewX) * 32, y: (p.y - viewY) * 32 });
-  if (map.shop) { const p = screen(map.shop); sprite(30, p.x, p.y); }
-  map.portals.forEach(portal => { if (!explored.has(portal.y * map.width + portal.x)) return; const p = screen(portal); sprite(portal.to > state!.level ? 7 : 9, p.x, p.y); ctx.strokeStyle = '#e9ce55'; ctx.strokeRect(p.x + 1, p.y + 1, 30, 30); });
+  if (map.shop) { const p = screen(map.shop); sprite(12, p.x, p.y); }
+  map.portals.forEach(portal => { if (!explored.has(portal.y * map.width + portal.x)) return; const p = screen(portal); sprite(portal.to > state!.level ? 10 : 8, p.x, p.y); ctx.strokeStyle = '#e9ce55'; ctx.strokeRect(p.x + 1, p.y + 1, 30, 30); });
   map.loot.forEach(item => { if (!explored.has(item.y * map.width + item.x)) return; const p = screen(item); sprite({ gold: art.gold, potion: art.potion, mana: art.mana, weapon: art.sword, armor: art.armor }[item.kind], p.x, p.y); });
-  map.enemies.filter(e => e.hp > 0 && explored.has(e.y * map.width + e.x)).forEach(e => { const p = screen(e); sprite(creatureArt[e.name] ?? e.icon, p.x, p.y); ctx.fillStyle = '#381919'; ctx.fillRect(p.x + 3, p.y + 29, 26, 3); ctx.fillStyle = '#c53727'; ctx.fillRect(p.x + 3, p.y + 29, 26 * e.hp / e.maxHp, 3); });
-  state.players.forEach(p => { const s = screen(p); ctx.strokeStyle = p.id === playerId ? '#ffec53' : '#63e6ff'; ctx.lineWidth = 2; ctx.strokeRect(s.x + 1, s.y + 1, 30, 30); ctx.lineWidth = 1; sprite(p.hp ? p.slot === 0 ? art.hero : art.companion : 52, s.x, s.y); });
+  map.enemies.filter(e => e.hp > 0 && explored.has(e.y * map.width + e.x)).forEach(e => { const p = screen(e); sprite(creatureArt[e.name] ?? e.icon, p.x, p.y); if (e.hp < e.maxHp) { ctx.fillStyle = '#441b22'; ctx.fillRect(p.x + 3, p.y + 28, 26, 3); ctx.fillStyle = '#d36e63'; ctx.fillRect(p.x + 3, p.y + 28, 26 * e.hp / e.maxHp, 3); } });
+  state.players.forEach(p => { const s = screen(p); ctx.strokeStyle = p.id === playerId ? '#dfbe7688' : '#63e6ff'; ctx.lineWidth = 2; ctx.strokeRect(s.x + 1, s.y + 1, 30, 30); ctx.lineWidth = 1; sprite(p.hp ? p.slot === 0 ? art.hero : art.companion : 52, s.x, s.y); });
+  if (map.safe) {
+    const label = (text: string, x: number, y: number) => {
+      if (!explored.has(y * map.width + x)) return;
+      const p = screen({ x, y }); if (p.y < 14 || p.y > canvas.height || p.x < 0 || p.x >= canvas.width) return;
+      ctx.font = 'bold 9px Tahoma, sans-serif';
+      const width = ctx.measureText(text).width, left = Math.max(3, Math.min(canvas.width - width - 7, p.x + 16 - width / 2));
+      ctx.fillStyle = '#102029dd'; ctx.fillRect(left - 3, p.y - 13, width + 6, 13);
+      ctx.fillStyle = '#e0e5e2'; ctx.fillText(text, left, p.y - 3);
+    };
+    if (map.shop) label('TRADE / REST', map.shop.x, map.shop.y);
+    for (const portal of map.portals) label(portal.to > state.level ? 'ROAD NORTH' : 'RETURN', portal.x, portal.y);
+  }
   let animating = false;
   for (const arrow of state.arrows ?? []) {
     if (arrow.level !== state.level) continue;
@@ -287,8 +308,8 @@ function draw() {
   }
   if (animating) animationFrame = requestAnimationFrame(draw);
   if (destination) { const p = screen(destination); ctx.strokeStyle = '#fff'; ctx.strokeRect(p.x + 4, p.y + 4, 24, 24); }
-  mc.fillStyle = '#101719'; mc.fillRect(0, 0, mini.width, mini.height); const size = Math.min(mini.width / map.width, mini.height / map.height);
-  map.explored.forEach(index => { const x = index % map.width, y = Math.floor(index / map.width); mc.fillStyle = ['floor', 'grass', 'open', 'door'].includes(map.tiles[index]) ? '#81987b' : '#38423b'; mc.fillRect(x * size, y * size, Math.ceil(size), Math.ceil(size)); });
+  mc.fillStyle = mapColors.unseen; mc.fillRect(0, 0, mini.width, mini.height); const size = Math.min(mini.width / map.width, mini.height / map.height);
+  map.explored.forEach(index => { const x = index % map.width, y = Math.floor(index / map.width); mc.fillStyle = terrainColor(map.tiles[index], map.rawTiles?.[index], map.safe); mc.fillRect(x * size, y * size, Math.ceil(size), Math.ceil(size)); });
   map.portals.forEach(p => { if (explored.has(p.y * map.width + p.x)) { mc.fillStyle = 'white'; mc.fillRect(p.x * size, p.y * size, size, size); } });
   state.players.forEach(p => { mc.fillStyle = p.id === playerId ? '#ffe953' : '#63e6ff'; mc.fillRect(p.x * size, p.y * size, Math.max(3, size), Math.max(3, size)); });
 }

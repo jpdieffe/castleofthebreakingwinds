@@ -1,5 +1,14 @@
 # Test results - October 17, 2026
 
+
+## Mobile-reference map style
+
+- Matched the reference BoardView palette, rounded trees, pale dungeon floors, beveled gray wall faces, dark unexplored/solid-rock background, muted player outline and injured-enemy health bars. The desktop minimap uses the same terrain palette.
+- Hamlet buildings use the reference's red-roof resources with preserved image proportions; fountain and stair icons follow its assignments. Added signs for the actual online trade/rest point and exits.
+- Safe settlements are fully explored, including resumed solo sessions. Dangerous areas retain exploration. Existing collision tiles, routes and procedural dungeon generator are retained; this is a map presentation adaptation, not a port of the native campaign layouts.
+- Validation: **29 engine/network tests passed**, **11 mobile browser tests passed** (3 platform-specific skips as documented below), **2 responsive layout tests passed**, **3 targeting tests passed**. Includes two-client WebRTC co-op, guest projectiles, movement, purchases and reconnect.
+- Production build passed; phone-sized production preview checked for town/dungeon rendering, rotation and movement with no runtime errors. Visual evidence: [town](screenshots/map-style-town.png), [dungeon](screenshots/map-style-dungeon.png), [landscape](screenshots/map-style-landscape.png).
+
 ## Mobile browser interface
 
 - `npm test`: **28 passed**. `npx playwright test --headed`: **34 passed** (2.8 minutes). Existing solo, WebRTC, dedicated-server, inventory, layout and targeting regressions passed.

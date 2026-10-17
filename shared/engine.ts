@@ -46,6 +46,8 @@ export function updateStatus(game: GameState) {
 }
 export function reveal(game: GameState) {
   const map = game.levels[game.level], seen = new Set(map.explored);
+  // The mobile reference shows the whole safe settlement immediately.
+  if (map.safe) { map.explored = Array.from({ length: map.width * map.height }, (_, i) => i); return; }
   for (const p of game.players) for (let y = p.y - 7; y <= p.y + 7; y++) for (let x = p.x - 7; x <= p.x + 7; x++) {
     if (x >= 0 && y >= 0 && x < map.width && y < map.height && Math.hypot(x - p.x, y - p.y) <= 7.5) seen.add(y * map.width + x);
   }

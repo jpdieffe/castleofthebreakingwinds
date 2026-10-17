@@ -45,7 +45,7 @@ function enemy(id: string, p: Point, depth: number, index: number): Enemy {
 function original(id: number, mapIndex: number, safe: boolean, seed: number): Level {
   const recovered = maps[mapIndex];
   const level = base(id, recovered.name, recovered.width, recovered.height, safe);
-  level.source = `CASTLE1.EXE segment ${recovered.segment} Â· recovered tile plane`;
+  level.source = `CASTLE1.EXE segment ${recovered.segment} · recovered tile plane`;
   level.rawTiles = [];
   for (let y = 0; y < level.height; y++) for (let x = 0; x < level.width; x++) {
     const raw = recovered.tiles[y * 64 + x] ?? 0;
@@ -93,7 +93,7 @@ export function floorPositions(level: Level) {
   return positions;
 }
 function dungeon(id: number, depth: number, seed: number): Level {
-  const level = base(id, depth <= 4 ? `The Mine Â· Level ${depth}` : `Hrungnir's Stronghold Â· Level ${depth - 4}`, 48, 40);
+  const level = base(id, depth <= 4 ? `The Mine · Level ${depth}` : `Hrungnir's Stronghold · Level ${depth - 4}`, 48, 40);
   const rng = random(seed + id * 997), centers: Point[] = [];
   // New connected generator informed by the original room dimensions and MS C RNG.
   // It is intentionally not represented as a byte-for-byte port of segment 11.
@@ -120,7 +120,7 @@ function dungeon(id: number, depth: number, seed: number): Level {
     Object.assign(boss, { name: 'Hrungnir, the Hill Giant Lord', icon: 425, hp: 180, maxHp: 180, damage: 9, boss: true });
     level.enemies.push(boss);
   }
-  level.source = 'Reconstructed dungeon generator Â· original MS C random sequence';
+  level.source = 'Reconstructed dungeon generator · original MS C random sequence';
   return level;
 }
 export function makeWorld(seed: number): Level[] {

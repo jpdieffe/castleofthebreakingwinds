@@ -147,6 +147,15 @@ test('shared exploration and snapshot exclude other maps', () => {
   const g = gameFixture(); g.levels[0].explored = []; g.players[1].x = 18; reveal(g);
   assert.ok(g.levels[0].explored.includes(5 * 24 + 18)); assert.ok(!('levels' in snapshot(g)));
 });
+
+test('safe towns are fully mapped while dangerous areas still require exploration', () => {
+  const g = createGame('MAP123', 42, 'solo'); addPlayer(g, 'a', 'Astrid'); reveal(g);
+  assert.equal(g.levels[0].explored.length, g.levels[0].width * g.levels[0].height);
+  g.level = 1; g.players[0].x = g.levels[1].spawn.x; g.players[0].y = g.levels[1].spawn.y;
+  reveal(g);
+  assert.ok(g.levels[1].explored.length > 0);
+  assert.ok(g.levels[1].explored.length < g.levels[1].width * g.levels[1].height);
+});
 test('replacing a departed companion never teleports the remaining player', () => {
   const g = gameFixture(); g.players = [g.players[0]]; g.players[0].x = 18; g.players[0].y = 12;
   const replacement = addPlayer(g, 'new', 'New companion');
