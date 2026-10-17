@@ -35,7 +35,7 @@ test('native shop selects before buying, sells only owned potions, and saves tra
   await expect(page.locator('[data-shop-notice]')).toContainText('Equipped');
   await press(page, '[data-shop-item=potion]');
   for (const gold of [93, 96]) {
-    await page.waitForTimeout(350); await press(page, '[data-shop-commit]');
+    await press(page, '[data-shop-commit]');
     await expect(page.locator('[data-shop-balance]')).toContainText(`${gold} gold`);
   }
   await expect(page.locator('[data-shop-item=potion]')).toHaveCount(0);

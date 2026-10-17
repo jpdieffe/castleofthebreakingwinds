@@ -50,14 +50,14 @@ export function mountShop(body: HTMLElement, send: (action: Action) => void, hea
     find('[data-shop-notice]').textContent = [feedback, item ? unavailable(item.id) : !entrance ? 'Stand near a shop entrance to trade.' : ''].filter(Boolean).join(' ');
     const commit = find<HTMLButtonElement>('[data-shop-commit]');
     commit.textContent = !item ? 'Select an icon' : mode === 'sell' && (item.id === 'weapon' || item.id === 'armor') ? 'Equipped' : `${mode === 'buy' ? 'Buy' : 'Sell'} · ${mode === 'buy' ? buyPrice(player, item.id) : potionSellPrice} gold`;
-    commit.disabled = !item || !!unavailable(item.id) || !!pending;
+    commit.disabled = !item || !!unavailable(item.id) || !!pending || state.time < player.nextAction;
   }
   body.querySelectorAll<HTMLButtonElement>('[data-shop-tab]').forEach(tab => tab.onclick = () => {
     mode = tab.dataset.shopTab as 'buy' | 'sell'; selected = undefined; feedback = '';
     body.querySelectorAll('[data-shop-tab]').forEach(t => t.setAttribute('aria-pressed', String(t === tab))); render();
   });
   find<HTMLButtonElement>('[data-shop-commit]').onclick = () => {
-    if (!selected || !state || !player || unavailable(selected) || pending) return;
+    if (!selected || !state || !player || unavailable(selected) || pending || state.time < player.nextAction) return;
     pending = { gold: player.gold, logId: state.nextLog };
     const action: Action = mode === 'buy' ? { type: 'buy', item: selected } : { type: 'sell', item: selected as 'potion' | 'mana' };
     send(action); render();
