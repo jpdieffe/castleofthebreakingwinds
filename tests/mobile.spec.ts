@@ -87,7 +87,11 @@ test('two touch clients host/join, synchronize movement and arrows, purchase ind
     await b.locator('#cancel-aim').tap(); await b.getByRole('button',{name:'Pack',exact:true}).tap(); await b.locator('[data-buy=potion]').tap(); await b.waitForTimeout(350); await b.locator('[data-selected-action]').tap();
     await expect(b.locator('[data-slot=purse]')).toContainText('10 gold'); await expect(a.locator('.player-card').nth(1)).toContainText('4 potions');
     await b.locator('#close-dialog').tap(); await b.reload(); await expect(b.locator('#simulation-status')).toHaveText('REAL TIME',{timeout:25000});
-    await expect(b.locator('#mobile-vitals')).toContainText('10 gold'); await a.screenshot({path:info.outputPath('phone-coop.png')});
+    await expect(b.locator('#mobile-vitals')).toContainText('10 gold');
+    await b.getByRole('button',{name:'Spells',exact:true}).tap(); await b.locator('[data-spell=fireball]').tap(); await b.locator('[data-assign-slot="0"]').tap(); await b.locator('#close-dialog').tap();
+    await expect(b.locator('[data-quick-slot="0"]')).toHaveAttribute('data-assigned','fireball'); await expect(a.locator('[data-quick-slot="0"]')).toHaveAttribute('data-assigned','bolt');
+    await b.reload(); await expect(b.locator('#simulation-status')).toHaveText('REAL TIME',{timeout:25000}); await expect(b.locator('[data-quick-slot="0"]')).toHaveAttribute('data-assigned','fireball');
+    await a.screenshot({path:info.outputPath('phone-coop.png')});
   } finally {await ctx.close();}
 });
 
@@ -126,4 +130,47 @@ test('real multi-touch pinch and long press do not move or cast', async ({ page,
   await expect(page.locator('#position')).toHaveAttribute('data-x','13');
   const target=await tile(page,14,16); await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:target.x,y:target.y,id:1}]}); await page.waitForTimeout(650);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]}); await expect(page.locator('#toast')).toBeVisible(); await expect(page.locator('#position')).toHaveAttribute('data-x','13');
+});
+
+
+test('quick slots assign spells and potions without using them, execute the assigned action, and persist', async ({ page }, info) => {
+  await page.goto(url); const game = createGame('SLOTSQ',42,'solo'); game.levels[0] = arena();
+  const player = addPlayer(game,'slot-host','Astrid'); Object.assign(player,{hp:10,mana:5});
+  game.levels[0].enemies.push({id:'target',name:'Ogre',icon:395,x:8,y:5,hp:100,maxHp:100,damage:1,nextMove:999999});
+  await page.evaluate(game => { sessionStorage.setItem('castle-peer-host-v1',JSON.stringify({game,token:'slot-token'})); sessionStorage.setItem('castle-session',JSON.stringify({code:game.code,token:'slot-token',playerId:'slot-host',server:'peer'})); },game);
+  await page.reload(); await expect(page.locator('#simulation-status')).toHaveText('REAL TIME');
+  const slot1=page.locator('[data-quick-slot="0"]'), slot2=page.locator('[data-quick-slot="1"]');
+  await expect(slot1).toHaveAttribute('data-assigned','bolt'); await expect(slot2).toHaveAttribute('data-assigned','potion');
+  await page.getByRole('button',{name:'Spells',exact:true}).tap(); await page.locator('[data-spell=heal]').tap();
+  await expect(page.locator('#cast-spell')).toBeDisabled();
+  await page.locator('[data-assign-slot="0"]').tap(); await expect(page.locator('[data-assign-slot="0"]')).toHaveText('Assigned to slot 1');
+  await expect(page.locator('#mobile-vitals')).toContainText('10/60'); await expect(page.locator('#mobile-vitals')).toContainText('5/30');
+  await page.locator('#close-dialog').tap(); await expect(slot1).toHaveAttribute('data-assigned','heal'); await expect(slot1).toBeDisabled();
+  await page.getByRole('button',{name:'Pack',exact:true}).tap(); await page.locator('[data-potion=mana]').tap();
+  await page.locator('[data-assign-slot="1"]').tap(); await expect(page.locator('[data-potion=mana]')).toContainText('Quantity: 2');
+  await page.setViewportSize({width:667,height:375});
+  for(const id of ['0','1']) await expect(page.locator(`[data-assign-slot="${id}"]`)).toBeInViewport({ratio:1});
+  await page.screenshot({path:info.outputPath('quick-slot-pack.png')}); await page.locator('#close-dialog').tap();
+  await expect(slot2.locator('img')).toHaveAttribute('src',/233\.png$/); await expect(slot2).not.toContainText('Mana');
+  await slot2.tap(); await expect(page.locator('#mobile-vitals')).toContainText('25/30'); await expect(slot2.locator('.quick-count')).toHaveText('1');
+  await page.waitForTimeout(350); await slot1.tap(); await expect(page.locator('#mobile-vitals')).toContainText('30/60');
+  await page.getByRole('button',{name:'Spells',exact:true}).tap(); await page.locator('[data-spell=fireball]').tap(); await page.locator('[data-assign-slot="0"]').tap(); await page.locator('#close-dialog').tap();
+  await page.waitForTimeout(350); await slot1.tap(); await expect(page.locator('#mobile-log')).toContainText('casts at Ogre for 14');
+  await page.getByRole('button',{name:'Pack',exact:true}).tap(); await page.locator('[data-potion=potion]').tap(); await page.locator('[data-assign-slot="0"]').tap(); await page.locator('#close-dialog').tap();
+  await page.waitForTimeout(350); await slot1.tap(); await expect(page.locator('#mobile-vitals')).toContainText('60/60'); await expect(slot1.locator('.quick-count')).toHaveText('2'); await expect(slot1).toBeDisabled();
+  await page.getByRole('button',{name:'Spells',exact:true}).tap(); await page.locator('[data-spell=bolt]').tap(); await page.locator('[data-assign-slot="1"]').tap(); await page.locator('#close-dialog').tap();
+  await slot2.tap(); await expect(slot2).toHaveAttribute('aria-pressed','true'); await expect(slot1).toHaveAttribute('aria-pressed','false');
+  await page.waitForTimeout(350); await tapTile(page,5,6); await expect(page.locator('#mobile-log')).toContainText('fires a Magic Arrow'); await expect(page.locator('#position')).toHaveAttribute('data-y','5');
+  await page.locator('#cancel-aim').tap(); await expect(slot2).toHaveAttribute('aria-pressed','false');
+  await page.reload(); await expect(slot1).toHaveAttribute('data-assigned','potion'); await expect(slot2).toHaveAttribute('data-assigned','bolt');
+  await page.setViewportSize({width:390,height:844}); await fits(page); await page.screenshot({path:info.outputPath('quick-slot-icons.png')});
+});
+
+test('invalid saved quick slots fall back to defaults; empty potions can be assigned safely', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('castle-quick-slots-v1','["unknown","__proto__"]'));
+  await page.goto(url); const game=createGame('EMPTYQ',42,'solo');game.levels[0]=arena();const p=addPlayer(game,'empty-host','Astrid');p.manaPotions=0;
+  await page.evaluate(game => {sessionStorage.setItem('castle-peer-host-v1',JSON.stringify({game,token:'empty-token'}));sessionStorage.setItem('castle-session',JSON.stringify({code:game.code,token:'empty-token',playerId:'empty-host',server:'peer'}));},game);
+  await page.reload(); await expect(page.locator('[data-quick-slot="0"]')).toHaveAttribute('data-assigned','bolt');
+  await page.getByRole('button',{name:'Pack',exact:true}).tap();await page.locator('[data-potion=mana]').tap();await page.locator('[data-assign-slot="0"]').tap();await page.locator('#close-dialog').tap();
+  await expect(page.locator('[data-quick-slot="0"]')).toBeDisabled();await expect(page.locator('[data-quick-slot="0"] .quick-count')).toHaveText('0');
 });

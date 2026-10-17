@@ -4,12 +4,18 @@ import { PeerSession } from './peer-session';
 import { mountInventory } from './inventory';
 import { mountSpellbook } from './spellbook';
 import { touchMap } from './touch-map';
+import { createQuickSlots, quickActions, type SlotAssignments, type QuickSlot } from './quick-slots';
 import { drawTerrain, mapColors, terrainColor, buildingArt } from './map-style';
 import { art, creatureArt } from '../shared/art';
 import type { Action, Player, ServerMessage, Snapshot } from '../shared/types';
 
 const base = import.meta.env.BASE_URL;
 const icon = (id: number | string) => `${base}classic/${id}.png`;
+const quickSlots = createQuickSlots();
+const slotAssignments: SlotAssignments = {
+  get: slot => quickSlots.get(slot),
+  assign(slot, action) { quickSlots.assign(slot, action); aimArrow(false); toast(`${quickActions[action].name} assigned to slot ${slot + 1}.`); },
+};
 const query = new URLSearchParams(location.search);
 const defaultServer = 'peer';
 let serverUrl = query.get('server') || defaultServer;
@@ -58,7 +64,7 @@ dialog.addEventListener('close', () => { inventoryView = undefined; spellbookVie
 dialog.setAttribute('aria-labelledby', 'dialog-title');
 document.querySelector('.window')!.insertAdjacentHTML('afterbegin', `<header class="mobile-heading"><div><small>CASTLE OF THE WINDS</small><h2 id="mobile-location">Adventure together</h2><div id="mobile-vitals"></div><div id="mobile-partner"></div></div><button data-dialog="menu" aria-label="Game menu">☰</button></header>`);
 el('world').parentElement!.insertAdjacentHTML('beforeend', `<div class="map-tools"><button id="zoom-out" aria-label="Zoom out">−</button><button id="zoom-in" aria-label="Zoom in">+</button><button id="cancel-aim" hidden>Cancel aim</button></div><span class="map-hint">Tap to walk · Pinch to zoom</span>`);
-document.querySelector('.touch-controls')!.innerHTML = `<div class="mobile-feedback"><span id="mobile-status"></span><p id="mobile-log"></p></div><div class="movement-panel"><div class="dpad">${[[-1,-1,'↖','northwest'],[0,-1,'↑','north'],[1,-1,'↗','northeast'],[-1,0,'←','west'],[0,0,'⚔','attack'],[1,0,'→','east'],[-1,1,'↙','southwest'],[0,1,'↓','south'],[1,1,'↘','southeast']].map(([dx,dy,label,name]) => `<button ${name === 'attack' ? 'id="touch-attack" aria-label="Melee attack"' : `data-direction="${dx},${dy}" aria-label="Move ${name}"`}>${label}</button>`).join('')}</div><div class="touch-actions"><button id="touch-interact">Action</button><button id="touch-arrow">Magic Arrow</button><button id="touch-potion">Potion</button></div></div>`;
+document.querySelector('.touch-controls')!.innerHTML = `<div class="mobile-feedback"><span id="mobile-status"></span><p id="mobile-log"></p></div><div class="movement-panel"><div class="dpad">${[[-1,-1,'↖','northwest'],[0,-1,'↑','north'],[1,-1,'↗','northeast'],[-1,0,'←','west'],[0,0,'⚔','attack'],[1,0,'→','east'],[-1,1,'↙','southwest'],[0,1,'↓','south'],[1,1,'↘','southeast']].map(([dx,dy,label,name]) => `<button ${name === 'attack' ? 'id="touch-attack" aria-label="Melee attack"' : `data-direction="${dx},${dy}" aria-label="Move ${name}"`}>${label}</button>`).join('')}</div><div class="touch-actions"><button id="touch-interact">Action</button><button id="touch-arrow" class="quick-slot" data-quick-slot="0" aria-label="Quick slot 1: Magic Arrow"></button><button id="touch-potion" class="quick-slot" data-quick-slot="1" aria-label="Quick slot 2: Healing potion"></button></div></div>`;
 document.querySelector('.window')!.insertAdjacentHTML('beforeend', `<nav class="mobile-tabs" aria-label="Adventure screens"><button data-mobile-dialog="inventory">Pack</button><button data-mobile-dialog="spells">Spells</button><button data-mobile-dialog="hero">Hero</button><button data-mobile-dialog="journal">Journal</button></nav>`);
 function mobileLayout() { document.body.classList.toggle('mobile-ui', mobileMedia.matches); }
 mobileLayout(); mobileMedia.addEventListener('change', () => { mobileLayout(); held.clear(); destination = undefined; draw(); });
@@ -131,7 +137,7 @@ function aimArrow(active: boolean) {
   aimingArrow = active; destination = undefined; held.clear(); touchMove = undefined;
   canvas.classList.toggle('aiming-arrow', active);
   document.querySelector('[data-action="bolt"]')!.setAttribute('aria-pressed', String(active));
-  el('touch-arrow').setAttribute('aria-pressed', String(active)); el('cancel-aim').hidden = !active;
+  el('cancel-aim').hidden = !active;
   if (state) render();
 }
 function chooseAction(type: Action['type']) {
@@ -148,8 +154,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-direction]').forEach(button 
   button.onclick = e => { if (!e.detail) { move(); touchMove = undefined; } };
 });
 el('touch-attack').onclick = () => chooseAction('attack');
-el('touch-arrow').onclick = () => chooseAction('bolt');
-el('touch-potion').onclick = () => chooseAction('potion');
+document.querySelectorAll<HTMLButtonElement>('[data-quick-slot]').forEach(button => { button.onclick = () => chooseAction(quickSlots.get(Number(button.dataset.quickSlot) as QuickSlot)); });
 el('touch-interact').onclick = () => {
   const p = me(), shop = state?.map.shop;
   if (p && shop && Math.max(Math.abs(p.x - shop.x), Math.abs(p.y - shop.y)) <= 2) void openDialog('inventory');
@@ -181,7 +186,7 @@ function render() {
   if (aimingArrow && (state.status !== 'playing' || !me()?.hp)) {
     aimingArrow = false; canvas.classList.remove('aiming-arrow');
     document.querySelector('[data-action="bolt"]')!.setAttribute('aria-pressed', 'false');
-    el('touch-arrow').setAttribute('aria-pressed', 'false'); el('cancel-aim').hidden = true;
+    el('cancel-aim').hidden = true;
   }
   for (const id of arrowStarts.keys()) if (!state.arrows?.some(a => a.id === id)) arrowStarts.delete(id);
   const solo = state.mode === 'solo';
@@ -230,8 +235,19 @@ function render() {
   el('mobile-log').textContent = state.log.at(-1)?.text ?? '';
   const near = (p: { x: number; y: number }, radius: number) => !!player && Math.max(Math.abs(player.x - p.x), Math.abs(player.y - p.y)) <= radius;
   el('touch-interact').textContent = state.map.shop && near(state.map.shop, 2) ? 'Trade' : state.map.portals.some(p => near(p, 1)) ? 'Travel' : 'Action';
-  el('touch-potion').textContent = `Potion (${player?.potions ?? 0})`;
-  el('touch-arrow').textContent = aimingArrow ? 'Aiming…' : 'Magic Arrow';
+  document.querySelectorAll<HTMLButtonElement>('[data-quick-slot]').forEach(button => {
+    const slot = Number(button.dataset.quickSlot) as QuickSlot, action = quickSlots.get(slot), info = quickActions[action];
+    const count = action === 'potion' ? player?.potions ?? 0 : action === 'mana' ? player?.manaPotions ?? 0 : undefined;
+    if (button.dataset.assigned !== action) {
+      button.dataset.assigned = action;
+      button.innerHTML = `<span class="quick-number">${slot + 1}</span><img src="${icon(info.icon)}" alt=""><span class="quick-count"></span>`;
+    }
+    button.querySelector('.quick-count')!.textContent = count === undefined ? '' : String(count);
+    const label = `Quick slot ${slot + 1}: ${info.name}${count === undefined ? ` (${info.cost} mana)` : ` (${count} remaining)`}`;
+    button.setAttribute('aria-label', label); button.title = label;
+    button.setAttribute('aria-pressed', String(action === 'bolt' && aimingArrow));
+    button.disabled = state!.status !== 'playing' || !player?.hp || (count !== undefined ? count === 0 || (action === 'potion' ? player.hp === player.maxHp : player.mana === player.maxMana) : player.mana < info.cost || (action === 'heal' && player.hp === player.maxHp));
+  });
   document.querySelector('.map-hint')!.textContent = aimingArrow ? 'Tap to fire · Cancel aim to walk' : 'Tap to walk · Pinch to zoom';
   draw();
 }
@@ -385,10 +401,10 @@ async function openDialog(kind: string) {
   if (!dialog.open) dialog.showModal();
   if (kind === 'inventory') {
     const p = me(); if (!p || !state) { body.textContent = 'Join an expedition to view your equipment.'; return; }
-    inventoryView = mountInventory(body, send, closeDialog); inventoryView.update(state, p);
+    inventoryView = mountInventory(body, send, closeDialog, slotAssignments); inventoryView.update(state, p);
   } else if (kind === 'spells') {
     el('dialog-title').textContent = 'Spellbook'; const p = me(); if (!p) return;
-    spellbookView = mountSpellbook(body, type => { closeDialog(); chooseAction(type); }); spellbookView.update(p, state?.status === 'playing');
+    spellbookView = mountSpellbook(body, type => { closeDialog(); chooseAction(type); }, slotAssignments); spellbookView.update(p, state?.status === 'playing');
   } else if (kind === 'hero') {
     el('dialog-title').textContent = 'Your expedition';
     for (const p of state?.players ?? []) {
@@ -413,7 +429,7 @@ async function openDialog(kind: string) {
       stories.forEach(s => { const section = document.createElement('details'), summary = document.createElement('summary'), text = document.createElement('p'); summary.textContent = `Story ${s.id}`; text.className = 'story-text'; text.textContent = s.text.replace(/^[^a-zA-Z]+/, '').replaceAll('#', '\n'); section.append(summary, text); body.append(section); });
     } catch { body.textContent = 'Unable to load the recovered story. Please try again.'; }
   } else if (kind !== 'invite') {
-    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Touch controls</dt><dd>Use the eight-way pad; hold a direction to keep moving. The center button attacks. Tap the map to walk, pinch or use + / - to zoom, and long-press to inspect. Pack, Spells, Hero and Journal open touch panels. Choose Magic Arrow, then tap a tile to shoot; Cancel aim returns to walking. Trade opens the shop near a well; Rest at well is in the menu. Rotate your phone for a side-by-side layout.</dd><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1 or Magic Arrow: aim with the crosshair, then click any map tile to fire (3 MP, six-tile range). Click again to keep firing; Escape, right-click, movement, or another action cancels aiming. 2: Heal (6 MP). 3: Fireball (8 MP). Magic Arrow travels toward your chosen tile, stopping at walls or the first monster. Fireball targets the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
+    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Touch controls</dt><dd>Use the eight-way pad; hold a direction to keep moving. The center button attacks. Tap the map to walk, pinch or use + / - to zoom, and long-press to inspect. Pack, Spells, Hero and Journal open touch panels. Select a potion in Pack or a spell in Spells, then Assign to slot 1 or 2 to customize the two icon buttons. Potion badges show quantities; assignments are saved on this device. Choose Magic Arrow, then tap a tile to shoot; Cancel aim returns to walking. Trade opens the shop near a well; Rest at well is in the menu. Rotate your phone for a side-by-side layout.</dd><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1 or Magic Arrow: aim with the crosshair, then click any map tile to fire (3 MP, six-tile range). Click again to keep firing; Escape, right-click, movement, or another action cancels aiming. 2: Heal (6 MP). 3: Fireball (8 MP). Magic Arrow travels toward your chosen tile, stopping at walls or the first monster. Fireball targets the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
   }
 }
 document.querySelectorAll<HTMLButtonElement>('[data-dialog], [data-mobile-dialog]').forEach(b => { b.onclick = () => { void openDialog((b.dataset.dialog ?? b.dataset.mobileDialog)!); }; });

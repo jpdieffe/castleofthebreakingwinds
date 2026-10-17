@@ -1,3 +1,4 @@
+import { mountSlotPicker, type SlotAssignments } from './quick-slots';
 import { art } from '../shared/art';
 import type { Action, Player, Snapshot } from '../shared/types';
 
@@ -13,7 +14,7 @@ const slots = [
 ] as const;
 
 /** A view of authoritative player state; opening inventory never creates or equips items. */
-export function mountInventory(body: HTMLElement, send: (action: Action) => void, close: () => void) {
+export function mountInventory(body: HTMLElement, send: (action: Action) => void, close: () => void, assignments: SlotAssignments) {
   body.innerHTML = `<nav class="inventory-menu" aria-label="Inventory menu"><button type="button" data-exit>Exit!</button><span>Equipment &amp; belongings</span></nav>
     <div class="inventory-summary"><strong data-character></strong><span data-stats></span></div>
     <div class="inventory-layout">
@@ -35,18 +36,21 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
             <div class="inventory-row" data-potion="potion"><img src="${asset(art.potion)}" alt=""><span>Healing potion<small data-count></small></span><button type="button" aria-label="Drink healing potion">Drink</button></div>
             <div class="inventory-row" data-potion="mana"><img src="${asset(233)}" alt=""><span>Mana potion<small data-count></small></span><button type="button" aria-label="Drink mana potion">Drink</button></div>
           </div>
-          <p class="container-note">Select Drink to use a potion.</p>
+          <p class="container-note">Select a potion to assign quick slots, or Drink to use it.</p>
         </section>
       </div>
     </div>
-    <section class="inventory-selection"><strong data-selected-title>Choose an item</strong><p data-selected-detail>Tap equipment, a potion, or a store item to inspect it.</p><button data-selected-action disabled>Select an item</button></section>
+    <section class="inventory-selection"><strong data-selected-title>Choose an item</strong><p data-selected-detail>Tap equipment, a potion, or a store item to inspect it.</p><button data-selected-action disabled>Select an item</button><div data-slot-picker></div></section>
     <div class="inventory-description"><span data-inventory-message role="status">Combat continues while inventory is open.</span><span data-vitals></span></div>`;
   const find = <T extends HTMLElement = HTMLElement>(selector: string) => body.querySelector<T>(selector)!;
+  const picker = mountSlotPicker(find('[data-slot-picker]'), assignments);
   let selected: { kind: 'store' | 'pack' | 'slot'; key: string } | undefined;
   let current: Snapshot | undefined, player: Player | undefined;
   const mobile = () => document.body.classList.contains('mobile-ui');
   function select(kind: 'store' | 'pack' | 'slot', key: string) { selected = { kind, key }; updateSelection(); }
   function updateSelection() {
+    const quickItem = selected?.kind === 'pack' ? selected.key as 'potion' | 'mana' : undefined;
+    picker.select(quickItem); find('.inventory-selection').classList.toggle('has-quick-item', !!quickItem);
     const button = find<HTMLButtonElement>('[data-selected-action]'); button.disabled = true; button.onclick = null;
     if (!selected || !player || !current) return;
     const p = player, active = current.status === 'playing' && p.hp > 0;

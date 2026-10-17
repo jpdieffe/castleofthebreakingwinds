@@ -104,3 +104,14 @@ Cases 4–9 use deterministic server-side test setup for rare combat states and 
 All automated cases must pass, TypeScript and the production build must pass, and both initial-area screenshots must display the original graphics and distinct adventurers. The peer launcher must open two clients on the deployed GitHub Pages build and complete a WebRTC session without a Node game server.
 
 For additional network coverage, repeat connection/reconnection from two separate external networks and test relay-only connectivity. For optional dedicated hosting, also test its TLS/WSS endpoint and persistent disk. These are environment-specific checks, not covered by local results. Long-session balance, every original spell/item, and exact original-game parity are outside this reconstructed campaign's coverage.
+
+
+## Configurable touch quick slots
+
+- Fresh browser defaults: Magic Arrow in slot 1, healing potion in slot 2; icon artwork, slot numbers, potion quantities and accessible names agree.
+- Select each spell and each pack potion, assign to either slot, and confirm selecting/assigning never spends mana, uses a potion or moves the player.
+- Assign when mana is insufficient, HP is full, or potion quantity is zero. Assignment remains available; actual use obeys game rules.
+- Cast Heal and Fireball and drink both potions using assigned slots; counts/vitals update authoritatively. Put Magic Arrow in slot 2, fire at empty ground, check no walking, and cancel aim.
+- Replace assignments, rotate between portrait and short landscape, verify both assignment buttons remain reachable, and reload to verify saved choices.
+- Two WebRTC clients: guest changes its slot, host retains its own choice, and guest reconnect restores its assignment.
+- Invalid saved slot data falls back to defaults without crashing. Run on Chrome and WebKit phone profiles; physical phone limitations are unchanged.

@@ -1,6 +1,15 @@
 # Test results - October 17, 2026
 
 
+## Configurable quick slots
+
+- Both touch quick slots accept Magic Arrow, Heal, Fireball, healing potion or mana potion. Selecting a spell/pack potion offers explicit slot-1/slot-2 assignment, independently of casting/drinking. Buttons show icon artwork, slot number and live potion quantity, with accessible action names and current aiming state.
+- Assignments persist in browser local storage; malformed saved values fall back to defaults. Per-player choices do not alter the companion's controls. Full health/mana, depleted potions, insufficient mana, death and paused play disable unusable quick actions without preventing assignment.
+- **29 engine/network checks passed. 15 mobile browser cases passed across Chrome and WebKit** (3 platform-specific skips). The initial two new end-to-end cases expected the word "Fireball" in a log that actually reports "casts at Ogre for 14"; both passed on targeted rerun with the correct combat-log assertion. No game-code change was needed.
+- **7 desktop/responsive inventory, layout and targeting cases passed.** Five passed initially; two were interrupted when the shared test server stopped and passed after restarting it. Includes real two-client WebRTC and independent guest slot assignment preserved through reconnect.
+- Production build and diff checks passed. Screenshots: [icon slots](screenshots/quick-slot-icons.png), [potion assignment](screenshots/quick-slot-pack.png). Browser profiles are not physical-phone tests.
+
+
 ## Mobile-reference map style
 
 - Matched the reference BoardView palette, rounded trees, pale dungeon floors, beveled gray wall faces, dark unexplored/solid-rock background, muted player outline and injured-enemy health bars. The desktop minimap uses the same terrain palette.
