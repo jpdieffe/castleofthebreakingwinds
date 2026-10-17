@@ -1,6 +1,11 @@
 # Test results - October 17, 2026
 
 
+## Three-line mobile combat log
+
+- The latest three messages now occupy three fixed rows, including short landscape screens. New messages remove the oldest row without moving the controls.
+- Android Chrome and iPhone WebKit layout cases passed. Production-build checks in both engines verified message order, live rollover after potion use, and visible log/controls at 320x568, 390x844, 667x375, 568x320 and 844x390. Build and diff checks passed.
+
 ## Mobile-reference shop interface
 
 - Replaced the inventory's store list with a dedicated native-style shop: actual location name, balance, Buy/Sell tabs, four-column pixel-art grid, selected item details and a separate commit button. Portrait and landscape follow the reference IconPopup layout. Existing online stock/prices remain; this is not a full native catalog or bank/weight-system port.

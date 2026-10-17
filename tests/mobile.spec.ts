@@ -20,7 +20,7 @@ async function fits(page: Page) {
   expect(b.sw).toBeLessThanOrEqual(b.vw); expect(b.sh).toBeLessThanOrEqual(b.vh + 1);
   expect(b.x).toBeGreaterThanOrEqual(0); expect(b.right).toBeLessThanOrEqual(b.vw); expect(b.bottom).toBeLessThanOrEqual(b.vh);
   expect(b.height).toBeGreaterThan(120); expect(b.width / b.cols).toBeCloseTo(b.height / b.rows, 1);
-  for (const s of ['#touch-arrow', '#touch-interact', '.mobile-tabs', '.dpad', '#mobile-vitals', '#mobile-partner']) await expect(page.locator(s)).toBeInViewport({ ratio: 1 });
+  for (const s of ['#touch-arrow', '#touch-interact', '.mobile-tabs', '.dpad', '#mobile-log', '#mobile-vitals', '#mobile-partner']) await expect(page.locator(s)).toBeInViewport({ ratio: 1 });
   const sizes = await page.locator('.dpad button, .touch-actions button, .mobile-tabs button, .map-tools button:visible').evaluateAll(els => els.map(el => { const r = el.getBoundingClientRect(); return [r.width, r.height]; }));
   for (const [w,h] of sizes) { expect(w).toBeGreaterThanOrEqual(44); expect(h).toBeGreaterThanOrEqual(44); }
 }

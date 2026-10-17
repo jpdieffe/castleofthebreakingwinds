@@ -68,7 +68,7 @@ dialog.addEventListener('close', () => { inventoryView = undefined; spellbookVie
 dialog.setAttribute('aria-labelledby', 'dialog-title');
 document.querySelector('.window')!.insertAdjacentHTML('afterbegin', `<header class="mobile-heading"><div><small>CASTLE OF THE WINDS</small><h2 id="mobile-location">Adventure together</h2><div id="mobile-vitals"></div><div id="mobile-partner"></div></div><button data-dialog="menu" aria-label="Game menu">☰</button></header>`);
 el('world').parentElement!.insertAdjacentHTML('beforeend', `<div class="map-tools"><button id="zoom-out" aria-label="Zoom out">−</button><button id="zoom-in" aria-label="Zoom in">+</button><button id="cancel-aim" hidden>Cancel aim</button></div><span class="map-hint">Tap to walk · Pinch to zoom</span>`);
-document.querySelector('.touch-controls')!.innerHTML = `<div class="mobile-feedback"><span id="mobile-status"></span><p id="mobile-log"></p></div><div class="movement-panel"><div class="dpad">${[[-1,-1,'↖','northwest'],[0,-1,'↑','north'],[1,-1,'↗','northeast'],[-1,0,'←','west'],[0,0,'⚔','attack'],[1,0,'→','east'],[-1,1,'↙','southwest'],[0,1,'↓','south'],[1,1,'↘','southeast']].map(([dx,dy,label,name]) => `<button ${name === 'attack' ? 'id="touch-attack" aria-label="Melee attack"' : `data-direction="${dx},${dy}" aria-label="Move ${name}"`}>${label}</button>`).join('')}</div><div class="touch-actions"><button id="touch-interact">Action</button><button id="touch-arrow" class="quick-slot" data-quick-slot="0" aria-label="Quick slot 1: Magic Arrow"></button><button id="touch-potion" class="quick-slot" data-quick-slot="1" aria-label="Quick slot 2: Healing potion"></button></div></div>`;
+document.querySelector('.touch-controls')!.innerHTML = `<div class="mobile-feedback"><span id="mobile-status"></span><div id="mobile-log" role="log" aria-label="Recent adventure messages" aria-live="polite"></div></div><div class="movement-panel"><div class="dpad">${[[-1,-1,'↖','northwest'],[0,-1,'↑','north'],[1,-1,'↗','northeast'],[-1,0,'←','west'],[0,0,'⚔','attack'],[1,0,'→','east'],[-1,1,'↙','southwest'],[0,1,'↓','south'],[1,1,'↘','southeast']].map(([dx,dy,label,name]) => `<button ${name === 'attack' ? 'id="touch-attack" aria-label="Melee attack"' : `data-direction="${dx},${dy}" aria-label="Move ${name}"`}>${label}</button>`).join('')}</div><div class="touch-actions"><button id="touch-interact">Action</button><button id="touch-arrow" class="quick-slot" data-quick-slot="0" aria-label="Quick slot 1: Magic Arrow"></button><button id="touch-potion" class="quick-slot" data-quick-slot="1" aria-label="Quick slot 2: Healing potion"></button></div></div>`;
 document.querySelector('.window')!.insertAdjacentHTML('beforeend', `<nav class="mobile-tabs" aria-label="Adventure screens"><button data-mobile-dialog="inventory">Pack</button><button data-mobile-dialog="spells">Spells</button><button data-mobile-dialog="hero">Hero</button><button data-mobile-dialog="journal">Journal</button></nav>`);
 function mobileLayout() { document.body.classList.toggle('mobile-ui', mobileMedia.matches); }
 mobileLayout(); mobileMedia.addEventListener('change', () => { mobileLayout(); held.clear(); destination = undefined; draw(); });
@@ -238,7 +238,14 @@ function render() {
   const partner = state.players.find(p => p.id !== playerId);
   el('mobile-partner').textContent = partner ? `${partner.name} · HP ${partner.hp}/${partner.maxHp} · ${partner.connected ? 'Connected' : 'Reconnecting'}` : solo ? 'Solo adventure' : 'Waiting for your companion';
   el('mobile-status').textContent = aimingArrow ? 'MAGIC ARROW · Tap a tile to shoot' : `LEVEL ${player?.rank ?? 1} · ${el('simulation-status').textContent}`;
-  el('mobile-log').textContent = state.log.at(-1)?.text ?? '';
+  const mobileLog = el('mobile-log'), messages = state.log.slice(-3).map(entry => entry.text);
+  const messagesKey = JSON.stringify(messages);
+  if (mobileLog.dataset.messages !== messagesKey) {
+    mobileLog.replaceChildren(...messages.map(text => {
+      const line = document.createElement('p'); line.textContent = text; line.title = text; return line;
+    }));
+    mobileLog.dataset.messages = messagesKey;
+  }
   const near = (p: { x: number; y: number }, radius: number) => !!player && Math.max(Math.abs(player.x - p.x), Math.abs(player.y - p.y)) <= radius;
   el('touch-interact').textContent = player && shopAt(state.map,player) ? 'Trade' : (state.map.restPoints??[]).some(p=>near(p,2)) ? 'Rest' : state.map.portals.some(p => near(p, 1)) ? 'Travel' : 'Action';
   document.querySelectorAll<HTMLButtonElement>('[data-quick-slot]').forEach(button => {
