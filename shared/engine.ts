@@ -8,7 +8,7 @@ export function log(game: GameState, text: string) {
   if (game.log.length > 40) game.log.shift();
 }
 export function createGame(code: string, seed: number, mode: 'solo' | 'coop' = 'coop'): GameState {
-  return { version: 1, mode, code, seed, levels: makeWorld(seed), level: 0, players: [], status: 'waiting',
+  return { version: 1, mode, code, seed, levels: makeWorld(seed), level: 0, players: [], arrows: [], status: 'waiting',
     tick: 0, time: 0, log: [{ id: 0, text: mode === 'solo' ? 'A question of vengeance. Your adventure begins.' : 'A question of vengeance. This time, you need not face it alone.' }], nextLog: 1 };
 }
 export function addPlayer(game: GameState, id: string, name: string): Player {
@@ -121,11 +121,37 @@ export function act(game: GameState, player: Player, action: Action): string | u
     if (!passable(map, x, y) || game.players.some(p => p.id !== player.id && p.x === x && p.y === y)) return;
     player.x = x; player.y = y; collect(game, player); reveal(game); return;
   }
-  if (action.type === 'attack' || action.type === 'bolt' || action.type === 'fireball') {
+  if (action.type === 'bolt') {
+    const { x, y } = action;
+    if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x >= map.width || y >= map.height) return 'Choose a point on the map.';
+    const steps = Math.max(Math.abs(x - player.x), Math.abs(y - player.y));
+    if (!steps) return 'Aim away from your adventurer.';
+    if (player.mana < 3) return 'Magic Arrow costs 3 mana.';
+    player.mana -= 3;
+    player.facing = { x: Math.sign(x - player.x), y: Math.sign(y - player.y) };
+    let end: Point = { x: player.x, y: player.y };
+    let victim: string | undefined;
+    for (let i = 1; i <= Math.min(6, steps); i++) {
+      const next = { x: Math.round(player.x + (x - player.x) * i / steps), y: Math.round(player.y + (y - player.y) * i / steps) };
+      if (next.x !== end.x && next.y !== end.y && (!passable(map, next.x, end.y) || !passable(map, end.x, next.y))) break;
+      end = next;
+      if (!passable(map, end.x, end.y)) break;
+      victim = map.enemies.find(e => e.hp > 0 && e.x === end.x && e.y === end.y)?.id;
+      if (victim) break;
+    }
+    log(game, `${player.name} fires a Magic Arrow toward ${x}, ${y}.`);
+    game.arrows = [...(game.arrows ?? []).filter(a => game.time - a.created < 1000), {
+      id: `${player.id}:${game.nextLog}`, level: game.level, from: { x: player.x, y: player.y }, to: end,
+      created: game.time, duration: Math.max(250, distance(player, end) * 90),
+    }].slice(-16);
+    if (victim) hit(game, player, victim, 12 + player.rank * 2, true);
+    return;
+  }
+  if (action.type === 'attack' || action.type === 'fireball') {
     const range = action.type === 'attack' ? 1 : 6;
     const targets = map.enemies.filter(e => e.hp > 0 && distance(e, player) <= range && lineOfSight(game, player, e)).sort((a, b) => distance(a, player) - distance(b, player));
     if (!targets.length) return 'No enemy in range and in sight.';
-    const cost = action.type === 'bolt' ? 3 : action.type === 'fireball' ? 8 : 0;
+    const cost = action.type === 'fireball' ? 8 : 0;
     if (player.mana < cost) return 'Not enough mana.';
     player.mana -= cost;
     const victims = action.type === 'fireball' ? targets.filter(e => distance(e, targets[0]) <= 2) : [targets[0]];
@@ -185,6 +211,7 @@ export function step(game: GameState, milliseconds: number) {
   updateStatus(game);
   if (game.status !== 'playing') return;
   game.time += Math.min(250, Math.max(0, milliseconds)); game.tick++;
+  game.arrows = (game.arrows ?? []).filter(a => a.level === game.level && game.time - a.created < 1000);
   const map = game.levels[game.level];
   if (game.tick % 30 === 0) game.players.forEach(p => { if (p.hp > 0) p.mana = Math.min(p.maxMana, p.mana + 1); });
   for (const enemy of map.enemies) {

@@ -1,6 +1,7 @@
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { createGame, addPlayer } from '../shared/engine';
 import { arena } from './fixtures';
+import { clickTile } from './aim';
 import type { GameState } from '../shared/types';
 
 const url = 'http://localhost:5173/castleofthebreakingwinds/';
@@ -123,7 +124,8 @@ test('enemies move without input and guest spell damage, shared experience and l
     chamber(game); game.levels[0].enemies.push({ id: 'rat', name: 'Giant Rat', icon: 387, x: 5, y: 9, hp: 14, maxHp: 14, damage: 1, nextMove: 500 });
   });
   await expect.poll(async () => (await saved(a)).levels[0].enemies[0].y, { timeout: 6000 }).toBeLessThan(9);
-  await key(b, '1');
+  await key(b, 'ArrowRight'); await expect(b.locator('#position')).toHaveAttribute('data-x', '5'); await b.waitForTimeout(350);
+  await key(b, '1'); await clickTile(b, 5, 9);
   await expect(a.locator('#log')).toContainText('Experience is shared');
   await expect(b.locator('#log')).toContainText('Experience is shared');
   await expect(b.locator('.player-card.you .mana')).toContainText('27/30');
@@ -155,7 +157,7 @@ test('boss victory and restart are shared across the data channel', async ({ bro
   const { a, b } = await pair(browser, game => {
     chamber(game); game.levels[0].enemies.push({ id: 'boss', name: 'Hrungnir', boss: true, icon: 429, x: 6, y: 5, hp: 14, maxHp: 14, damage: 1, nextMove: 999999 });
   });
-  await key(b, '1'); await expect(a.locator('#simulation-status')).toHaveText('VENGEANCE IS YOURS');
+  await key(b, '1'); await clickTile(b, 6, 5); await expect(a.locator('#simulation-status')).toHaveText('VENGEANCE IS YOURS');
   await expect(b.locator('#restart')).toBeVisible(); await b.locator('#restart').click();
   await expect(a.locator('#ready')).toBeVisible(); await expect(b.locator('#ready')).toBeVisible();
   await expect(a.locator('#location')).toHaveText('A Tiny Hamlet');

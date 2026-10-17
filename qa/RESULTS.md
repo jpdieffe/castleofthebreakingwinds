@@ -1,5 +1,14 @@
 # Test results - October 16, 2026
 
+## Magic Arrow targeting update
+
+- `npm test`: **28 passed**. Aimed arrows spend mana on empty-floor shots, stop at walls and the first monster, enforce range and cooldown, reject invalid coordinates and insufficient mana, and expire their shared visual effects.
+- `npx playwright test --headed`: **32 passed**, 3.8 minutes. This includes all layout, dedicated-server, WebRTC, solo and targeting cases.
+- Targeting checks verified crosshair and selected-button feedback, visible projectile pixels, repeated empty-floor shots without movement, cancellation of queued walking, Escape/right-click cancellation, and low-mana feedback. Two independent WebRTC clients both displayed the guest's projectile and agreed on mana and position.
+- TypeScript and production build passed. Screenshots: [solo aiming](screenshots/aiming-solo.png), [guest aiming](screenshots/aiming-guest.png).
+
+The host resolves damage when a shot is accepted; both clients animate its path. The spell costs 3 MP, has a six-tile range, and stays selected until cancelled. The existing one-computer and network coverage limits below still apply.
+
 ## Viewport layout update
 
 - `npx playwright test tests/layout.spec.ts --headed`: **2 passed**, 17.6 seconds.

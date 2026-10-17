@@ -7,6 +7,7 @@ import type { Room } from '../server/index';
 import { reveal } from '../server/engine';
 import { passable } from '../server/world';
 import { arena } from './fixtures';
+import { clickTile } from './aim';
 
 let app: ReturnType<typeof createGameServer>, contexts: BrowserContext[], url: string;
 test.beforeEach(async () => {
@@ -79,7 +80,7 @@ test('spells, mana, healing and inventory purchases use the same authoritative s
   const { a, b, room } = await pair(browser); await fixture(room, [a, b]);
   const p = room.game.players[0]; const map = room.game.levels[0];
   map.enemies.push({ id: 'orc', name: 'Orc', icon: 429, x: 9, y: 5, hp: 100, maxHp: 100, damage: 1, nextMove: 999999 });
-  app.broadcast(room); await key(a, '1'); await expect.poll(() => p.mana).toBe(27); expect(map.enemies[0].hp).toBe(86);
+  app.broadcast(room); await key(a, '1'); await clickTile(a, 9, 5); await expect.poll(() => p.mana).toBe(27); expect(map.enemies[0].hp).toBe(86);
   await cooldown(room); p.hp = 10; app.broadcast(room); await key(a, '2'); await expect.poll(() => p.hp).toBe(30);
   await cooldown(room); await key(a, 'h'); await expect.poll(() => p.hp).toBe(60); expect(p.potions).toBe(2);
   await expect(b.locator('.player-card').first()).toContainText('2 potions');

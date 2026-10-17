@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { createGame, addPlayer } from '../shared/engine';
 import type { GameState } from '../shared/types';
 import { arena } from './fixtures';
+import { clickTile } from './aim';
 
 const url = 'http://localhost:5173/castleofthebreakingwinds/';
 async function key(page: Page, value: string) { await page.locator('#world').focus(); await page.keyboard.press(value); }
@@ -44,7 +45,7 @@ test('solo enemies advance without input and spells award experience', async ({ 
     game.levels[0].enemies.push({ id: 'rat', name: 'Giant Rat', icon: 387, x: 5, y: 8, hp: 14, maxHp: 14, damage: 1, nextMove: 100 });
   });
   await expect.poll(() => page.evaluate(() => JSON.parse(sessionStorage.getItem('castle-peer-host-v1')!).game.levels[0].enemies[0].y)).toBeLessThan(8);
-  await key(page, '1'); await expect(page.locator('#log')).toContainText('Giant Rat falls');
+  await key(page, '1'); await clickTile(page, 5, 8); await expect(page.locator('#log')).toContainText('Giant Rat falls');
   await page.locator('[data-dialog=inventory]').click(); await expect(page.locator('#dialog-body')).toContainText('XP 12/45');
 });
 

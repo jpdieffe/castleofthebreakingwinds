@@ -10,8 +10,9 @@ export function validAction(value: unknown): value is Action {
   if (!value || typeof value !== 'object') return false;
   const a = value as Record<string, unknown>;
   if (a.type === 'move') return Number.isInteger(a.dx) && Number.isInteger(a.dy) && Math.abs(Number(a.dx)) <= 1 && Math.abs(Number(a.dy)) <= 1;
+  if (a.type === 'bolt') return Number.isInteger(a.x) && Number.isInteger(a.y);
   if (a.type === 'buy') return ['potion', 'mana', 'weapon', 'armor'].includes(String(a.item));
-  return ['attack', 'bolt', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart'].includes(String(a.type));
+  return ['attack', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart'].includes(String(a.type));
 }
 
 /** WebSocket-shaped adapter: signaling only uses PeerServer; all game data uses WebRTC. */
@@ -45,7 +46,7 @@ export class PeerSession {
       return;
     }
     if (message.type === 'action' && validAction(message.action)) {
-      if (this.host) { act(this.host.game, this.host.game.players[0], message.action); this.broadcast(); }
+      if (this.host) { const error = act(this.host.game, this.host.game.players[0], message.action); if (error) this.emit({ type: 'error', message: error }); this.broadcast(); }
       else if (this.link?.open) this.link.send(message);
     }
   }
@@ -143,7 +144,7 @@ export class PeerSession {
       }
       if (this.link !== conn) return;
       this.lastSeen = Date.now();
-      if (msg.type === 'action' && validAction(msg.action)) { act(game, game.players[1], msg.action); this.broadcast(); }
+      if (msg.type === 'action' && validAction(msg.action)) { const error = act(game, game.players[1], msg.action); if (error) conn.send({ type: 'error', message: error }); this.broadcast(); }
       if (msg.type === 'leave') {
         game.players.splice(1); h.guestToken = undefined; this.link = undefined;
         if (game.status !== 'won' && game.status !== 'defeated') updateStatus(game);

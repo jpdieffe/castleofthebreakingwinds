@@ -2,6 +2,10 @@
 
 Windows, Node 24, and desktop Google Chrome. The default game now uses browser-hosted WebRTC, with public PeerJS matchmaking. Browser tests use independent storage contexts and real data channels. The older dedicated-server regression suite remains separate.
 
+## Magic Arrow targeting
+
+`tests/targeting.spec.ts` verifies button/hotkey crosshair selection without an immediate cast, empty-floor shots with mana cost and no walking, visible cyan projectile pixels on the canvas, repeated shots, Escape/right-click/other-action cancellation, normal walking after cancellation, cancellation of an existing walk destination, and low-mana feedback. A real WebRTC guest fires while both clients verify the visible projectile and the host-authoritative mana cost. Engine cases cover range, the first enemy along the selected path, unrelated nearer monsters, walls, diagonal corners, invalid coordinates, cooldowns and effect expiry.
+
 ## Viewport layout acceptance cases
 
 `tests/layout.spec.ts` checks the actual bounding boxes of the map and spell toolbar at seven desktop, short-window, and phone sizes. Neither page overflow nor map distortion is allowed. Click-to-walk must continue to hit the intended tile after resizing. A live two-client co-op case also checks both health bars and touch controls. At heights below 500 pixels, the decorative header and adventure log are hidden to prioritize gameplay; the map and spell controls remain available.

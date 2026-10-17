@@ -69,9 +69,43 @@ test('melee, death, drops and shared experience occur once', () => {
 test('spell range, mana cost, wall occlusion and fireball area damage', () => {
   const g = gameFixture(), p = g.players[0], map = g.levels[0];
   map.enemies = [8, 9].map((x, i) => ({ id: `e${i}`, name: 'Rat', icon: 387, x, y: 5, hp: 30, maxHp: 30, damage: 1, nextMove: 99999 }));
-  map.tiles[5 * map.width + 6] = 'wall'; act(g, p, { type: 'bolt' }); assert.equal(p.mana, 30); assert.equal(map.enemies[0].hp, 30);
-  map.tiles[5 * map.width + 6] = 'floor'; g.time += 300; act(g, p, { type: 'fireball' }); assert.equal(p.mana, 22); assert.deepEqual(map.enemies.map(e => e.hp), [16, 16]);
-  g.time += 300; p.mana = 0; act(g, p, { type: 'bolt' }); assert.equal(map.enemies[0].hp, 16);
+  map.tiles[5 * map.width + 6] = 'wall'; act(g, p, { type: 'bolt', x: 8, y: 5 }); assert.equal(p.mana, 27); assert.equal(map.enemies[0].hp, 30);
+  assert.deepEqual(g.arrows![0].to, { x: 6, y: 5 });
+  map.tiles[5 * map.width + 6] = 'floor'; g.time += 300; act(g, p, { type: 'fireball' }); assert.equal(p.mana, 19); assert.deepEqual(map.enemies.map(e => e.hp), [16, 16]);
+  g.time += 300; p.mana = 0; act(g, p, { type: 'bolt', x: 8, y: 5 }); assert.equal(map.enemies[0].hp, 16);
+});
+
+test('aimed arrows fire at empty floor without movement, spend mana once, and expire', () => {
+  const g = gameFixture(), p = g.players[0];
+  act(g, p, { type: 'bolt', x: 10, y: 5 });
+  assert.deepEqual([p.x, p.y, p.mana], [5, 5, 27]);
+  assert.deepEqual(g.arrows![0].to, { x: 10, y: 5 });
+  assert.equal(snapshot(g).arrows!.length, 1);
+  act(g, p, { type: 'bolt', x: 10, y: 5 }); assert.equal(p.mana, 27);
+  for (let i = 0; i < 5; i++) step(g, 250);
+  assert.equal(g.arrows!.length, 0);
+});
+
+test('aimed arrows hit the first monster in their path, not a closer monster off the path', () => {
+  const g = gameFixture(), p = g.players[0], map = g.levels[0];
+  map.enemies = [[5, 6], [8, 5], [9, 5]].map(([x, y], i) => ({ id: `e${i}`, name: 'Rat', icon: 387, x, y, hp: 30, maxHp: 30, damage: 1, nextMove: 99999 }));
+  act(g, p, { type: 'bolt', x: 11, y: 5 });
+  assert.deepEqual(map.enemies.map(e => e.hp), [30, 16, 30]);
+  assert.deepEqual(g.arrows![0].to, { x: 8, y: 5 });
+});
+
+test('arrows enforce range, blocked diagonal corners, valid coordinates and sufficient mana', () => {
+  const g = gameFixture(), p = g.players[0], map = g.levels[0];
+  act(g, p, { type: 'bolt', x: 22, y: 5 }); assert.deepEqual(g.arrows![0].to, { x: 11, y: 5 });
+  g.time += 300; map.tiles[5 * map.width + 6] = 'wall';
+  act(g, p, { type: 'bolt', x: 8, y: 8 }); assert.deepEqual(g.arrows!.at(-1)!.to, { x: 5, y: 5 });
+  const mana = p.mana, count = g.arrows!.length;
+  for (const [x, y] of [[NaN, 5], [Infinity, 5], [-1, 5], [24, 5], [5.5, 5], [5, 5]]) {
+    g.time += 300; assert.ok(act(g, p, { type: 'bolt', x, y }));
+    assert.equal(p.mana, mana); assert.equal(g.arrows!.length, count);
+  }
+  g.time += 300; p.mana = 2; assert.match(act(g, p, { type: 'bolt', x: 8, y: 5 })!, /mana/);
+  assert.equal(g.arrows!.length, count); assert.equal(p.mana, 2);
 });
 test('potions and healing clamp stats and never consume at full health', () => {
   const g = gameFixture(), p = g.players[0]; act(g, p, { type: 'potion' }); assert.equal(p.potions, 3);

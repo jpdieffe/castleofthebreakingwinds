@@ -10,6 +10,8 @@ let serverUrl = query.get('server') || defaultServer;
 let socket: WebSocket | PeerSession | undefined, state: Snapshot | undefined, playerId = '', reconnectTimer = 0;
 let manualClose = false, pending = false, reconnectCount = 0, lastMessage = Date.now();
 let destination: { x: number; y: number } | undefined;
+let aimingArrow = false, animationFrame = 0;
+const arrowStarts = new Map<string, number>();
 let saved: { code: string; token: string; playerId: string; server: string } | undefined;
 try { saved = JSON.parse(sessionStorage.getItem('castle-session') || 'null') || undefined; } catch { sessionStorage.removeItem('castle-session'); }
 // Old dedicated-server sessions must not trap returning Pages visitors in the retired default.
@@ -105,9 +107,22 @@ el('join').onclick = () => enter('join');
 el('solo').onclick = () => enter('solo');
 function send(action: Action) { if (socket?.readyState === WebSocket.OPEN && state) socket.send(JSON.stringify({ type: 'action', action })); }
 el('ready').onclick = () => send({ type: 'ready' }); el('restart').onclick = () => send({ type: 'restart' });
-document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => { button.onclick = () => { destination = undefined; send({ type: button.dataset.action } as Action); canvas.focus(); }; });
-document.querySelectorAll<HTMLButtonElement>('[data-direction]').forEach(button => { button.onclick = () => { const [dx, dy] = button.dataset.direction!.split(',').map(Number); send({ type: 'move', dx, dy }); }; });
+function aimArrow(active: boolean) {
+  aimingArrow = active; destination = undefined; held.clear();
+  canvas.classList.toggle('aiming-arrow', active);
+  document.querySelector('[data-action="bolt"]')!.setAttribute('aria-pressed', String(active));
+  if (state) render();
+}
+function chooseAction(type: Action['type']) {
+  if (type === 'bolt') {
+    if (state?.status !== 'playing' || !me()?.hp) { toast('Start your adventure before aiming.'); return; }
+    aimArrow(!aimingArrow);
+  } else { aimArrow(false); send({ type } as Action); }
+}
+document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => { button.onclick = () => { chooseAction(button.dataset.action as Action['type']); canvas.focus(); }; });
+document.querySelectorAll<HTMLButtonElement>('[data-direction]').forEach(button => { button.onclick = () => { aimArrow(false); const [dx, dy] = button.dataset.direction!.split(',').map(Number); send({ type: 'move', dx, dy }); }; });
 el('leave').onclick = () => {
+  aimArrow(false); arrowStarts.clear();
   manualClose = true; clearTimeout(reconnectTimer);
   if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ type: 'leave' })); socket?.close();
   saved = undefined; state = undefined; playerId = ''; sessionStorage.removeItem('castle-session');
@@ -126,6 +141,11 @@ el('new-menu').onclick = () => { if (state?.mode === 'solo') toast('Solo expedit
 function me(): Player | undefined { return state?.players.find(p => p.id === playerId); }
 function render() {
   if (!state) return;
+  if (aimingArrow && (state.status !== 'playing' || !me()?.hp)) {
+    aimingArrow = false; canvas.classList.remove('aiming-arrow');
+    document.querySelector('[data-action="bolt"]')!.setAttribute('aria-pressed', 'false');
+  }
+  for (const id of arrowStarts.keys()) if (!state.arrows?.some(a => a.id === id)) arrowStarts.delete(id);
   const solo = state.mode === 'solo';
   el('party-size').textContent = solo ? 'SOLO' : '2 PLAYERS';
   el('map-sharing').textContent = solo ? 'EXPLORED' : 'SHARED';
@@ -136,7 +156,7 @@ function render() {
   if (solo) connection('Solo play', true);
   const player = me(); el('location').textContent = state.map.name;
   el('area-info').textContent = state.map.safe ? 'SAFE HAVEN' : `AREA ${state.level + 1} / 14`;
-  el('position').textContent = player ? `${player.name} · ${player.x}, ${player.y} · Click to walk` : '';
+  el('position').textContent = player ? `${player.name} · ${player.x}, ${player.y} · ${aimingArrow ? 'Magic Arrow: click to fire (3 MP). Esc cancels.' : 'Click to walk'}` : '';
   el('position').dataset.x = String(player?.x); el('position').dataset.y = String(player?.y);
   el('world-clock').textContent = `${Math.floor(state.time / 60000)}:${String(Math.floor(state.time / 1000) % 60).padStart(2, '0')} · enemies: 1.4s / step`;
   el('simulation-status').textContent = { waiting: 'FORMING PARTY', playing: 'REAL TIME', paused: 'PAUSED · RECONNECTING', defeated: 'EXPEDITION FALLEN', won: 'VENGEANCE IS YOURS' }[state.status];
@@ -168,6 +188,7 @@ function render() {
 let viewX = 0, viewY = 0;
 function sprite(id: string | number, x: number, y: number, w = 32, h = 32) { const img = image(id); if (img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h); }
 function draw() {
+  cancelAnimationFrame(animationFrame); animationFrame = 0;
   ctx.imageSmoothingEnabled = false; ctx.fillStyle = '#101719'; ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (!state) { for (let y = 0; y < 17; y++) for (let x = 0; x < 23; x++) { ctx.fillStyle = (x + y) % 2 ? '#243b32' : '#273e35'; ctx.fillRect(x * 32, y * 32, 32, 32); } return; }
   const map = state.map, player = me() ?? state.players[0]; if (!player) return;
@@ -191,6 +212,22 @@ function draw() {
   map.loot.forEach(item => { if (!explored.has(item.y * map.width + item.x)) return; const p = screen(item); sprite({ gold: 153, potion: 231, mana: 233, weapon: 111, armor: 117 }[item.kind], p.x, p.y); });
   map.enemies.filter(e => e.hp > 0 && explored.has(e.y * map.width + e.x)).forEach(e => { const p = screen(e); sprite(e.icon, p.x, p.y); ctx.fillStyle = '#381919'; ctx.fillRect(p.x + 3, p.y + 29, 26, 3); ctx.fillStyle = '#c53727'; ctx.fillRect(p.x + 3, p.y + 29, 26 * e.hp / e.maxHp, 3); });
   state.players.forEach(p => { const s = screen(p); ctx.strokeStyle = p.id === playerId ? '#ffec53' : '#63e6ff'; ctx.lineWidth = 2; ctx.strokeRect(s.x + 1, s.y + 1, 30, 30); ctx.lineWidth = 1; sprite(p.hp ? p.slot === 0 ? 421 : 403 : 52, s.x, s.y); });
+  let animating = false;
+  for (const arrow of state.arrows ?? []) {
+    if (arrow.level !== state.level) continue;
+    if (!arrowStarts.has(arrow.id)) arrowStarts.set(arrow.id, performance.now());
+    const t = (performance.now() - arrowStarts.get(arrow.id)!) / arrow.duration;
+    if (t >= 1) continue;
+    animating = true;
+    const from = screen(arrow.from), to = screen(arrow.to), dx = to.x - from.x, dy = to.y - from.y;
+    const x = from.x + 16 + dx * t, y = from.y + 16 + dy * t;
+    ctx.save(); ctx.strokeStyle = '#8cf4ff'; ctx.fillStyle = '#fff'; ctx.lineWidth = 3;
+    ctx.shadowColor = '#19bfff'; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.moveTo(from.x + 16 + dx * Math.max(0, t - 0.2), from.y + 16 + dy * Math.max(0, t - 0.2)); ctx.lineTo(x, y); ctx.stroke();
+    ctx.translate(x, y); ctx.rotate(Math.atan2(dy, dx));
+    ctx.beginPath(); ctx.moveTo(7, 0); ctx.lineTo(-5, -4); ctx.lineTo(-2, 0); ctx.lineTo(-5, 4); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  if (animating) animationFrame = requestAnimationFrame(draw);
   if (destination) { const p = screen(destination); ctx.strokeStyle = '#fff'; ctx.strokeRect(p.x + 4, p.y + 4, 24, 24); }
   mc.fillStyle = '#101719'; mc.fillRect(0, 0, mini.width, mini.height); const size = Math.min(mini.width / map.width, mini.height / map.height);
   map.explored.forEach(index => { const x = index % map.width, y = Math.floor(index / map.width); mc.fillStyle = ['floor', 'grass', 'open', 'door'].includes(map.tiles[index]) ? '#81987b' : '#38423b'; mc.fillRect(x * size, y * size, Math.ceil(size), Math.ceil(size)); });
@@ -204,8 +241,9 @@ const hotkeys: Record<string, Action['type']> = { ' ': 'attack', '1': 'bolt', '2
 window.addEventListener('keydown', e => {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || dialog.open || !state) return;
   const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-  if (directions[key]) { e.preventDefault(); destination = undefined; if (!held.has(key)) { const [dx, dy] = directions[key]; send({ type: 'move', dx, dy }); } held.add(key); }
-  if (hotkeys[key]) { e.preventDefault(); if (!e.repeat) send({ type: hotkeys[key] } as Action); }
+  if (key === 'Escape') { e.preventDefault(); aimArrow(false); return; }
+  if (directions[key]) { e.preventDefault(); if (aimingArrow) aimArrow(false); destination = undefined; if (!held.has(key)) { const [dx, dy] = directions[key]; send({ type: 'move', dx, dy }); } held.add(key); }
+  if (hotkeys[key]) { e.preventDefault(); if (!e.repeat) chooseAction(hotkeys[key]); }
   if (key === 'i' || key === 'j' || key === '?') void openDialog(key === 'i' ? 'inventory' : key === 'j' ? 'journal' : 'help');
 });
 window.addEventListener('keyup', e => held.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key));
@@ -214,10 +252,17 @@ document.addEventListener('visibilitychange', () => { held.clear(); destination 
 canvas.onclick = e => {
   if (!state || state.status !== 'playing') return;
   const rect = canvas.getBoundingClientRect(); const x = Math.floor((e.clientX - rect.left) / rect.width * 23) + viewX, y = Math.floor((e.clientY - rect.top) / rect.height * 17) + viewY;
+  if (aimingArrow) {
+    destination = undefined;
+    if ((me()?.mana ?? 0) < 3) toast('Magic Arrow costs 3 mana.');
+    else send({ type: 'bolt', x, y });
+    canvas.focus(); return;
+  }
   if (state.map.explored.includes(y * state.map.width + x)) destination = { x, y }; canvas.focus();
 };
+canvas.oncontextmenu = e => { if (aimingArrow) { e.preventDefault(); aimArrow(false); } };
 function walk() {
-  if (dialog.open || !state || state.status !== 'playing') return;
+  if (aimingArrow || dialog.open || !state || state.status !== 'playing') return;
   const player = me(); if (!player || player.hp <= 0) return;
   const key = [...held].at(-1); if (key && directions[key]) { const [dx, dy] = directions[key]; send({ type: 'move', dx, dy }); return; }
   if (!destination) return;
@@ -241,7 +286,7 @@ setInterval(walk, 300);
 setInterval(() => { if (socket?.readyState === WebSocket.OPEN && state && Date.now() - lastMessage > 8000) socket.close(); }, 2000);
 
 async function openDialog(kind: string) {
-  held.clear(); destination = undefined;
+  aimArrow(false); held.clear(); destination = undefined;
   const body = el('dialog-body'); body.replaceChildren(); el('dialog-title').textContent = kind === 'inventory' ? 'Character & inventory' : kind === 'journal' ? 'Recovered story journal' : kind === 'invite' ? 'Invite a companion' : 'How to adventure';
   if (!dialog.open) dialog.showModal();
   if (kind === 'inventory') {
@@ -258,7 +303,7 @@ async function openDialog(kind: string) {
       stories.forEach(s => { const section = document.createElement('details'), summary = document.createElement('summary'), text = document.createElement('p'); summary.textContent = `Story ${s.id}`; text.className = 'story-text'; text.textContent = s.text.replace(/^[^a-zA-Z]+/, '').replaceAll('#', '\n'); section.append(summary, text); body.append(section); });
     } catch { body.textContent = 'Unable to load the recovered story. Please try again.'; }
   } else if (kind !== 'invite') {
-    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1: Magic Arrow (3 MP). 2: Heal (6 MP). 3: Fireball (8 MP). Spells target the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
+    body.innerHTML = `<h2>Solo or co-op. No waiting for turns.</h2><p>Play solo starts immediately, with no matchmaking connection. For co-op, both adventurers join and choose Ready. Enemies act every 1.4 seconds. Opening a menu does not pause combat.</p><dl><dt>Move</dt><dd>WASD, arrows, Home / End / Page Up / Page Down for diagonals, or click an explored tile.</dd><dt>Fight</dt><dd>Bump an enemy or Space to strike. 1 or Magic Arrow: aim with the crosshair, then click any map tile to fire (3 MP, six-tile range). Click again to keep firing; Escape, right-click, movement, or another action cancels aiming. 2: Heal (6 MP). 3: Fireball (8 MP). Magic Arrow travels toward your chosen tile, stopping at walls or the first monster. Fireball targets the nearest visible enemy.</dd><dt>Survive</dt><dd>H: healing potion. Q: mana potion. R: revive an adjacent partner using one healing potion. Mana slowly regenerates.</dd><dt>Explore</dt><dd>E: use stairs. In co-op, both players must be alive and within three tiles. Solo adventurers can travel alone. Walk over loot to collect it. Experience is shared in co-op.</dd><dt>Rest & trade</dt><dd>E beside the village well restores HP and MP. I opens inventory and shop purchases.</dd><dt>Connections</dt><dd>Host expedition, then share the six-character code or invite link. PeerJS provides free matchmaking; the host browser runs the game and sends updates over WebRTC. A relay may carry traffic when a direct connection is unavailable. Keep the host tab and computer awake. A disconnect pauses combat; refreshing the same tab restores your adventurer. Progress is saved in the host tab's session storage, so closing that tab can lose the expedition. Leave ends your session. Matchmaking and relay availability depend on the free service.</dd></dl><p>Recovered: original icons, bitmaps, seven map planes, and story resources. Reconstructed: combat balance, procedural dungeons, co-op route, and networking. This is not the complete original game running in an emulator.</p>`;
   }
 }
 document.querySelectorAll<HTMLButtonElement>('[data-dialog]').forEach(b => { b.onclick = () => { void openDialog(b.dataset.dialog!); }; });

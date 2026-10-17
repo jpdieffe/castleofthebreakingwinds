@@ -13,6 +13,7 @@ export interface Enemy extends Point {
 export interface Loot extends Point { id: string; kind: 'gold' | 'potion' | 'mana' | 'weapon' | 'armor'; amount: number }
 export interface Decoration extends Point { image: string; width: number; height: number }
 export interface Portal extends Point { to: number; label: string }
+export interface MagicArrow { id: string; level: number; from: Point; to: Point; created: number; duration: number }
 export interface Level {
   id: number; name: string; width: number; height: number; tiles: Tile[];
   rawTiles?: number[]; source?: string; decorations: Decoration[];
@@ -20,6 +21,7 @@ export interface Level {
   explored: number[]; safe: boolean; shop?: Point;
 }
 export interface GameState {
+  arrows?: MagicArrow[];
   mode?: 'solo' | 'coop';
   version: 1; code: string; seed: number; level: number; levels: Level[];
   players: Player[]; status: 'waiting' | 'playing' | 'paused' | 'defeated' | 'won';
@@ -27,7 +29,8 @@ export interface GameState {
 }
 export type Action =
   | { type: 'move'; dx: number; dy: number }
-  | { type: 'attack' | 'bolt' | 'heal' | 'fireball' | 'potion' | 'mana' | 'interact' | 'revive' | 'ready' | 'restart' }
+  | { type: 'bolt'; x: number; y: number }
+  | { type: 'attack' | 'heal' | 'fireball' | 'potion' | 'mana' | 'interact' | 'revive' | 'ready' | 'restart' }
   | { type: 'buy'; item: 'potion' | 'mana' | 'weapon' | 'armor' };
 export interface Snapshot extends Omit<GameState, 'levels'> { map: Level }
 export type ServerMessage =

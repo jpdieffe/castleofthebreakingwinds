@@ -3,6 +3,8 @@
 @media(max-width:650px){.window.in-game .canvas-wrap{min-height:0}.window.in-game #world{position:static;height:auto;aspect-ratio:23/17}.window.in-game aside{display:block}.window.in-game aside>.pane-title:not(:first-child),.window.in-game #minimap,.window.in-game .quest,.window.in-game .legend{display:none}.window.in-game #party{display:grid;grid-template-columns:1fr 1fr;gap:5px}.window.in-game .player-card{margin:0;padding:6px}.window.in-game .player-heading{gap:5px}.window.in-game .player-heading strong{font-size:10px}.window.in-game .player-heading span{font-size:9px}.window.in-game .pocket{font-size:8px}.menubar #room-label{margin-left:0}}
 
 /* During play, reserve room for controls and fit the entire map in the remaining viewport. */
+#world.aiming-arrow { cursor: crosshair; }
+.toolbar button[aria-pressed="true"] { background: #163f55; color: #fff; border-color: #72d8eb; box-shadow: inset 0 0 0 1px #72d8eb; }
 body:has(.window.in-game) #app {
   height: 100dvh;
   display: flex;

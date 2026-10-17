@@ -26,7 +26,9 @@ This is a playable reconstruction, not a complete faithful port of the original 
 | Move | WASD / arrows, or click an explored tile |
 | Diagonal movement | Home / End / Page Up / Page Down |
 | Melee | Bump enemy or Space |
-| Magic Arrow / Heal / Fireball | 1 / 2 / 3 |
+| Aim Magic Arrow | Click Magic Arrow or press 1, then click a map tile |
+| Cancel aiming | Escape, right-click, press 1 again, or choose another action |
+| Heal / Fireball | 2 / 3 |
 | Health / mana potion | H / Q |
 | Stairs / rest at well | E |
 | Revive adjacent partner | R, costs one healing potion |
@@ -34,6 +36,8 @@ This is a playable reconstruction, not a complete faithful port of the original 
 | Original story journal | J |
 
 In co-op, both adventurers must be alive and within three tiles of the stairs to travel. Solo players use the stairs alone. Menus do not pause combat. Shops and free restoration are available near the well in safe areas.
+
+Magic Arrow uses 3 MP per shot and travels up to six tiles toward the clicked point, including empty floor. It stops at walls or the first monster in its path. While selected, map clicks fire instead of walking; aiming stays active for repeated shots. The crosshair and highlighted button show the selected mode.
 
 ## Development and verification
 
