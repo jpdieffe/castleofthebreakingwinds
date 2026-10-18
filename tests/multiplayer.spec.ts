@@ -139,7 +139,7 @@ test('travel requires both partners and all thirteen native areas load in both c
 test('journal, help, touch controls and mobile layout are usable without runtime errors', async ({ browser }, info) => {
   const { a, b } = await pair(browser), errors: string[] = []; a.on('pageerror', error => errors.push(error.message));
   await a.locator('[data-dialog="journal"]').click(); await expect(a.locator('#dialog-body details')).toHaveCount(15); await a.locator('#dialog-body summary').first().click(); await expect(a.locator('.story-text').first()).not.toBeEmpty();
-  await a.locator('#close-dialog').click(); await a.locator('[data-dialog="help"]').click(); await expect(a.locator('#dialog-body')).toContainText('Opening a menu does not pause combat'); await a.locator('#close-dialog').click();
+  await a.locator('#close-dialog').click(); await a.locator('[data-dialog="help"]').click(); await expect(a.locator('#dialog-body')).toContainText('Real-time enemies act every 1.4 seconds; menus do not pause combat'); await a.locator('#close-dialog').click();
   await a.setViewportSize({ width: 390, height: 844 });
   await expect(a.getByRole('button', { name: 'Move east', exact: true })).toBeVisible(); await a.getByRole('button', { name: 'Move east', exact: true }).click();
   await expect(a.locator('#position')).toHaveAttribute('data-x', '19');

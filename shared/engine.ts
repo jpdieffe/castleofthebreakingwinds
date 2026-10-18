@@ -1,5 +1,5 @@
 import { buyPrice, potionSellPrice } from './shop.ts';
-import type { Action, GameState, Player, Point, Snapshot } from './types.ts';
+import type { Action, GamePace, GameState, Player, Point, Snapshot } from './types.ts';
 import { at, distance, makeWorld, passable, shopAt, MOBILE_MAP_VERSION } from './world.ts';
 
 export const PLAYER_INTERVAL = 240;
@@ -8,8 +8,8 @@ export function log(game: GameState, text: string) {
   game.log.push({ id: game.nextLog++, text });
   if (game.log.length > 40) game.log.shift();
 }
-export function createGame(code: string, seed: number, mode: 'solo' | 'coop' = 'coop'): GameState {
-  return { version: 1, mapVersion: MOBILE_MAP_VERSION, mode, code, seed, levels: makeWorld(seed), level: 0, players: [], arrows: [], status: 'waiting',
+export function createGame(code: string, seed: number, mode: 'solo' | 'coop' = 'coop', pace: GamePace = 'realtime'): GameState {
+  return { version: 1, mapVersion: MOBILE_MAP_VERSION, mode, pace, turn: 1, acted: [], code, seed, levels: makeWorld(seed), level: 0, players: [], arrows: [], status: 'waiting',
     tick: 0, time: 0, log: [{ id: 0, text: mode === 'solo' ? 'A question of vengeance. Your adventure begins.' : 'A question of vengeance. This time, you need not face it alone.' }], nextLog: 1 };
 }
 export function addPlayer(game: GameState, id: string, name: string): Player {
@@ -114,20 +114,35 @@ function lineOfSight(game: GameState, a: Point, b: Point) {
   }
   return true;
 }
+/** A co-op round gives each living adventurer one action, in either order. */
 export function act(game: GameState, player: Player, action: Action): string | undefined {
+  const turns = game.pace === 'turn-based', setup = action.type === 'ready' || action.type === 'restart';
+  if (turns && !setup && game.status === 'playing' && game.acted?.includes(player.id)) return 'Waiting for your companion to act. They can use Wait to pass.';
+  const result = applyAction(game, player, action);
+  if (turns && !setup && result === true && game.status === 'playing') {
+    game.acted = [...(game.acted ?? []), player.id];
+    if (game.players.filter(p => p.hp > 0).every(p => game.acted!.includes(p.id))) {
+      advanceWorld(game, ENEMY_INTERVAL, true);
+      game.acted = []; game.turn = (game.turn ?? 1) + 1;
+    }
+  }
+  return typeof result === 'string' ? result : undefined;
+}
+function applyAction(game: GameState, player: Player, action: Action): string | true | undefined {
   if (action.type === 'ready') { player.ready = true; updateStatus(game); reveal(game); return; }
   if (action.type === 'restart') {
     if (!['defeated', 'won'].includes(game.status)) return 'The expedition is still in progress.';
     const identities = game.players.map(p => ({ id: p.id, name: p.name, connected: p.connected }));
-    Object.assign(game, createGame(game.code, game.seed, game.mode));
+    Object.assign(game, createGame(game.code, game.seed, game.mode, game.pace));
     identities.forEach(p => { addPlayer(game, p.id, p.name).connected = p.connected; });
     if (game.mode === 'solo') { game.players[0].ready = true; updateStatus(game); reveal(game); }
     return;
   }
   if (game.status !== 'playing') return 'Waiting for two connected, ready adventurers.';
   if (player.hp <= 0) return 'You are down. Your partner can revive you with R.';
-  if (game.time < player.nextAction) return;
-  player.nextAction = game.time + PLAYER_INTERVAL;
+  if (game.pace !== 'turn-based' && game.time < player.nextAction) return;
+  player.nextAction = game.time + (game.pace === 'turn-based' ? 0 : PLAYER_INTERVAL);
+  if (action.type === 'wait') return true;
   const map = game.levels[game.level];
   if (action.type === 'move') {
     const { dx, dy } = action;
@@ -136,10 +151,10 @@ export function act(game: GameState, player: Player, action: Action): string | u
     const x = player.x + dx, y = player.y + dy;
     if (dx && dy && (!passable(map, player.x + dx, player.y) || !passable(map, player.x, player.y + dy))) return;
     const target = map.enemies.find(e => e.hp > 0 && e.x === x && e.y === y);
-    if (target) { hit(game, player, target.id, 6 + player.weapon * 2 + player.rank); return; }
-    if (at(map, x, y) === 'door') { map.tiles[y * map.width + x] = 'open'; log(game, `${player.name} opens a door.`); reveal(game); return; }
+    if (target) { hit(game, player, target.id, 6 + player.weapon * 2 + player.rank); return true; }
+    if (at(map, x, y) === 'door') { map.tiles[y * map.width + x] = 'open'; log(game, `${player.name} opens a door.`); reveal(game); return true; }
     if (!passable(map, x, y) || game.players.some(p => p.id !== player.id && p.x === x && p.y === y)) return;
-    player.x = x; player.y = y; collect(game, player); reveal(game); return;
+    player.x = x; player.y = y; collect(game, player); reveal(game); return true;
   }
   if (action.type === 'bolt') {
     const { x, y } = action;
@@ -165,7 +180,7 @@ export function act(game: GameState, player: Player, action: Action): string | u
       created: game.time, duration: Math.max(250, distance(player, end) * 90),
     }].slice(-16);
     if (victim) hit(game, player, victim, 12 + player.rank * 2, true);
-    return;
+    return true;
   }
   if (action.type === 'attack' || action.type === 'fireball') {
     const range = action.type === 'attack' ? 1 : 6;
@@ -176,28 +191,28 @@ export function act(game: GameState, player: Player, action: Action): string | u
     player.mana -= cost;
     const victims = action.type === 'fireball' ? targets.filter(e => distance(e, targets[0]) <= 2) : [targets[0]];
     victims.forEach(e => hit(game, player, e.id, cost ? 12 + player.rank * 2 : 6 + player.weapon * 2 + player.rank, !!cost));
-    return;
+    return true;
   }
   if (action.type === 'potion') {
     if (!player.potions) return 'No healing potions left.';
     if (player.hp === player.maxHp) return 'Health is already full.';
-    player.potions--; player.hp = Math.min(player.maxHp, player.hp + 35); log(game, `${player.name} drinks a healing potion.`); return;
+    player.potions--; player.hp = Math.min(player.maxHp, player.hp + 35); log(game, `${player.name} drinks a healing potion.`); return true;
   }
   if (action.type === 'mana') {
     if (!player.manaPotions) return 'No mana potions left.';
     if (player.mana === player.maxMana) return 'Mana is already full.';
-    player.manaPotions--; player.mana = Math.min(player.maxMana, player.mana + 20); return;
+    player.manaPotions--; player.mana = Math.min(player.maxMana, player.mana + 20); return true;
   }
   if (action.type === 'heal') {
     if (player.mana < 6) return 'Healing costs 6 mana.';
     if (player.hp === player.maxHp) return 'Health is already full.';
-    player.mana -= 6; player.hp = Math.min(player.maxHp, player.hp + 20); return;
+    player.mana -= 6; player.hp = Math.min(player.maxHp, player.hp + 20); return true;
   }
   if (action.type === 'revive') {
     const partner = game.players.find(p => p.id !== player.id && p.hp === 0 && distance(player, p) <= 1);
     if (!partner) return 'Stand beside your fallen partner to revive them.';
     if (!player.potions) return 'Reviving your partner requires one healing potion.';
-    player.potions--; partner.hp = Math.ceil(partner.maxHp / 2); log(game, `${player.name} revives ${partner.name}.`); return;
+    player.potions--; partner.hp = Math.ceil(partner.maxHp / 2); log(game, `${player.name} revives ${partner.name}.`); return true;
   }
   if (action.type === 'sell') {
     if (!shopAt(map, player)) return 'Stand near a shop entrance to trade.';
@@ -205,7 +220,7 @@ export function act(game: GameState, player: Player, action: Action): string | u
     const field = action.item === 'potion' ? 'potions' : 'manaPotions';
     if (player[field] <= 0) return 'None remaining in your pack.';
     player[field]--; player.gold += potionSellPrice;
-    log(game, `${player.name} sells a ${action.item === 'potion' ? 'healing' : 'mana'} potion for ${potionSellPrice} gold.`); return;
+    log(game, `${player.name} sells a ${action.item === 'potion' ? 'healing' : 'mana'} potion for ${potionSellPrice} gold.`); return true;
   }
   if (action.type === 'buy') {
     if (!shopAt(map, player)) return 'Stand near a shop entrance to trade.';
@@ -216,7 +231,7 @@ export function act(game: GameState, player: Player, action: Action): string | u
     if (action.item === 'mana') player.manaPotions++;
     if (action.item === 'weapon') player.weapon++;
     if (action.item === 'armor') player.armor++;
-    log(game, `${player.name} buys ${action.item}.`); return;
+    log(game, `${player.name} buys ${action.item}.`); return true;
   }
   if (action.type === 'interact') {
     const portal = map.portals.find(p => distance(player, p) <= 1);
@@ -226,10 +241,10 @@ export function act(game: GameState, player: Player, action: Action): string | u
       const next = game.levels[game.level];
       const entry = next.portals.find(p => p.to === old) ?? next.spawn;
       placePlayers(game, entry); reveal(game);
-      log(game, `You enter ${next.name}.`); return;
+      log(game, `You enter ${next.name}.`); return true;
     }
     if ((map.restPoints ?? (map.shop ? [map.shop] : [])).some(p=>distance(player,p)<=2)) {
-      player.hp = player.maxHp; player.mana = player.maxMana; log(game, `${player.name} rests at the sanctuary.`); return;
+      player.hp = player.maxHp; player.mana = player.maxMana; log(game, `${player.name} rests at the sanctuary.`); return true;
     }
     collect(game, player);
     return 'Move onto treasure to collect it. Use E near stairs, a road exit or the sanctuary.';
@@ -238,12 +253,16 @@ export function act(game: GameState, player: Player, action: Action): string | u
 export function step(game: GameState, milliseconds: number) {
   updateStatus(game);
   if (game.status !== 'playing') return;
-  game.time += Math.min(250, Math.max(0, milliseconds)); game.tick++;
-  game.arrows = (game.arrows ?? []).filter(a => a.level === game.level && game.time - a.created < 1000);
+  if (game.pace === 'turn-based') return;
+  advanceWorld(game, Math.min(250, Math.max(0, milliseconds)), false);
+}
+function advanceWorld(game: GameState, milliseconds: number, turnBased: boolean) {
+  game.time += milliseconds; game.tick++;
+  game.arrows = (game.arrows ?? []).filter(a => a.level === game.level && game.time - a.created < (turnBased ? ENEMY_INTERVAL + 1 : 1000));
   const map = game.levels[game.level];
-  if (game.tick % 30 === 0) game.players.forEach(p => { if (p.hp > 0) p.mana = Math.min(p.maxMana, p.mana + 1); });
+  if (game.tick % (turnBased ? 3 : 30) === 0) game.players.forEach(p => { if (p.hp > 0) p.mana = Math.min(p.maxMana, p.mana + 1); });
   for (const enemy of map.enemies) {
-    if (enemy.hp <= 0 || game.time < enemy.nextMove) continue;
+    if (enemy.hp <= 0 || (!turnBased && game.time < enemy.nextMove)) continue;
     enemy.nextMove = game.time + ENEMY_INTERVAL;
     const targets = game.players.filter(p => p.hp > 0).sort((a, b) => distance(a, enemy) - distance(b, enemy));
     const player = targets[0];

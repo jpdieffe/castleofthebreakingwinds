@@ -16,6 +16,7 @@ export function mountShop(body: HTMLElement, send: (action: Action) => void, hea
   const unavailable = (id: ShopItem) => {
     if (!state || !player) return 'Join an expedition to trade.';
     if (state.status !== 'playing' || player.hp <= 0) return 'You cannot trade right now.';
+    if (state.pace === 'turn-based' && state.acted?.includes(player.id)) return 'Waiting for your companion to act.';
     if (!shopAt(state.map, player)) return 'Stand near a shop entrance to trade.';
     if (mode === 'sell') return id === 'weapon' || id === 'armor' ? 'Equipped items cannot be sold.' : !quantity(id) ? 'None remaining in your pack.' : '';
     return player.gold < buyPrice(player, id) ? 'Not enough gold.' : '';

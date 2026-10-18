@@ -51,7 +51,7 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
     picker.select(quickItem); find('.inventory-selection').classList.toggle('has-quick-item', !!quickItem);
     const button = find<HTMLButtonElement>('[data-selected-action]'); button.disabled = true; button.onclick = null;
     if (!selected || !player || !current) return;
-    const p = player, active = current.status === 'playing' && p.hp > 0;
+    const p = player, active = current.status === 'playing' && p.hp > 0 && !(current.pace === 'turn-based' && current.acted?.includes(p.id));
     body.querySelectorAll('[data-buy], [data-potion], [data-slot]').forEach(el => el.classList.toggle('selected-item', el.getAttribute(selected!.kind === 'pack' ? 'data-potion' : 'data-slot') === selected!.key));
     if (selected.kind === 'slot') {
       const slot = find(`[data-slot="${selected.key}"]`);
@@ -87,6 +87,7 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
     message(text: string) { find('[data-inventory-message]').textContent = text; },
     update(state: Snapshot, p: Player) {
       current = state; player = p;
+      if (state.pace === 'turn-based' && find('[data-inventory-message]').textContent === 'Combat continues while inventory is open.') find('[data-inventory-message]').textContent = 'Enemies move after each living player acts.';
       find('[data-character]').textContent = p.name;
       find('[data-stats]').textContent = `Level ${p.rank} · XP ${p.xp}/${p.rank * 45} · ${p.gold} gold`;
       find('[data-vitals]').textContent = `HP ${p.hp}/${p.maxHp} · MP ${p.mana}/${p.maxMana}`;
@@ -95,7 +96,7 @@ export function mountInventory(body: HTMLElement, send: (action: Action) => void
       setSlot('pack', 'Small Pack', 143, `${p.potions + p.manaPotions} potions`);
       setSlot('purse', 'Purse', 157, `${p.gold} gold`);
       find('[data-pack-count]').textContent = `${p.potions + p.manaPotions} items`;
-      const active = state.status === 'playing' && p.hp > 0;
+      const active = state.status === 'playing' && p.hp > 0 && !(state.pace === 'turn-based' && state.acted?.includes(p.id));
       for (const [type, count, full] of [['potion', p.potions, p.hp >= p.maxHp], ['mana', p.manaPotions, p.mana >= p.maxMana]] as const) {
         const row = find(`[data-potion="${type}"]`), button = row.querySelector('button')!;
         row.querySelector('[data-count]')!.textContent = `Quantity: ${count}`;

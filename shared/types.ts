@@ -23,7 +23,11 @@ export interface Level {
   enemies: Enemy[]; loot: Loot[]; portals: Portal[]; spawn: Point;
   explored: number[]; safe: boolean; shop?: Point;
 }
+export type GamePace = 'realtime' | 'turn-based';
 export interface GameState {
+  pace?: GamePace;
+  turn?: number;
+  acted?: string[];
   arrows?: MagicArrow[];
   mode?: 'solo' | 'coop';
   mapVersion?: number;
@@ -34,7 +38,7 @@ export interface GameState {
 export type Action =
   | { type: 'move'; dx: number; dy: number }
   | { type: 'bolt'; x: number; y: number }
-  | { type: 'attack' | 'heal' | 'fireball' | 'potion' | 'mana' | 'interact' | 'revive' | 'ready' | 'restart' }
+  | { type: 'wait' | 'attack' | 'heal' | 'fireball' | 'potion' | 'mana' | 'interact' | 'revive' | 'ready' | 'restart' }
   | { type: 'buy'; item: 'potion' | 'mana' | 'weapon' | 'armor' }
   | { type: 'sell'; item: 'potion' | 'mana' };
 export interface Snapshot extends Omit<GameState, 'levels'> { map: Level }

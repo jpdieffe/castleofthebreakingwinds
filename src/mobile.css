@@ -146,3 +146,9 @@ body.mobile-ui:has(.window.in-game) .masthead { display:none; }
   .mobile-ui .mobile-heading small { display:none; }
   #mobile-status { line-height:14px; }
 }
+
+/* Shared solo/host creation option; guests inherit the room's pace. */
+.lobby .pace-label { margin-top:10px; }
+#game-pace { width:100%; min-height:36px; padding:6px; font:inherit; background:#fffff5; color:#18231c; }
+.lobby #pace-help { margin:5px 0 8px; font-size:11px; line-height:1.35; }
+.mobile-ui #game-pace { min-height:44px; font-size:16px; border-radius:8px; background:#1b2b34; color:#e0e5e2; border:1px solid #344c57; }

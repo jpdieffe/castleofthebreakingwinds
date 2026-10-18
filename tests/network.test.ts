@@ -50,16 +50,32 @@ test('room state survives server restart; only hashed reconnect keys reach disk'
   const dir = mkdtempSync(join(tmpdir(), 'castle-save-'));
   let app = createGameServer({ port: 0, host: '127.0.0.1', dataDir: dir }); await once(app.server, 'listening');
   const a = await client(`ws://127.0.0.1:${(app.server.address() as AddressInfo).port}/ws`);
-  a.send({ type: 'create', name: 'Persistent' }); const welcome = await a.wait(m => m.type === 'welcome');
+  a.send({ type: 'create', name: 'Persistent', pace: 'turn-based' }); const welcome = await a.wait(m => m.type === 'welcome');
   app.rooms.get(welcome.code)!.game.players[0].gold = 77; app.save(); a.socket.terminate(); await app.close();
   const disk = readFileSync(join(dir, readdirSync(dir).find(n => n.endsWith('.json'))!), 'utf8'); assert.ok(!disk.includes(welcome.token));
   app = createGameServer({ port: 0, host: '127.0.0.1', dataDir: dir }); await once(app.server, 'listening');
   const b = await client(`ws://127.0.0.1:${(app.server.address() as AddressInfo).port}/ws`);
-  try { b.send({ type: 'resume', code: welcome.code, token: welcome.token }); await b.wait(m => m.type === 'welcome'); const state = await b.wait(m => m.type === 'state'); assert.equal(state.state.players[0].gold, 77); }
+  try { b.send({ type: 'resume', code: welcome.code, token: welcome.token }); await b.wait(m => m.type === 'welcome'); const state = await b.wait(m => m.type === 'state'); assert.equal(state.state.players[0].gold, 77); assert.equal(state.state.pace, 'turn-based'); }
   finally { b.socket.terminate(); await app.close(); }
 });
 test('disallowed browser origins are rejected before the handshake', async () => {
   const app = createGameServer({ port: 0, host: '127.0.0.1', dataDir: false, origins: ['https://allowed.example'] }); await once(app.server, 'listening');
   try { const ws = new WebSocket(`ws://127.0.0.1:${(app.server.address() as AddressInfo).port}/ws`, { origin: 'https://untrusted.example' }); const [error] = await once(ws, 'error'); assert.match(error.message, /403/); }
   finally { await app.close(); }
+});
+
+
+test('dedicated server uses the host pace and advances only after both players act', async () => {
+  const app=createGameServer({port:0,host:'127.0.0.1',dataDir:false});await once(app.server,'listening');
+  const url=`ws://127.0.0.1:${(app.server.address() as AddressInfo).port}/ws`;
+  const a=await client(url),b=await client(url);
+  try {
+    a.send({type:'create',name:'Astrid',pace:'turn-based'});const welcome=await a.wait(m=>m.type==='welcome');
+    b.send({type:'join',name:'Bjorn',code:welcome.code,pace:'realtime'});await b.wait(m=>m.type==='welcome');
+    a.send({type:'action',action:{type:'ready'}});b.send({type:'action',action:{type:'ready'}});
+    const start=await b.wait(m=>m.type==='state'&&m.state.status==='playing');assert.equal(start.state.pace,'turn-based');
+    a.send({type:'action',action:{type:'wait'}});const partial=await b.wait(m=>m.type==='state'&&m.state.acted?.length===1);assert.equal(partial.state.turn,1);
+    a.send({type:'action',action:{type:'wait'}});assert.match((await a.wait(m=>m.type==='error')).message,/companion/);
+    b.send({type:'action',action:{type:'wait'}});const completed=await a.wait(m=>m.type==='state'&&m.state.turn===2);assert.deepEqual(completed.state.acted,[]);
+  }finally{a.socket.terminate();b.socket.terminate();await app.close();}
 });

@@ -1,5 +1,14 @@
-# Test results - October 17, 2026
+# Test results - October 18, 2026
 
+
+## Selectable game pace
+
+- Solo and Host now offer Real-time (default) or Turn-based. Guests inherit the host setting. Turn-based co-op gives each living player one action in either order, then enemies act once. Wait or the period key passes an action; blocked/rejected actions are free. Downed companions do not hold up turns. Held directions and distant map taps cannot advance extra turns automatically.
+- Pace, round number and acted-player IDs survive reconnects and saves; restart retains the selected pace. Older saves remain real-time. The same rules run in browser hosts and the optional dedicated server. Inventory, shop and spell controls respect already-spent turns.
+- **42 engine/network tests passed**, covering idle time, enemy phases, failed actions, duplicate commands, downed players/revival, spells, mana, purchases, travel, restart, partial-turn reconnect and server persistence.
+- **40 desktop/co-op browser cases passed** across the full run and targeted follow-up. The full run passed 39/40; its only failure asserted the old real-time-only help text. After updating that assertion to the new instructions, the case passed. Real WebRTC clients verified host choice, guest inheritance and refreshing either client during a partial turn.
+- **24 mobile browser cases passed; 4 platform-specific cases skipped.** Chrome exercised real WebRTC, WebKit exercised solo turns and the retained WebSocket transport. Windows WebKit does not provide WebRTC or the Chromium pinch protocol. These are browser device profiles, not physical-device certification.
+- TypeScript, production build and diff checks passed. [Creation screen](screenshots/pace-creation.png).
 
 ## Three-line mobile combat log
 

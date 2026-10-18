@@ -12,7 +12,7 @@ export interface Room { game: GameState; seats: Seat[]; sockets: Map<string, Web
 interface Options { port?: number; host?: string; dataDir?: string | false; origins?: string[] }
 const hash = (token: string) => createHash('sha256').update(token).digest('hex');
 const tokenMatches = (token: string, saved: string) => saved.length === 64 && timingSafeEqual(Buffer.from(hash(token), 'hex'), Buffer.from(saved, 'hex'));
-const actions = new Set(['move', 'attack', 'bolt', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart', 'buy', 'sell']);
+const actions = new Set(['move', 'attack', 'bolt', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart', 'buy', 'sell', 'wait']);
 const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json' };
 
 export function createGameServer(options: Options = {}) {
@@ -85,7 +85,7 @@ export function createGameServer(options: Options = {}) {
             if (rooms.size >= 100) throw new Error('The server is full. Please try again later.');
             let code: string;
             do { code = randomBytes(4).toString('hex').slice(0, 6).toUpperCase(); } while (rooms.has(code));
-            room = { game: createGame(code, randomBytes(4).readUInt32LE()), seats: [], sockets: new Map(), touched: Date.now() };
+            room = { game: createGame(code, randomBytes(4).readUInt32LE(), 'coop', message.pace === 'turn-based' ? 'turn-based' : 'realtime'), seats: [], sockets: new Map(), touched: Date.now() };
             rooms.set(code, room);
           } else {
             const code = typeof message.code === 'string' ? message.code.trim().toUpperCase() : '';

@@ -135,3 +135,12 @@ For additional network coverage, repeat connection/reconnection from two separat
 - Sell owned healing/mana potions one at a time; verify gold, last-item removal, empty quantity rejection and equipped-item protection. Keep online prices and existing inventory model; full native catalog, weight, bank credit and unequipping are outside this interface change.
 - Check 320x568, 390x844, 667x375, 844x390 and desktop: Close, Buy/Sell, details and commit remain visible; icons load; no horizontal overflow. Repeat on Android Chrome and iPhone WebKit browser profiles.
 - Two WebRTC clients and two WebSocket clients: buy/sell on one client, confirm the other sees exactly the same player state and its own inventory remains independent. Reload and confirm persistence. Engine rejects selling outside shop range, while down, at zero quantity and during action cooldown.
+
+
+## Creation-time game pace
+
+- Solo and Host expose Real-time / Turn-based; default remains Real-time. Joining inherits the host's setting regardless of the guest's selector. Check phone creation controls and Wait visibility in portrait/landscape.
+- Turn-based idle does not move enemies, regenerate mana, or advance time. Each living player gets one successful action in either order; duplicate actions are rejected until the companion acts. Wait passes the action. Failed/blocked actions and inspecting menus are free.
+- Confirm enemy movement/attack once per completed round, spell animation, potion/upgrade use, downed-player exclusion, revival, defeat/restart, mana regeneration, and no automatic repeated turns from held directions or distant map taps.
+- Reconnect either player and restart the host during a partial turn. Preserve pace, round number and acted-player IDs. Verify dedicated-server creation and disk restore, plus old saves without pace remaining real-time.
+- Run existing real-time solo/co-op, combat, trade, travel, map, targeting and phone regressions. Run real two-browser WebRTC and retained WebSocket mode checks.

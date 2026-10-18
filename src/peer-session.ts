@@ -1,6 +1,6 @@
 import Peer, { type DataConnection } from 'peerjs';
 import { act, addPlayer, createGame, migrateMaps, reveal, snapshot, step, updateStatus } from '../shared/engine';
-import type { Action, GameState, ServerMessage } from '../shared/types';
+import type { Action, GamePace, GameState, ServerMessage } from '../shared/types';
 
 const SAVE = 'castle-peer-host-v1';
 const prefix = 'castle-winds-v1-';
@@ -13,7 +13,7 @@ export function validAction(value: unknown): value is Action {
   if (a.type === 'bolt') return Number.isInteger(a.x) && Number.isInteger(a.y);
   if (a.type === 'sell') return ['potion', 'mana'].includes(String(a.item));
   if (a.type === 'buy') return ['potion', 'mana', 'weapon', 'armor'].includes(String(a.item));
-  return ['attack', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart'].includes(String(a.type));
+  return ['wait', 'attack', 'heal', 'fireball', 'potion', 'mana', 'interact', 'revive', 'ready', 'restart'].includes(String(a.type));
 }
 
 /** WebSocket-shaped adapter: signaling only uses PeerServer; all game data uses WebRTC. */
@@ -51,7 +51,7 @@ export class PeerSession {
       else if (this.link?.open) this.link.send(message);
     }
   }
-  private start(message: { type: string; name?: string; code?: string; token?: string }) {
+  private start(message: { type: string; name?: string; code?: string; token?: string; pace?: GamePace }) {
     let stored: HostSave | undefined;
     try { stored = JSON.parse(sessionStorage.getItem(SAVE) || 'null') || undefined; } catch { /* Ignore damaged saves. */ }
     const restoring = message.type === 'resume' && stored?.game?.code === message.code && stored?.token === message.token;
@@ -62,7 +62,7 @@ export class PeerSession {
     const hosting = message.type === 'solo' || message.type === 'create' || restoring;
     const code = hosting ? restoring ? stored!.game.code : Array.from(crypto.getRandomValues(new Uint8Array(6)), n => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n % 31]).join('') : message.code!;
     if (hosting) {
-      this.host = restoring ? stored : { game: createGame(code, crypto.getRandomValues(new Uint32Array(1))[0], message.type === 'solo' ? 'solo' : 'coop'), token: uid() };
+      this.host = restoring ? stored : { game: createGame(code, crypto.getRandomValues(new Uint32Array(1))[0], message.type === 'solo' ? 'solo' : 'coop', message.pace === 'turn-based' ? 'turn-based' : 'realtime'), token: uid() };
       const game = this.host!.game;
       if(restoring && game.mapVersion !== 2 && game.levels.length===14) {
         try { sessionStorage.setItem('castle-peer-before-mobile-maps-v1', JSON.stringify(this.host)); } catch { /* Continue if storage is full. */ }
